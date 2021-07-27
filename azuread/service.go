@@ -5,22 +5,21 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
-	"regexp"
 	"runtime"
-	"strings"
+	"time"
 
-	"github.com/Azure/go-autorest/autorest"
-	"github.com/Azure/go-autorest/autorest/azure"
-	"github.com/Azure/go-autorest/autorest/azure/auth"
+	"github.com/manicminer/hamilton/auth"
+	"github.com/manicminer/hamilton/environments"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 )
 
 // Session info
 type Session struct {
 	TenantID   string
-	Authorizer autorest.Authorizer
+	Authorizer auth.Authorizer
 }
 
 // GetNewSession creates an session configured from environment variables/CLI in the order:
@@ -29,81 +28,54 @@ type Session struct {
 // 3. Username password
 // 4. MSI
 // 5. CLI
-func GetNewSession(ctx context.Context, d *plugin.QueryData, tokenAudience string) (session *Session, err error) {
+func GetNewSession(ctx context.Context, d *plugin.QueryData) (sess *Session, err error) {
 	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the session?
+	serviceCacheKey := "authMethod"
+	// if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	// 	return cachedData.(*Session), nil
+	// }
+
 	azureADConfig := GetConfig(d.Connection)
-
-	if azureADConfig.TenantID != nil {
-		os.Setenv("AZURE_TENANT_ID", *azureADConfig.TenantID)
-	}
-	if azureADConfig.ClientID != nil {
-		os.Setenv("AZURE_CLIENT_ID", *azureADConfig.ClientID)
-	}
-	if azureADConfig.ClientSecret != nil {
-		os.Setenv("AZURE_CLIENT_SECRET", *azureADConfig.ClientSecret)
-	}
-
-	tenantID := os.Getenv("AZURE_TENANT_ID")
-	authMethod, resource, err := getApplicableAuthorizationDetails(ctx, tokenAudience)
+	var tenantID string
+	authMethod, authConfig, err := getApplicableAuthorizationDetails(ctx, azureADConfig)
 	if err != nil {
 		logger.Debug("GetNewSession__", "getApplicableAuthorizationDetails error", err)
 		return nil, err
 	}
 
-	var authorizer autorest.Authorizer
-
-	// have we already created and cached the session?
-	serviceCacheKey := tokenAudience + resource + authMethod
-
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
-		return cachedData.(*Session), nil
+	if authConfig.TenantID != "" {
+		tenantID = authConfig.TenantID
 	}
 
-	// so if it was not in cache - create session
-	switch authMethod {
-	case "Environment":
-		authorizer, err = auth.NewAuthorizerFromEnvironmentWithResource(resource)
-		if err != nil {
-			logger.Debug("GetNewSession__", "NewAuthorizerFromEnvironmentWithResource error", err)
-			return nil, err
-		}
+	plugin.Logger(ctx).Error("GetNewSession", "TenantID", authConfig.TenantID)
+	plugin.Logger(ctx).Error("GetNewSession", "ClientCertData", authConfig.ClientCertData)
+	plugin.Logger(ctx).Error("GetNewSession", "ClientCertPassword", authConfig.ClientCertPassword)
+	plugin.Logger(ctx).Error("GetNewSession", "ClientCertPath", authConfig.ClientCertPath)
+	plugin.Logger(ctx).Error("GetNewSession", "ClientID", authConfig.ClientID)
+	plugin.Logger(ctx).Error("GetNewSession", "ClientSecret", authConfig.ClientSecret)
+	plugin.Logger(ctx).Error("GetNewSession", "EnableAzureCliToken", authConfig.EnableAzureCliToken)
+	plugin.Logger(ctx).Error("GetNewSession", "EnableClientCertAuth", authConfig.EnableClientCertAuth)
+	plugin.Logger(ctx).Error("GetNewSession", "EnableClientSecretAuth", authConfig.EnableClientSecretAuth)
+	plugin.Logger(ctx).Error("GetNewSession", "AzureADEndpoint", authConfig.Environment.AzureADEndpoint)
+	plugin.Logger(ctx).Error("GetNewSession", "EnableMsiAuth", authConfig.EnableMsiAuth)
+	plugin.Logger(ctx).Error("GetNewSession", "MsiEndpoint", authConfig.MsiEndpoint)
 
-	// In this case need to get the details of SUBSCRIPTION_ID
-	// And TENANT_ID if tokenAudience is GRAPH
-	case "CLI":
-		authorizer, err = auth.NewAuthorizerFromCLIWithResource(resource)
-		if err != nil {
-			logger.Debug("GetNewSession__", "NewAuthorizerFromCLIWithResource error", err)
-
-			// In case the password got changed, and the session token stored in the system, or the CLI is outdated
-			if strings.Contains(err.Error(), "invalid_grant") {
-				return nil, fmt.Errorf("ValidationError: The credential data used by CLI has been expired because you might have changed or reset the password. Please clear browser's cookies and run 'az login'")
-			}
-			return nil, err
-		}
-	default:
-		authorizer, err = auth.NewAuthorizerFromCLIWithResource(resource)
-		if err != nil {
-			logger.Debug("GetNewSession__", "NewAuthorizerFromCLIWithResource error", err)
-
-			if strings.Contains(err.Error(), "invalid_grant") {
-				return nil, fmt.Errorf("ValidationError: The credential data used by CLI has been expired because you might have changed or reset the password. Please clear browser's cookies and run 'az login'")
-			}
-			return nil, err
-		}
+	authorizer, err := authConfig.NewAuthorizer(ctx, auth.MsGraph)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	if authMethod == "CLI" {
-		subscription, err := getSubscriptionFromCLI(resource)
+		tenantID, err = getTenantFromCLI()
 		if err != nil {
-			logger.Debug("GetNewSession__", "getSubscriptionFromCLI error", err)
+			logger.Debug("GetNewSession__", "getTenantFromCLI error", err)
 			return nil, err
 		}
-		tenantID = *subscription.TenantID
-
 	}
 
-	sess := &Session{
+	sess = &Session{
 		Authorizer: authorizer,
 		TenantID:   tenantID,
 	}
@@ -113,69 +85,109 @@ func GetNewSession(ctx context.Context, d *plugin.QueryData, tokenAudience strin
 	return sess, err
 }
 
-func getApplicableAuthorizationDetails(ctx context.Context, tokenAudience string) (authMethod string, resource string, err error) {
-	logger := plugin.Logger(ctx)
-	tenantID := os.Getenv("AZURE_TENANT_ID")
+func getApplicableAuthorizationDetails(ctx context.Context, config azureADConfig) (authMethod string, authConfig auth.Config, err error) {
+
+	var environment, tenantID, clientID, clientSecret, certificatePath, certificatePassword string
+	// username, password string
+	if config.TenantID != nil {
+		tenantID = *config.TenantID
+	} else {
+		tenantID = os.Getenv("AZURE_TENANT_ID")
+	}
+
+	if config.Environment != nil {
+		environment = *config.Environment
+	} else {
+		environment = os.Getenv("AZURE_ENVIRONMENT")
+	}
+
+	// Can be	"AZURECHINACLOUD", "AZUREGERMANCLOUD", "AZUREPUBLICCLOUD", "AZUREUSGOVERNMENTCLOUD"
+	switch environment {
+	case "AZURECHINACLOUD":
+		authConfig.Environment = environments.China
+	case "AZUREUSGOVERNMENTCLOUD":
+		authConfig.Environment = environments.USGovernmentL4
+	case "AZUREGERMANCLOUD":
+		authConfig.Environment = environments.Germany
+	default:
+		authConfig.Environment = environments.Global
+	}
 
 	// 1. Client credentials
-	clientID := os.Getenv("AZURE_CLIENT_ID")
-	clientSecret := os.Getenv("AZURE_CLIENT_SECRET")
+	if config.ClientID != nil {
+		clientID = *config.ClientID
+	} else {
+		clientID = os.Getenv("AZURE_CLIENT_ID")
+	}
+
+	if config.ClientSecret != nil {
+		clientSecret = *config.ClientSecret
+	} else {
+		clientSecret = os.Getenv("AZURE_CLIENT_SECRET")
+	}
 
 	// 2. Client certificate
-	certificatePath := os.Getenv("AZURE_CERTIFICATE_PATH")
-	certificatePassword := os.Getenv("AZURE_CERTIFICATE_PASSWORD")
+	if config.CertificatePath != nil {
+		certificatePath = *config.CertificatePath
+	} else {
+		certificatePath = os.Getenv("AZURE_CERTIFICATE_PATH")
+	}
+
+	if config.CertificatePassword != nil {
+		certificatePassword = *config.CertificatePassword
+	} else {
+		certificatePassword = os.Getenv("AZURE_CERTIFICATE_PASSWORD")
+	}
 
 	// 3. Username password
-	username := os.Getenv("AZURE_USERNAME")
-	password := os.Getenv("AZURE_PASSWORD")
+	// if config.Username != nil {
+	// 	username = *config.Username
+	// } else {
+	// 	username = os.Getenv("AZURE_USERNAME")
+	// }
+
+	// if config.Password != nil {
+	// 	password = *config.Password
+	// } else {
+	// 	password = os.Getenv("AZURE_PASSWORD")
+	// }
+
+	// hamiltonauth.
+	// authConfig := auth.Config{}
+	// Environment: environments.Global,
+	// TenantID:               tenantId,
+	// ClientID:               clientId,
+	// ClientSecret:           clientSecret,
+	// EnableClientSecretAuth: true,
+	// }
 
 	authMethod = "CLI"
 	if tenantID == "" {
 		authMethod = "CLI"
-	} else if (tenantID != "" && clientID != "") && (clientSecret != "" ||
-		(certificatePath != "" && certificatePassword != "") ||
-		(username != "" && password != "")) {
-		authMethod = "Environment"
+		authConfig.EnableAzureCliToken = true
+	} else if tenantID != "" && clientID != "" && clientSecret != "" {
+		authConfig.TenantID = tenantID
+		authConfig.ClientID = clientID
+		authConfig.ClientSecret = clientSecret
+		authConfig.EnableClientSecretAuth = true
+		authMethod = "EnableClientSecretAuth"
+	} else if tenantID != "" && certificatePath != "" && certificatePassword != "" {
+		authConfig.TenantID = tenantID
+		authConfig.ClientCertPath = certificatePath
+		authConfig.ClientCertPassword = certificatePassword
+		authConfig.EnableClientCertAuth = true
+		authMethod = "EnableClientCertificateAuth"
 	}
-
-	logger.Trace("getApplicableAuthorizationDetails_", "Auth Method: ", authMethod)
-
-	var environment azure.Environment
-	// get the environment endpoint to be used for authorization
-	if v := os.Getenv("AZURE_ENVIRONMENT"); v == "" {
-		environment = azure.PublicCloud
-	} else {
-		environment, err = azure.EnvironmentFromName(v)
-		if err != nil {
-			logger.Error("Unable to get environment", "ERROR", err)
-			return
-		}
-	}
-	logger.Trace("getApplicableAuthorizationDetails_", "tokenAudience: ", tokenAudience)
-
-	switch tokenAudience {
-	case "GRAPH":
-		resource = environment.GraphEndpoint
-	case "VAULT":
-		resource = strings.TrimSuffix(environment.KeyVaultEndpoint, "/")
-	case "MANAGEMENT":
-		resource = environment.ResourceManagerEndpoint
-	default:
-		resource = environment.ResourceManagerEndpoint
-	}
-
-	logger.Trace("getApplicableAuthorizationDetails_", "resource: ", resource)
-
+	// else if username != "" && password != "" {
+	// 	authConfig. = true
+	// 	authMethod = "EnableUserPasswordAuth"
+	// }
 	return
-}
-
-type tenant struct {
-	TenantID *string `json:"tenantID,omitempty"`
 }
 
 // https://github.com/Azure/go-autorest/blob/3fb5326fea196cd5af02cf105ca246a0fba59021/autorest/azure/cli/token.go#L126
 // NewAuthorizerFromCLIWithResource creates an Authorizer configured from Azure CLI 2.0 for local development scenarios.
-func getSubscriptionFromCLI(resource string) (*tenant, error) {
+func getTenantFromCLI() (string, error) {
 	// This is the path that a developer can set to tell this class what the install path for Azure CLI is.
 	const azureCLIPath = "AzureCLIPath"
 
@@ -184,16 +196,6 @@ func getSubscriptionFromCLI(resource string) (*tenant, error) {
 
 	// Default path for non-Windows.
 	const azureCLIDefaultPath = "/bin:/sbin:/usr/bin:/usr/local/bin"
-
-	// Validate resource, since it gets sent as a command line argument to Azure CLI
-	const invalidResourceErrorTemplate = "Resource %s is not in expected format. Only alphanumeric characters, [dot], [colon], [hyphen], and [forward slash] are allowed."
-	match, err := regexp.MatchString("^[0-9a-zA-Z-.:/]+$", resource)
-	if err != nil {
-		return nil, err
-	}
-	if !match {
-		return nil, fmt.Errorf(invalidResourceErrorTemplate, resource)
-	}
 
 	// Execute Azure CLI to get token
 	var cliCmd *exec.Cmd
@@ -207,25 +209,26 @@ func getSubscriptionFromCLI(resource string) (*tenant, error) {
 		cliCmd.Env = os.Environ()
 		cliCmd.Env = append(cliCmd.Env, fmt.Sprintf("PATH=%s:%s", os.Getenv(azureCLIPath), azureCLIDefaultPath))
 	}
-	cliCmd.Args = append(cliCmd.Args, "account", "get-access-token", "-o", "json", "--resource", resource)
+	cliCmd.Args = append(cliCmd.Args, "account", "get-access-token", "--resource-type=ms-graph", "-o", "json")
 
 	var stderr bytes.Buffer
 	cliCmd.Stderr = &stderr
 
 	output, err := cliCmd.Output()
 	if err != nil {
-		return nil, fmt.Errorf("Invoking Azure CLI failed with the following error: %v", err)
+		return "", fmt.Errorf("Invoking Azure CLI failed with the following error: %v", err)
 	}
 
-	var tokenResponse map[string]interface{}
+	var tokenResponse struct {
+		AccessToken string    `json:"accessToken"`
+		ExpiresOn   time.Time `json:"expiresOn"`
+		Tenant      string    `json:"tenant"`
+		TokenType   string    `json:"tokenType"`
+	}
 	err = json.Unmarshal(output, &tokenResponse)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	tenantID := tokenResponse["tenant"].(string)
-
-	return &tenant{
-		TenantID: &tenantID,
-	}, nil
+	return tokenResponse.Tenant, nil
 }
