@@ -145,7 +145,6 @@ func listAdUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		for _, user := range result.Values() {
 			d.StreamListItem(ctx, user)
 		}
-		result.NextWithContext(context.Background())
 		pagesLeft = result.NotDone()
 	}
 

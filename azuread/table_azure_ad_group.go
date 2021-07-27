@@ -113,7 +113,6 @@ func listAdGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		for _, group := range result.Values() {
 			d.StreamListItem(ctx, group)
 		}
-		result.NextWithContext(context.Background())
 		pagesLeft = result.NotDone()
 	}
 
