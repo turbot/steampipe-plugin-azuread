@@ -2,11 +2,12 @@ package azuread
 
 import (
 	"context"
+	"log"
 
-	"github.com/manicminer/hamilton/msgraph"
-	"github.com/manicminer/hamilton/odata"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
+	msgraph "github.com/yaegashi/msgraph.go/v1.0"
+	"golang.org/x/oauth2"
 
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 )
@@ -71,11 +72,11 @@ func tableAzureAdUser(_ context.Context) *plugin.Table {
 			// 	Description: "Family name or last name of the active directory user.",
 			// 	Type:        proto.ColumnType_STRING,
 			// },
-			// {
-			// 	Name:        "account_enabled",
-			// 	Description: "Specifies the account status of the active directory user.",
-			// 	Type:        proto.ColumnType_BOOL,
-			// },
+			{
+				Name:        "account_enabled",
+				Description: "Specifies the account status of the active directory user.",
+				Type:        proto.ColumnType_BOOL,
+			},
 			// {
 			// 	Name:        "deletion_timestamp",
 			// 	Description: " The time at which the directory object was deleted.",
@@ -137,22 +138,26 @@ func listAdUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	if err != nil {
 		return nil, err
 	}
-	tenantID := session.TenantID
+	// tenantID := session.TenantID
 
-	client := msgraph.NewUsersClient(tenantID)
-	client.BaseClient.Authorizer = session.Authorizer
+	token, err := session.Authorizer.Token()
+	if err != nil {
+		return nil, err
+	}
+	ts := oauth2.StaticTokenSource(token)
+	httpClient := oauth2.NewClient(ctx, ts)
+	graphClient := msgraph.NewClient(httpClient)
 
-	pagesLeft := true
-	for pagesLeft {
-		users, _, err := client.List(ctx, odata.Query{})
-		if err != nil {
-			return nil, err
-		}
+	log.Printf("LIST USERS")
+	userClient := graphClient.Users().Request()
+	userClient.Expand("manager")
+	// userClient.Top(5) // Max page length
 
-		for _, user := range *users {
-			d.StreamListItem(ctx, user)
-		}
-		pagesLeft = false
+	log.Printf("URL %s", userClient.URL())
+
+	users, _ := userClient.Get(ctx) // List only first page with 5 results as we have applied page limit of 5
+	for _, user := range users {
+		d.StreamListItem(ctx, user)
 	}
 
 	return nil, err

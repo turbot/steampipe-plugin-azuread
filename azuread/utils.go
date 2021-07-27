@@ -12,40 +12,6 @@ import (
 
 //// TRANSFORM FUNCTIONS
 
-func idToSubscriptionID(ctx context.Context, d *transform.TransformData) (interface{}, error) {
-	id := types.SafeString(d.Value)
-	if len(id) == 0 {
-		return nil, nil
-	}
-	subscriptionid := strings.Split(id, "/")[2]
-	return subscriptionid, nil
-}
-
-func idToAkas(ctx context.Context, d *transform.TransformData) (interface{}, error) {
-	id := types.SafeString(d.Value)
-	akas := []string{"azure://" + id, "azure://" + strings.ToLower(id)}
-	occured := map[string]bool{}
-	result := []string{}
-	for i := range akas {
-		if !occured[akas[i]] {
-			occured[akas[i]] = true
-			result = append(result, akas[i])
-		}
-	}
-	akas = result
-	return akas, nil
-}
-
-func extractResourceGroupFromID(ctx context.Context, d *transform.TransformData) (interface{}, error) {
-	id := types.SafeString(d.Value)
-
-	// Common resource properties
-	splitID := strings.Split(id, "/")
-	resourceGroup := splitID[4]
-	resourceGroup = strings.ToLower(resourceGroup)
-	return resourceGroup, nil
-}
-
 func lastPathElement(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	return getLastPathElement(types.SafeString(d.Value)), nil
 }
