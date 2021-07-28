@@ -141,9 +141,9 @@ func listAdUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		input.Filter = strings.Join(filter, " and ")
 	}
 
-	if input.Filter != "" {
-		plugin.Logger(ctx).Error("Filter", "input.Filter", input.Filter)
-	}
+	// if input.Filter != "" {
+	// 	plugin.Logger(ctx).Error("Filter", "input.Filter", input.Filter)
+	// }
 
 	pagesLeft := true
 	for pagesLeft {
