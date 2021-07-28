@@ -49,18 +49,18 @@ func GetNewSession(ctx context.Context, d *plugin.QueryData) (sess *Session, err
 		tenantID = authConfig.TenantID
 	}
 
-	plugin.Logger(ctx).Error("GetNewSession", "TenantID", authConfig.TenantID)
-	plugin.Logger(ctx).Error("GetNewSession", "ClientCertData", authConfig.ClientCertData)
-	plugin.Logger(ctx).Error("GetNewSession", "ClientCertPassword", authConfig.ClientCertPassword)
-	plugin.Logger(ctx).Error("GetNewSession", "ClientCertPath", authConfig.ClientCertPath)
-	plugin.Logger(ctx).Error("GetNewSession", "ClientID", authConfig.ClientID)
-	plugin.Logger(ctx).Error("GetNewSession", "ClientSecret", authConfig.ClientSecret)
-	plugin.Logger(ctx).Error("GetNewSession", "EnableAzureCliToken", authConfig.EnableAzureCliToken)
-	plugin.Logger(ctx).Error("GetNewSession", "EnableClientCertAuth", authConfig.EnableClientCertAuth)
-	plugin.Logger(ctx).Error("GetNewSession", "EnableClientSecretAuth", authConfig.EnableClientSecretAuth)
-	plugin.Logger(ctx).Error("GetNewSession", "AzureADEndpoint", authConfig.Environment.AzureADEndpoint)
-	plugin.Logger(ctx).Error("GetNewSession", "EnableMsiAuth", authConfig.EnableMsiAuth)
-	plugin.Logger(ctx).Error("GetNewSession", "MsiEndpoint", authConfig.MsiEndpoint)
+	// logger.Error("GetNewSession", "TenantID", authConfig.TenantID)
+	// logger.Error("GetNewSession", "ClientCertData", authConfig.ClientCertData)
+	// logger.Error("GetNewSession", "ClientCertPassword", authConfig.ClientCertPassword)
+	// logger.Error("GetNewSession", "ClientCertPath", authConfig.ClientCertPath)
+	// logger.Error("GetNewSession", "ClientID", authConfig.ClientID)
+	// logger.Error("GetNewSession", "ClientSecret", authConfig.ClientSecret)
+	// logger.Error("GetNewSession", "EnableAzureCliToken", authConfig.EnableAzureCliToken)
+	// logger.Error("GetNewSession", "EnableClientCertAuth", authConfig.EnableClientCertAuth)
+	// logger.Error("GetNewSession", "EnableClientSecretAuth", authConfig.EnableClientSecretAuth)
+	// logger.Error("GetNewSession", "AzureADEndpoint", authConfig.Environment.AzureADEndpoint)
+	// logger.Error("GetNewSession", "EnableMsiAuth", authConfig.EnableMsiAuth)
+	// logger.Error("GetNewSession", "MsiEndpoint", authConfig.MsiEndpoint)
 
 	authorizer, err := authConfig.NewAuthorizer(ctx, auth.MsGraph)
 	if err != nil {
