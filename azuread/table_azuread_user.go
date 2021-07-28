@@ -32,11 +32,17 @@ func tableAzureAdUser(_ context.Context) *plugin.Table {
 				{Name: "filter", Require: plugin.Optional},              // where filter = 'displayName eq ''Luis'''
 
 				// event fields
-				{Name: "user_type", Require: plugin.Optional},       // filter=userType eq 'Guest'
-				{Name: "account_enabled", Require: plugin.Optional}, // accountEnabled eq true
-				{Name: "display_name", Require: plugin.Optional},    // displayName eq 'Luis'
-				{Name: "surname", Require: plugin.Optional},         // surname eq 'Luis'
+				{Name: "user_type", Require: plugin.Optional},                                       // filter=userType eq 'Guest'
+				{Name: "account_enabled", Require: plugin.Optional, Operators: []string{"<>", "="}}, // accountEnabled eq true = for true and <> for false
+				{Name: "display_name", Require: plugin.Optional},                                    // displayName eq 'Luis'
+				{Name: "surname", Require: plugin.Optional},                                         // surname eq 'Luis'
 			},
+			// select * from azuread.azuread_user where account_enabled
+			// Column: account_enabled, Operator: '=', Value: 'true'
+
+			// select * from azuread.azuread_user where not account_enabled
+			// Column: account_enabled, Operator: '<>', Value: 'true'
+
 		},
 
 		Columns: []*plugin.Column{
@@ -105,9 +111,25 @@ func listAdUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 
 	input := odata.Query{}
 	equalQuals := d.KeyColumnQuals
+	quals := d.Quals
 
 	var queryFilter string
 	filter := buildQueryFilter(equalQuals)
+
+	if quals["account_enabled"] != nil {
+		// accoutEnabled doesn't support 'ne' Operator
+		for _, q := range quals["account_enabled"].Quals {
+			value := q.Value.GetBoolValue()
+			if q.Operator == "<>" {
+				if value {
+					filter = append(filter, "accountEnabled eq false")
+				} else {
+					filter = append(filter, "accountEnabled eq true")
+				}
+				break
+			}
+		}
+	}
 
 	if equalQuals["filter"] != nil {
 		queryFilter = equalQuals["filter"].GetStringValue()
