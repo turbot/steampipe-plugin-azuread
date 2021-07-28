@@ -20,10 +20,10 @@ func tableAzureAdUser(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "azuread_user",
 		Description: "Azure AD User",
-		Get: &plugin.GetConfig{
-			KeyColumns: plugin.SingleColumn("id"),
-			Hydrate:    getAdUser,
-		},
+		// Get: &plugin.GetConfig{
+		// 	KeyColumns: plugin.SingleColumn("id"),
+		// 	Hydrate:    getAdUser,
+		// },
 		List: &plugin.ListConfig{
 			Hydrate: listAdUsers,
 			KeyColumns: plugin.KeyColumnSlice{
@@ -77,7 +77,7 @@ func tableAzureAdUser(_ context.Context) *plugin.Table {
 			{Name: "password_profile", Type: proto.ColumnType_JSON, Description: "Specifies the password profile for the user. The profile contains the user’s password. This property is required when a user is created."},
 			// {Name: "sign_in_activity", Type: proto.ColumnType_JSON, Description: ""},
 
-			// {Name: "data", Type: proto.ColumnType_JSON, Description: "The unique ID that identifies an active directory user.", Transform: transform.FromValue()}, // For debugging
+			{Name: "data", Type: proto.ColumnType_JSON, Description: "The unique ID that identifies an active directory user.", Transform: transform.FromValue()}, // For debugging
 
 			// // Standard columns
 			{
@@ -109,7 +109,16 @@ func listAdUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	client := msgraph.NewUsersClient(tenantID)
 	client.BaseClient.Authorizer = session.Authorizer
 
-	input := odata.Query{}
+	plugin.Logger(ctx).Error("Filter", "d.QueryContext.Columns", d.QueryContext.Columns)
+
+	input := odata.Query{
+		Expand: odata.Expand{
+			Relationship: "memberOf",
+			Select:       []string{"id", "displayName"},
+		},
+	}
+
+	plugin.Logger(ctx).Error("INPUT", "Expand", input.Expand.String())
 	equalQuals := d.KeyColumnQuals
 	quals := d.Quals
 
@@ -141,10 +150,11 @@ func listAdUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		input.Filter = strings.Join(filter, " and ")
 	}
 
-	// if input.Filter != "" {
-	// 	plugin.Logger(ctx).Error("Filter", "input.Filter", input.Filter)
-	// }
+	if input.Filter != "" {
+		plugin.Logger(ctx).Error("Filter", "input.Filter", input.Filter)
+	}
 
+	plugin.Logger(ctx).Error("Query", "input.Values()", input.Values())
 	pagesLeft := true
 	for pagesLeft {
 		users, _, err := client.List(ctx, input)
