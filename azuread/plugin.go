@@ -24,7 +24,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 		TableMap: map[string]*plugin.Table{
 			// "azure_ad_group":             tableAzureAdGroup(ctx),
 			// "azure_ad_service_principal": tableAzureAdServicePrincipal(ctx),
-			"azure_ad_user": tableAzureAdUser(ctx),
+			"azuread_user": tableAzureAdUser(ctx),
 		},
 	}
 
