@@ -8,6 +8,7 @@ import (
 	"github.com/ettle/strcase"
 	"github.com/manicminer/hamilton/msgraph"
 	"github.com/manicminer/hamilton/odata"
+	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 
@@ -20,29 +21,20 @@ func tableAzureAdUser(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "azuread_user",
 		Description: "Azure AD User",
-		// Get: &plugin.GetConfig{
-		// 	KeyColumns: plugin.SingleColumn("id"),
-		// 	Hydrate:    getAdUser,
-		// },
 		List: &plugin.ListConfig{
 			Hydrate: listAdUsers,
 			KeyColumns: plugin.KeyColumnSlice{
-				{Name: "id", Require: plugin.Optional},                  //
-				{Name: "user_principal_name", Require: plugin.Optional}, // 'userPrincipalName eq 'lalit@yyyyyy.onmicrosoft.com'
-				{Name: "filter", Require: plugin.Optional},              // where filter = 'displayName eq ''Luis'''
+				// Key fields
+				{Name: "id", Require: plugin.Optional},
+				{Name: "user_principal_name", Require: plugin.Optional},
+				{Name: "filter", Require: plugin.Optional},
 
-				// event fields
-				{Name: "user_type", Require: plugin.Optional},                                       // filter=userType eq 'Guest'
-				{Name: "account_enabled", Require: plugin.Optional, Operators: []string{"<>", "="}}, // accountEnabled eq true = for true and <> for false
-				{Name: "display_name", Require: plugin.Optional},                                    // displayName eq 'Luis'
-				{Name: "surname", Require: plugin.Optional},                                         // surname eq 'Luis'
+				// Other fields for filtering OData
+				{Name: "user_type", Require: plugin.Optional},
+				{Name: "account_enabled", Require: plugin.Optional, Operators: []string{"<>", "="}},
+				{Name: "display_name", Require: plugin.Optional},
+				{Name: "surname", Require: plugin.Optional},
 			},
-			// select * from azuread.azuread_user where account_enabled
-			// Column: account_enabled, Operator: '=', Value: 'true'
-
-			// select * from azuread.azuread_user where not account_enabled
-			// Column: account_enabled, Operator: '<>', Value: 'true'
-
 		},
 
 		Columns: []*plugin.Column{
@@ -57,27 +49,27 @@ func tableAzureAdUser(_ context.Context) *plugin.Table {
 			{Name: "filter", Type: proto.ColumnType_STRING, Transform: transform.FromQual("filter"), Description: "Odata query to search for resources."},
 
 			// Other fields
-
-			{Name: "about_me", Type: proto.ColumnType_TIMESTAMP, Description: "A freeform text entry field for the user to describe themselves."},
 			{Name: "created_date_time", Type: proto.ColumnType_TIMESTAMP, Description: "The time at which the user was created."},
-			// {Name: "deleted_date_time", Type: proto.ColumnType_TIMESTAMP, Description: " The time at which the directory object was deleted."},
 			{Name: "is_management_restricted", Type: proto.ColumnType_BOOL, Description: ""},
-			// {Name: "is_resource_account", Type: proto.ColumnType_BOOL, Description: "Do not use – reserved for future use."},
 			{Name: "mail", Type: proto.ColumnType_STRING, Description: "	The SMTP address for the user, for example, jeff@contoso.onmicrosoft.com."},
 			{Name: "mail_nickname", Type: proto.ColumnType_STRING, Description: "The mail alias for the user."},
 			{Name: "password_policies", Type: proto.ColumnType_STRING, Description: "Specifies password policies for the user. This value is an enumeration with one possible value being DisableStrongPassword, which allows weaker passwords than the default policy to be specified. DisablePasswordExpiration can also be specified. The two may be specified together; for example: DisablePasswordExpiration, DisableStrongPassword."},
 			{Name: "refresh_tokens_valid_from_date_time", Type: proto.ColumnType_TIMESTAMP, Description: "Any refresh tokens or sessions tokens (session cookies) issued before this time are invalid, and applications will get an error when using an invalid refresh or sessions token to acquire a delegated access token (to access APIs such as Microsoft Graph)."},
 			{Name: "sign_in_sessions_valid_from_date_time", Type: proto.ColumnType_TIMESTAMP, Description: "Any refresh tokens or sessions tokens (session cookies) issued before this time are invalid, and applications will get an error when using an invalid refresh or sessions token to acquire a delegated access token (to access APIs such as Microsoft Graph)."},
 			{Name: "usage_location", Type: proto.ColumnType_STRING, Description: "A two letter country code (ISO standard 3166), required for users that will be assigned licenses due to legal requirement to check for availability of services in countries."},
+			// {Name: "about_me", Type: proto.ColumnType_TIMESTAMP, Description: "A freeform text entry field for the user to describe themselves."},
+			// {Name: "deleted_date_time", Type: proto.ColumnType_TIMESTAMP, Description: " The time at which the directory object was deleted."},
+			// {Name: "is_resource_account", Type: proto.ColumnType_BOOL, Description: "Do not use – reserved for future use."},
 
 			// Json fields
+			{Name: "member_of", Type: proto.ColumnType_JSON, Description: "A list the groups and directory roles that the user is a direct member of."},
 			{Name: "additional_properties", Type: proto.ColumnType_JSON, Description: "A list of unmatched properties from the message are deserialized this collection."},
 			{Name: "im_addresses", Type: proto.ColumnType_JSON, Description: "The instant message voice over IP (VOIP) session initiation protocol (SIP) addresses for the user."},
 			{Name: "other_mails", Type: proto.ColumnType_JSON, Description: "A list of additional email addresses for the user."},
 			{Name: "password_profile", Type: proto.ColumnType_JSON, Description: "Specifies the password profile for the user. The profile contains the user’s password. This property is required when a user is created."},
-			// {Name: "sign_in_activity", Type: proto.ColumnType_JSON, Description: ""},
 
-			{Name: "data", Type: proto.ColumnType_JSON, Description: "The unique ID that identifies an active directory user.", Transform: transform.FromValue()}, // For debugging
+			// {Name: "sign_in_activity", Type: proto.ColumnType_JSON, Description: ""},
+			// {Name: "data", Type: proto.ColumnType_JSON, Description: "The unique ID that identifies an active directory user.", Transform: transform.FromValue()}, // For debugging
 
 			// // Standard columns
 			{
@@ -88,7 +80,7 @@ func tableAzureAdUser(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "tenant_id",
-				Description: "",
+				Description: ColumnDescriptionTenant,
 				Type:        proto.ColumnType_STRING,
 				Hydrate:     getTenantId,
 				Transform:   transform.FromValue(),
@@ -111,11 +103,12 @@ func listAdUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 
 	plugin.Logger(ctx).Error("Filter", "d.QueryContext.Columns", d.QueryContext.Columns)
 
-	input := odata.Query{
-		Expand: odata.Expand{
+	input := odata.Query{}
+	if helpers.StringSliceContains(d.QueryContext.Columns, "member_of") {
+		input.Expand = odata.Expand{
 			Relationship: "memberOf",
 			Select:       []string{"id", "displayName"},
-		},
+		}
 	}
 
 	plugin.Logger(ctx).Error("INPUT", "Expand", input.Expand.String())
@@ -172,28 +165,6 @@ func listAdUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 }
 
 //// HYDRATE FUNCTIONS
-
-func getAdUser(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getAdUser")
-
-	session, err := GetNewSession(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-
-	tenantID := session.TenantID
-	client := msgraph.NewUsersClient(tenantID)
-	client.BaseClient.Authorizer = session.Authorizer
-
-	userID := d.KeyColumnQuals["id"].GetStringValue()
-
-	user, _, err := client.Get(ctx, userID, odata.Query{})
-	if err != nil {
-		return nil, err
-	}
-
-	return user, nil
-}
 
 func getTenantId(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	session, err := GetNewSession(ctx, d)
