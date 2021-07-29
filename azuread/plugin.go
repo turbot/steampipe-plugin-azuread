@@ -9,14 +9,11 @@ import (
 
 const pluginName = "steampipe-plugin-azuread"
 
-// Plugin creates this (azure) plugin
+// Plugin creates this (azuread) plugin
 func Plugin(ctx context.Context) *plugin.Plugin {
 	p := &plugin.Plugin{
 		Name:             pluginName,
 		DefaultTransform: transform.FromCamel(),
-		DefaultGetConfig: &plugin.GetConfig{
-			ShouldIgnoreError: isNotFoundError([]string{"ResourceGroupNotFound"}),
-		},
 		ConnectionConfigSchema: &plugin.ConnectionConfigSchema{
 			NewInstance: ConfigInstance,
 			Schema:      ConfigSchema,
