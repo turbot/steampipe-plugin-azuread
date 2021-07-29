@@ -96,12 +96,9 @@ func listAdUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	if err != nil {
 		return nil, err
 	}
-	tenantID := session.TenantID
 
-	client := msgraph.NewUsersClient(tenantID)
+	client := msgraph.NewUsersClient(session.TenantID)
 	client.BaseClient.Authorizer = session.Authorizer
-
-	plugin.Logger(ctx).Error("Filter", "d.QueryContext.Columns", d.QueryContext.Columns)
 
 	input := odata.Query{}
 	if helpers.StringSliceContains(d.QueryContext.Columns, "member_of") {
@@ -111,7 +108,6 @@ func listAdUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		}
 	}
 
-	plugin.Logger(ctx).Error("INPUT", "Expand", input.Expand.String())
 	equalQuals := d.KeyColumnQuals
 	quals := d.Quals
 
@@ -143,11 +139,10 @@ func listAdUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		input.Filter = strings.Join(filter, " and ")
 	}
 
-	if input.Filter != "" {
-		plugin.Logger(ctx).Error("Filter", "input.Filter", input.Filter)
-	}
+	// if input.Filter != "" {
+	// 	plugin.Logger(ctx).Debug("Filter", "input.Filter", input.Filter)
+	// }
 
-	plugin.Logger(ctx).Error("Query", "input.Values()", input.Values())
 	pagesLeft := true
 	for pagesLeft {
 		users, _, err := client.List(ctx, input)
