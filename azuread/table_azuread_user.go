@@ -51,7 +51,7 @@ func tableAzureAdUser(_ context.Context) *plugin.Table {
 			// Other fields
 			{Name: "created_date_time", Type: proto.ColumnType_TIMESTAMP, Description: "The time at which the user was created."},
 			{Name: "is_management_restricted", Type: proto.ColumnType_BOOL, Description: ""},
-			{Name: "mail", Type: proto.ColumnType_STRING, Description: "	The SMTP address for the user, for example, jeff@contoso.onmicrosoft.com."},
+			{Name: "mail", Type: proto.ColumnType_STRING, Description: "The SMTP address for the user, for example, jeff@contoso.onmicrosoft.com."},
 			{Name: "mail_nickname", Type: proto.ColumnType_STRING, Description: "The mail alias for the user."},
 			{Name: "password_policies", Type: proto.ColumnType_STRING, Description: "Specifies password policies for the user. This value is an enumeration with one possible value being DisableStrongPassword, which allows weaker passwords than the default policy to be specified. DisablePasswordExpiration can also be specified. The two may be specified together; for example: DisablePasswordExpiration, DisableStrongPassword."},
 			{Name: "refresh_tokens_valid_from_date_time", Type: proto.ColumnType_TIMESTAMP, Description: "Any refresh tokens or sessions tokens (session cookies) issued before this time are invalid, and applications will get an error when using an invalid refresh or sessions token to acquire a delegated access token (to access APIs such as Microsoft Graph)."},
@@ -67,24 +67,12 @@ func tableAzureAdUser(_ context.Context) *plugin.Table {
 			{Name: "im_addresses", Type: proto.ColumnType_JSON, Description: "The instant message voice over IP (VOIP) session initiation protocol (SIP) addresses for the user."},
 			{Name: "other_mails", Type: proto.ColumnType_JSON, Description: "A list of additional email addresses for the user."},
 			{Name: "password_profile", Type: proto.ColumnType_JSON, Description: "Specifies the password profile for the user. The profile contains the user’s password. This property is required when a user is created."},
-
 			// {Name: "sign_in_activity", Type: proto.ColumnType_JSON, Description: ""},
 			// {Name: "data", Type: proto.ColumnType_JSON, Description: "The unique ID that identifies an active directory user.", Transform: transform.FromValue()}, // For debugging
 
-			// // Standard columns
-			{
-				Name:        "title",
-				Description: ColumnDescriptionTitle,
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("DisplayName", "UserPrincipalName"),
-			},
-			{
-				Name:        "tenant_id",
-				Description: ColumnDescriptionTenant,
-				Type:        proto.ColumnType_STRING,
-				Hydrate:     getTenantId,
-				Transform:   transform.FromValue(),
-			},
+			// Standard columns
+			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Transform: transform.FromField("DisplayName", "UserPrincipalName")},
+			{Name: "tenant_id", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTenant, Hydrate: getTenantId, Transform: transform.FromValue()},
 		},
 	}
 }
