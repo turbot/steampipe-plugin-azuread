@@ -23,17 +23,18 @@ func tableAzureAdGroup() *plugin.Table {
 			KeyColumns: plugin.KeyColumnSlice{
 				// Key fields
 				{Name: "id", Require: plugin.Optional},
+				{Name: "display_name", Require: plugin.Optional},
 				{Name: "filter", Require: plugin.Optional},
 
 				// Other fields for filtering OData
-				{Name: "created_date_time", Operators: []string{">", ">=", "=", "<", "<="}, Require: plugin.Optional}, // Supports $filter (eq, ne, NOT, ge, le, in).
-				{Name: "display_name", Require: plugin.Optional},
-				{Name: "expiration_date_time", Operators: []string{">", ">=", "=", "<", "<="}, Require: plugin.Optional},
-				{Name: "mail", Require: plugin.Optional},                     // $filter (eq, ne, NOT, ge, le, in, startsWith).
-				{Name: "mail_enabled", Require: plugin.Optional},             // $filter (eq, ne, NOT).
-				{Name: "on_premises_sync_enabled", Require: plugin.Optional}, // $filter (eq, ne, NOT, in).
-				{Name: "on_premises_sync_enabled", Require: plugin.Optional}, // $filter (eq, ne, NOT, in).
-				{Name: "security_enabled", Require: plugin.Optional},         // $filter (eq, ne, NOT, in).
+				{Name: "mail", Require: plugin.Optional, Operators: []string{"<>", "="}},                     // $filter (eq, ne, NOT, ge, le, in, startsWith).
+				{Name: "mail_enabled", Require: plugin.Optional, Operators: []string{"<>", "="}},             // $filter (eq, ne, NOT).
+				{Name: "on_premises_sync_enabled", Require: plugin.Optional, Operators: []string{"<>", "="}}, // $filter (eq, ne, NOT, in).
+				{Name: "security_enabled", Require: plugin.Optional, Operators: []string{"<>", "="}},         // $filter (eq, ne, NOT, in).
+
+				// TODO
+				// {Name: "created_date_time", Operators: []string{">", ">=", "=", "<", "<="}, Require: plugin.Optional},    // Supports $filter (eq, ne, NOT, ge, le, in).
+				// {Name: "expiration_date_time", Operators: []string{">", ">=", "=", "<", "<="}, Require: plugin.Optional}, // Supports $filter (eq, ne, NOT, ge, le, in).
 			},
 		},
 
@@ -94,15 +95,12 @@ func listAdGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	client.BaseClient.Authorizer = session.Authorizer
 
 	input := odata.Query{}
-	// if helpers.StringSliceContains(d.QueryContext.Columns, "tags") {
-	// 	input.Expand = odata.Expand{Relationship: "members"}
-	// }
-
 	equalQuals := d.KeyColumnQuals
-	// quals := d.Quals
+	quals := d.Quals
 
 	var queryFilter string
 	filter := buildQueryFilter(equalQuals)
+	filter = append(filter, buildBoolNEFilter(quals)...)
 
 	if equalQuals["filter"] != nil {
 		queryFilter = equalQuals["filter"].GetStringValue()
@@ -114,14 +112,17 @@ func listAdGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		input.Filter = strings.Join(filter, " and ")
 	}
 
-	if input.Filter != "" {
-		plugin.Logger(ctx).Debug("Filter", "input.Filter", input.Filter)
-	}
+	// if input.Filter != "" {
+	// 	plugin.Logger(ctx).Debug("Filter", "input.Filter", input.Filter)
+	// }
 
 	pagesLeft := true
 	for pagesLeft {
 		groups, _, err := client.List(ctx, input)
 		if err != nil {
+			if isNotFoundError(err) {
+				return nil, nil
+			}
 			return nil, err
 		}
 

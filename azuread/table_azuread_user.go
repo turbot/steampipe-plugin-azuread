@@ -100,21 +100,7 @@ func listAdUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 
 	var queryFilter string
 	filter := buildQueryFilter(equalQuals)
-
-	if quals["account_enabled"] != nil {
-		// accoutEnabled doesn't support 'ne' Operator
-		for _, q := range quals["account_enabled"].Quals {
-			value := q.Value.GetBoolValue()
-			if q.Operator == "<>" {
-				if value {
-					filter = append(filter, "accountEnabled eq false")
-				} else {
-					filter = append(filter, "accountEnabled eq true")
-				}
-				break
-			}
-		}
-	}
+	filter = append(filter, buildBoolNEFilter(quals)...)
 
 	if equalQuals["filter"] != nil {
 		queryFilter = equalQuals["filter"].GetStringValue()
@@ -134,6 +120,9 @@ func listAdUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	for pagesLeft {
 		users, _, err := client.List(ctx, input)
 		if err != nil {
+			if isNotFoundError(err) {
+				return nil, nil
+			}
 			return nil, err
 		}
 
@@ -160,21 +149,53 @@ func getTenantId(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 func buildQueryFilter(equalQuals plugin.KeyColumnEqualsQualMap) []string {
 	filters := []string{}
 
-	filterQuals := []string{
-		"user_principal_name",
-		"user_type",
-		"id",
-		"display_name",
-		"surname",
+	filterQuals := map[string]string{
+		"display_name":             "string",
+		"id":                       "string",
+		"surname":                  "string",
+		"user_principal_name":      "string",
+		"user_type":                "string",
+		"account_enabled":          "bool",
+		"mail_enabled":             "bool",
+		"security_enabled":         "bool",
+		"on_premises_sync_enabled": "bool",
 	}
 
-	if equalQuals["account_enabled"] != nil {
-		filters = append(filters, fmt.Sprintf("%s eq %t", "accountEnabled", equalQuals["account_enabled"].GetBoolValue()))
+	for qual, qualType := range filterQuals {
+		switch qualType {
+		case "string":
+			if equalQuals[qual] != nil {
+				filters = append(filters, fmt.Sprintf("%s eq '%s'", strcase.ToCamel(qual), equalQuals[qual].GetStringValue()))
+			}
+		case "bool":
+			if equalQuals[qual] != nil {
+				filters = append(filters, fmt.Sprintf("%s eq %t", strcase.ToCamel(qual), equalQuals[qual].GetBoolValue()))
+			}
+		}
+	}
+
+	return filters
+}
+
+func buildBoolNEFilter(quals plugin.KeyColumnQualMap) []string {
+	filters := []string{}
+
+	filterQuals := []string{
+		"account_enabled",
+		"mail_enabled",
+		"on_premises_sync_enabled",
+		"security_enabled",
 	}
 
 	for _, qual := range filterQuals {
-		if equalQuals[qual] != nil {
-			filters = append(filters, fmt.Sprintf("%s eq '%s'", strcase.ToCamel(qual), equalQuals[qual].GetStringValue()))
+		if quals[qual] != nil {
+			for _, q := range quals[qual].Quals {
+				value := q.Value.GetBoolValue()
+				if q.Operator == "<>" {
+					filters = append(filters, fmt.Sprintf("%s eq %t", strcase.ToCamel(qual), !value))
+					break
+				}
+			}
 		}
 	}
 
