@@ -9,7 +9,6 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
-	"time"
 
 	"github.com/manicminer/hamilton/auth"
 	"github.com/manicminer/hamilton/environments"
@@ -220,10 +219,10 @@ func getTenantFromCLI() (string, error) {
 	}
 
 	var tokenResponse struct {
-		AccessToken string    `json:"accessToken"`
-		ExpiresOn   time.Time `json:"expiresOn"`
-		Tenant      string    `json:"tenant"`
-		TokenType   string    `json:"tokenType"`
+		AccessToken string `json:"accessToken"`
+		ExpiresOn   string `json:"expiresOn"`
+		Tenant      string `json:"tenant"`
+		TokenType   string `json:"tokenType"`
 	}
 	err = json.Unmarshal(output, &tokenResponse)
 	if err != nil {
