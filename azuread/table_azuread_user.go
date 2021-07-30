@@ -17,10 +17,10 @@ import (
 
 //// TABLE DEFINITION
 
-func tableAzureAdUser(_ context.Context) *plugin.Table {
+func tableAzureAdUser() *plugin.Table {
 	return &plugin.Table{
 		Name:        "azuread_user",
-		Description: "Azure AD User",
+		Description: "Represents an Azure AD user account.",
 		List: &plugin.ListConfig{
 			Hydrate: listAdUsers,
 			KeyColumns: plugin.KeyColumnSlice{
@@ -50,7 +50,6 @@ func tableAzureAdUser(_ context.Context) *plugin.Table {
 
 			// Other fields
 			{Name: "created_date_time", Type: proto.ColumnType_TIMESTAMP, Description: "The time at which the user was created."},
-			{Name: "is_management_restricted", Type: proto.ColumnType_BOOL, Description: ""},
 			{Name: "mail", Type: proto.ColumnType_STRING, Description: "The SMTP address for the user, for example, jeff@contoso.onmicrosoft.com."},
 			{Name: "mail_nickname", Type: proto.ColumnType_STRING, Description: "The mail alias for the user."},
 			{Name: "password_policies", Type: proto.ColumnType_STRING, Description: "Specifies password policies for the user. This value is an enumeration with one possible value being DisableStrongPassword, which allows weaker passwords than the default policy to be specified. DisablePasswordExpiration can also be specified. The two may be specified together; for example: DisablePasswordExpiration, DisableStrongPassword."},

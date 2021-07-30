@@ -19,7 +19,8 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			Schema:      ConfigSchema,
 		},
 		TableMap: map[string]*plugin.Table{
-			"azuread_user": tableAzureAdUser(ctx),
+			"azuread_user":  tableAzureAdUser(),
+			"azuread_group": tableAzureAdGroup(),
 		},
 	}
 
