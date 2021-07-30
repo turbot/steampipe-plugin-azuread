@@ -31,10 +31,10 @@ func GetNewSession(ctx context.Context, d *plugin.QueryData) (sess *Session, err
 	logger := plugin.Logger(ctx)
 
 	// have we already created and cached the session?
-	serviceCacheKey := "authMethod"
-	// if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
-	// 	return cachedData.(*Session), nil
-	// }
+	sessionCacheKey := "GetNewSession"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(sessionCacheKey); ok {
+		return cachedData.(*Session), nil
+	}
 
 	azureADConfig := GetConfig(d.Connection)
 	var tenantID string
@@ -48,18 +48,18 @@ func GetNewSession(ctx context.Context, d *plugin.QueryData) (sess *Session, err
 		tenantID = authConfig.TenantID
 	}
 
-	// logger.Error("GetNewSession", "TenantID", authConfig.TenantID)
-	// logger.Error("GetNewSession", "ClientCertData", authConfig.ClientCertData)
-	// logger.Error("GetNewSession", "ClientCertPassword", authConfig.ClientCertPassword)
-	// logger.Error("GetNewSession", "ClientCertPath", authConfig.ClientCertPath)
-	// logger.Error("GetNewSession", "ClientID", authConfig.ClientID)
-	// logger.Error("GetNewSession", "ClientSecret", authConfig.ClientSecret)
-	// logger.Error("GetNewSession", "EnableAzureCliToken", authConfig.EnableAzureCliToken)
-	// logger.Error("GetNewSession", "EnableClientCertAuth", authConfig.EnableClientCertAuth)
-	// logger.Error("GetNewSession", "EnableClientSecretAuth", authConfig.EnableClientSecretAuth)
-	// logger.Error("GetNewSession", "AzureADEndpoint", authConfig.Environment.AzureADEndpoint)
-	// logger.Error("GetNewSession", "EnableMsiAuth", authConfig.EnableMsiAuth)
-	// logger.Error("GetNewSession", "MsiEndpoint", authConfig.MsiEndpoint)
+	// logger.Debug("GetNewSession", "TenantID", authConfig.TenantID)
+	// logger.Debug("GetNewSession", "ClientCertData", authConfig.ClientCertData)
+	// logger.Debug("GetNewSession", "ClientCertPassword", authConfig.ClientCertPassword)
+	// logger.Debug("GetNewSession", "ClientCertPath", authConfig.ClientCertPath)
+	// logger.Debug("GetNewSession", "ClientID", authConfig.ClientID)
+	// logger.Debug("GetNewSession", "ClientSecret", authConfig.ClientSecret)
+	// logger.Debug("GetNewSession", "EnableAzureCliToken", authConfig.EnableAzureCliToken)
+	// logger.Debug("GetNewSession", "EnableClientCertAuth", authConfig.EnableClientCertAuth)
+	// logger.Debug("GetNewSession", "EnableClientSecretAuth", authConfig.EnableClientSecretAuth)
+	// logger.Debug("GetNewSession", "AzureADEndpoint", authConfig.Environment.AzureADEndpoint)
+	// logger.Debug("GetNewSession", "EnableMsiAuth", authConfig.EnableMsiAuth)
+	// logger.Debug("GetNewSession", "MsiEndpoint", authConfig.MsiEndpoint)
 
 	authorizer, err := authConfig.NewAuthorizer(ctx, auth.MsGraph)
 	if err != nil {
@@ -79,7 +79,8 @@ func GetNewSession(ctx context.Context, d *plugin.QueryData) (sess *Session, err
 		TenantID:   tenantID,
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	// Save session into cache
+	d.ConnectionManager.Cache.Set(sessionCacheKey, sess)
 
 	return sess, err
 }
