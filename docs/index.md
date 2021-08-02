@@ -10,9 +10,12 @@ og_description: "Query Azure Active Directory with SQL! Open source CLI. No DB r
 og_image: "/images/plugins/turbot/azuread-social-graphic.png"
 ---
 
-# Azure AD + Steampipe
+# [Azure Active Directory](https://docs.microsoft.com/en-in/azure/active-directory/fundamentals/active-directory-whatis) + [Steampipe](https://steampipe.io)
 
-[Azure AD](https://www.office.com/) provides access to data stored across Microsoft 365 services. Custom applications can use the Microsoft Graph API to connect to data and use it in custom applications to enhance organizational productivity.
+[Azure AD](https://azure.microsoft.com/en-in/services/active-directory/#overview) is Microsoft’s cloud-based identity and access management service, which helps your employees sign in and access resources in:
+
+- External resources, such as Microsoft 365, the Azure portal, and thousands of other SaaS applications.
+- Internal resources, such as apps on your corporate network and intranet, along with any cloud apps developed by your own organization.
 
 [Steampipe](https://steampipe.io) is an open source CLI to instantly query cloud APIs using SQL.
 

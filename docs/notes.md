@@ -1,3 +1,8 @@
+### useful links
+
+- [What is Azure Active Directory?](https://docs.microsoft.com/en-in/azure/active-directory/fundamentals/active-directory-whatis)
+- [Compare member and guest default permissions](https://docs.microsoft.com/en-in/azure/active-directory/fundamentals/users-default-permissions#compare-member-and-guest-default-permissions)
+
 ### Connection
 
 ```terraform
