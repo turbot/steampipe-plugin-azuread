@@ -28,14 +28,14 @@ from
 ```
 
 ```
-+--------------------------------+-------------------------------------------------------------------------------------------+-----------+
-| display_name                   | user_principal_name                                                                       | user_type |
-+--------------------------------+-------------------------------------------------------------------------------------------+-----------+
-| Dwight Schrute                 | dwight@contoso.onmicrosoft.com                                                            | Member    |
-| Jim Halpert                    | jim_gmail.com#EXT#@contoso.onmicrosoft.com                                                | Guest     |
-| Pam Beesly                     | pam_beesly@contoso.onmicrosoft.com                                                        | Member    |
-| Michael Scott                  | michael@contoso.onmicrosoft.com                                                           | Member    |
-+--------------------------------+-------------------------------------------------------------------------------------------+-----------+
++--------------------------------+--------------------------------------------+-----------+
+| display_name                   | user_principal_name                        | user_type |
++--------------------------------+--------------------------------------------+-----------+
+| Dwight Schrute                 | dwight@contoso.onmicrosoft.com             | Member    |
+| Jim Halpert                    | jim_gmail.com#EXT#@contoso.onmicrosoft.com | Guest     |
+| Pam Beesly                     | pam_beesly@contoso.onmicrosoft.com         | Member    |
+| Michael Scott                  | michael@contoso.onmicrosoft.com            | Member    |
++--------------------------------+--------------------------------------------+-----------+
 ```
 
 ## Documentation
