@@ -1,4 +1,4 @@
-# Table: azure_ad_user
+# Table: azuread_group
 
 Azure Active Directory (Azure AD) lets you use groups to manage access to your cloud-based apps, on-premises apps, and your resources.
 
