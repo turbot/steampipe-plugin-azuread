@@ -21,12 +21,12 @@ type Session struct {
 	Authorizer auth.Authorizer
 }
 
-// GetNewSession creates an session configured from environment variables/CLI in the order:
-// 1. Client credentials
-// 2. Client certificate
-// 3. Username password
-// 4. MSI
-// 5. CLI
+/* GetNewSession creates an session configured from (~/.steampipe/config, environment variables and CLI) in the order:
+1. Client certificate
+2. Client credentials
+3. MSI
+4. CLI
+*/
 func GetNewSession(ctx context.Context, d *plugin.QueryData) (sess *Session, err error) {
 	logger := plugin.Logger(ctx)
 
@@ -47,19 +47,6 @@ func GetNewSession(ctx context.Context, d *plugin.QueryData) (sess *Session, err
 	if authConfig.TenantID != "" {
 		tenantID = authConfig.TenantID
 	}
-
-	// logger.Debug("GetNewSession", "TenantID", authConfig.TenantID)
-	// logger.Debug("GetNewSession", "ClientCertData", authConfig.ClientCertData)
-	// logger.Debug("GetNewSession", "ClientCertPassword", authConfig.ClientCertPassword)
-	// logger.Debug("GetNewSession", "ClientCertPath", authConfig.ClientCertPath)
-	// logger.Debug("GetNewSession", "ClientID", authConfig.ClientID)
-	// logger.Debug("GetNewSession", "ClientSecret", authConfig.ClientSecret)
-	// logger.Debug("GetNewSession", "EnableAzureCliToken", authConfig.EnableAzureCliToken)
-	// logger.Debug("GetNewSession", "EnableClientCertAuth", authConfig.EnableClientCertAuth)
-	// logger.Debug("GetNewSession", "EnableClientSecretAuth", authConfig.EnableClientSecretAuth)
-	// logger.Debug("GetNewSession", "AzureADEndpoint", authConfig.Environment.AzureADEndpoint)
-	// logger.Debug("GetNewSession", "EnableMsiAuth", authConfig.EnableMsiAuth)
-	// logger.Debug("GetNewSession", "MsiEndpoint", authConfig.MsiEndpoint)
 
 	authorizer, err := authConfig.NewAuthorizer(ctx, auth.MsGraph)
 	if err != nil {
@@ -87,7 +74,8 @@ func GetNewSession(ctx context.Context, d *plugin.QueryData) (sess *Session, err
 
 func getApplicableAuthorizationDetails(ctx context.Context, config azureADConfig) (authMethod string, authConfig auth.Config, err error) {
 
-	var environment, tenantID, clientID, clientSecret, certificatePath, certificatePassword string
+	var environment, tenantID, clientID, clientSecret, certificatePath, certificatePassword, msiEndpoint string
+	var enableMsi bool
 	// username, password string
 	if config.TenantID != nil {
 		tenantID = *config.TenantID
@@ -139,6 +127,15 @@ func getApplicableAuthorizationDetails(ctx context.Context, config azureADConfig
 		certificatePassword = os.Getenv("AZURE_CERTIFICATE_PASSWORD")
 	}
 
+	if config.EnableMsi != nil {
+		enableMsi = *config.EnableMsi
+
+		if config.MsiEndpoint != nil {
+			msiEndpoint = *config.MsiEndpoint
+		}
+	}
+
+	// TODO
 	// 3. Username password
 	// if config.Username != nil {
 	// 	username = *config.Username
@@ -152,15 +149,6 @@ func getApplicableAuthorizationDetails(ctx context.Context, config azureADConfig
 	// 	password = os.Getenv("AZURE_PASSWORD")
 	// }
 
-	// hamiltonauth.
-	// authConfig := auth.Config{}
-	// Environment: environments.Global,
-	// TenantID:               tenantId,
-	// ClientID:               clientId,
-	// ClientSecret:           clientSecret,
-	// EnableClientSecretAuth: true,
-	// }
-
 	authMethod = "CLI"
 	if tenantID == "" {
 		authMethod = "CLI"
@@ -171,17 +159,17 @@ func getApplicableAuthorizationDetails(ctx context.Context, config azureADConfig
 		authConfig.ClientSecret = clientSecret
 		authConfig.EnableClientSecretAuth = true
 		authMethod = "EnableClientSecretAuth"
-	} else if tenantID != "" && certificatePath != "" && certificatePassword != "" {
+	} else if tenantID != "" && clientID != "" && certificatePath != "" && certificatePassword != "" {
 		authConfig.TenantID = tenantID
+		authConfig.ClientID = clientID
 		authConfig.ClientCertPath = certificatePath
 		authConfig.ClientCertPassword = certificatePassword
 		authConfig.EnableClientCertAuth = true
 		authMethod = "EnableClientCertificateAuth"
+	} else if enableMsi {
+		authConfig.EnableMsiAuth = true
+		authConfig.MsiEndpoint = msiEndpoint
 	}
-	// else if username != "" && password != "" {
-	// 	authConfig. = true
-	// 	authMethod = "EnableUserPasswordAuth"
-	// }
 	return
 }
 
