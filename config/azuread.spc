@@ -15,12 +15,14 @@ connection "azuread" {
   # required options:
   # tenant_id             = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
   # client_id             = "YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY"
-  # client_secret = "ZZZZZZZZZZZZZZZZZZZZZZZZ"
+  # client_secret         = "ZZZZZZZZZZZZZZZZZZZZZZZZ"
 
   # 3. MSI authentication (if enabled) using the Azure Metadata Service is then attempted
   # Useful for virtual machine hosted in azure
+  # If applicable provide msi endpoint, otherwise default endpoiint will be used
   # required options:
   # enable_msi = true
+  # msi_endpoint = "http://169.254.169.254/metadata/identity/oauth2/token"
 
   # 4. // Azure CLI authentication (if enabled) is attempted last
 }
