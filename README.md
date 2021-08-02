@@ -6,12 +6,14 @@
 
 Use SQL to query infrastructure including users, groups, applications and more from Azure Active Directory.
 
+<!-- Uncomment before release -->
 <!-- - **[Get started →](https://hub.steampipe.io/plugins/turbot/azuread)** -->
 <!-- - Documentation: [Table definitions & examples](https://hub.steampipe.io/plugins/turbot/azuread/tables) -->
 
 - Community: [Slack Channel](https://join.slack.com/t/steampipe/shared_invite/zt-oij778tv-lYyRTWOTMQYBVAbtPSWs3g)
 - Get involved: [Issues](https://github.com/turbot/steampipe-plugin-azuread/issues)
 
+<!-- Uncomment before release -->
 <!-- ## Quick start
 
 Install the plugin with [Steampipe](https://steampipe.io):
