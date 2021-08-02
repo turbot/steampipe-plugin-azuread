@@ -5,7 +5,7 @@ icon_url: "/images/plugins/turbot/azuread.svg"
 brand_color: "#0089D6"
 display_name: "Azure Active Directory"
 name: "azuread"
-description: "Steampipe plugin for querying resource users, groups, applications and more from Azure Active Directory.."
+description: "Steampipe plugin for querying resource users, groups, applications and more from Azure Active Directory."
 og_description: "Query Azure Active Directory with SQL! Open source CLI. No DB required."
 og_image: "/images/plugins/turbot/azuread-social-graphic.png"
 ---
