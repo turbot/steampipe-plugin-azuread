@@ -16,11 +16,6 @@ func tableAzureAdIdentityProvider() *plugin.Table {
 	return &plugin.Table{
 		Name:        "azuread_identity_provider",
 		Description: "Represents an Azure Active Directory (Azure AD) identity provider",
-		Get: &plugin.GetConfig{
-			Hydrate:           getAdIdentityProvider,
-			KeyColumns:        plugin.SingleColumn("id"),
-			ShouldIgnoreError: isNotFoundError,
-		},
 		List: &plugin.ListConfig{
 			Hydrate: listAdIdentityProviders,
 			KeyColumns: plugin.KeyColumnSlice{
@@ -42,7 +37,6 @@ func tableAzureAdIdentityProvider() *plugin.Table {
 			// Standard columns
 			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Transform: transform.FromField("DisplayName", "ID")},
 			{Name: "tenant_id", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTenant, Hydrate: plugin.HydrateFunc(getTenantId).WithCache(), Transform: transform.FromValue()},
-			// {Name: "data", Type: proto.ColumnType_JSON, Description: "The unique ID that identifies an active directory user.", Transform: transform.FromValue()}, // For debugging
 		},
 	}
 }
@@ -58,20 +52,16 @@ func listAdIdentityProviders(ctx context.Context, d *plugin.QueryData, _ *plugin
 	client := msgraph.NewIdentityProvidersClient(session.TenantID)
 	client.BaseClient.Authorizer = session.Authorizer
 
-	pagesLeft := true
-	for pagesLeft {
-		identityProviders, _, err := client.List(ctx)
-		if err != nil {
-			if isNotFoundError(err) {
-				return nil, nil
-			}
-			return nil, err
+	identityProviders, _, err := client.List(ctx)
+	if err != nil {
+		if isNotFoundError(err) {
+			return nil, nil
 		}
+		return nil, err
+	}
 
-		for _, identityProviders := range *identityProviders {
-			d.StreamListItem(ctx, identityProviders)
-		}
-		pagesLeft = false
+	for _, identityProviders := range *identityProviders {
+		d.StreamListItem(ctx, identityProviders)
 	}
 
 	return nil, err
@@ -79,25 +69,4 @@ func listAdIdentityProviders(ctx context.Context, d *plugin.QueryData, _ *plugin
 
 // Hydrate Functions
 
-func getAdIdentityProvider(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	session, err := GetNewSession(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-
-	client := msgraph.NewIdentityProvidersClient(session.TenantID)
-	client.BaseClient.Authorizer = session.Authorizer
-
-	var identityProviderId string
-	if h.Item != nil {
-		identityProviderId = *h.Item.(msgraph.IdentityProvider).ID
-	} else {
-		identityProviderId = d.KeyColumnQuals["id"].GetStringValue()
-	}
-
-	identityProvider, _, err := client.Get(ctx, identityProviderId)
-	if err != nil {
-		return nil, err
-	}
-	return *identityProvider, nil
-}
+// we didn't add the get function as it retries 5 times on 404 errors

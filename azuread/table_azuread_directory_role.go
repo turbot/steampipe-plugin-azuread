@@ -44,7 +44,6 @@ func tableAzureAdDirectoryRole() *plugin.Table {
 			// {Name: "tags", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTags, Transform: transform.From(applicationTags)},
 			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Transform: transform.FromField("DisplayName", "ID")},
 			{Name: "tenant_id", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTenant, Hydrate: plugin.HydrateFunc(getTenantId).WithCache(), Transform: transform.FromValue()},
-			// {Name: "data", Type: proto.ColumnType_JSON, Description: "The unique ID that identifies an active directory user.", Transform: transform.FromValue()}, // For debugging
 		},
 	}
 }
@@ -60,20 +59,16 @@ func listAdDirectoryRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	client := msgraph.NewDirectoryRolesClient(session.TenantID)
 	client.BaseClient.Authorizer = session.Authorizer
 
-	pagesLeft := true
-	for pagesLeft {
-		directoryRoles, _, err := client.List(ctx)
-		if err != nil {
-			if isNotFoundError(err) {
-				return nil, nil
-			}
-			return nil, err
+	directoryRoles, _, err := client.List(ctx)
+	if err != nil {
+		if isNotFoundError(err) {
+			return nil, nil
 		}
+		return nil, err
+	}
 
-		for _, directoryRoles := range *directoryRoles {
-			d.StreamListItem(ctx, directoryRoles)
-		}
-		pagesLeft = false
+	for _, directoryRoles := range *directoryRoles {
+		d.StreamListItem(ctx, directoryRoles)
 	}
 
 	return nil, err
@@ -81,14 +76,13 @@ func listAdDirectoryRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 
 // Hydrate Functions
 
+// we didn't add the get function as it retries 5 times on 404 errors
+
 func getAdDirectoryRole(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	session, err := GetNewSession(ctx, d)
 	if err != nil {
 		return nil, err
 	}
-
-	client := msgraph.NewDirectoryRolesClient(session.TenantID)
-	client.BaseClient.Authorizer = session.Authorizer
 
 	var directoryRoleId string
 	if h.Item != nil {
@@ -97,6 +91,12 @@ func getAdDirectoryRole(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 		directoryRoleId = d.KeyColumnQuals["id"].GetStringValue()
 	}
 
+	if directoryRoleId == "" {
+		return nil, nil
+	}
+
+	client := msgraph.NewDirectoryRolesClient(session.TenantID)
+	client.BaseClient.Authorizer = session.Authorizer
 
 	directoryRole, _, err := client.Get(ctx, directoryRoleId)
 	if err != nil {
@@ -111,9 +111,6 @@ func getAdDirectoryRoleMembers(ctx context.Context, d *plugin.QueryData, h *plug
 		return nil, err
 	}
 
-	client := msgraph.NewDirectoryRolesClient(session.TenantID)
-	client.BaseClient.Authorizer = session.Authorizer
-
 	var directoryRoleId string
 	if h.Item != nil {
 		directoryRoleId = *h.Item.(msgraph.DirectoryRole).ID
@@ -121,6 +118,12 @@ func getAdDirectoryRoleMembers(ctx context.Context, d *plugin.QueryData, h *plug
 		directoryRoleId = d.KeyColumnQuals["id"].GetStringValue()
 	}
 
+	if directoryRoleId == "" {
+		return nil, nil
+	}
+
+	client := msgraph.NewDirectoryRolesClient(session.TenantID)
+	client.BaseClient.Authorizer = session.Authorizer
 
 	members, _, err := client.ListMembers(ctx, directoryRoleId)
 	if err != nil {

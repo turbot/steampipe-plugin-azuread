@@ -1,4 +1,4 @@
-# Table: azuread_application
+# Table: azuread_directory_role
 
 Azure Active Directory (Azure AD) lets you use directory roles to manage access to your cloud-based resources.
 

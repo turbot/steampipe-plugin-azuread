@@ -1,4 +1,4 @@
-# Table: azuread_application
+# Table: azuread_service_principal
 
 Azure Active Directory (Azure AD) lets you use service principal to manage access to your cloud-based resources.
 

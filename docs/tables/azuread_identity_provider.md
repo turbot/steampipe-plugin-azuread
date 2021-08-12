@@ -1,4 +1,4 @@
-# Table: azuread_application
+# Table: azuread_identity_provider
 
 Azure Active Directory (Azure AD) lets you use identity provider to manage access to your cloud-based resources.
 

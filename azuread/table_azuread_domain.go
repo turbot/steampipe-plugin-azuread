@@ -17,27 +17,12 @@ func tableAzureAdDomain() *plugin.Table {
 	return &plugin.Table{
 		Name:        "azuread_domain",
 		Description: "Represents an Azure Active Directory (Azure AD) domain",
-		Get: &plugin.GetConfig{
-			Hydrate:           getAdDomain,
-			KeyColumns:        plugin.SingleColumn("id"),
-			ShouldIgnoreError: isNotFoundError,
-		},
 		List: &plugin.ListConfig{
 			Hydrate: listAdDomain,
 			KeyColumns: plugin.KeyColumnSlice{
 				// Key fields
 				{Name: "id", Require: plugin.Optional},
 				{Name: "filter", Require: plugin.Optional},
-
-				// Other fields for filtering OData
-				// {Name: "mail", Require: plugin.Optional, Operators: []string{"<>", "="}},                     // $filter (eq, ne, NOT, ge, le, in, startsWith).
-				// {Name: "mail_enabled", Require: plugin.Optional, Operators: []string{"<>", "="}},             // $filter (eq, ne, NOT).
-				// {Name: "on_premises_sync_enabled", Require: plugin.Optional, Operators: []string{"<>", "="}}, // $filter (eq, ne, NOT, in).
-				// {Name: "security_enabled", Require: plugin.Optional, Operators: []string{"<>", "="}},         // $filter (eq, ne, NOT, in).
-
-				// TODO
-				// {Name: "created_date_time", Operators: []string{">", ">=", "=", "<", "<="}, Require: plugin.Optional},    // Supports $filter (eq, ne, NOT, ge, le, in).
-				// {Name: "expiration_date_time", Operators: []string{">", ">=", "=", "<", "<="}, Require: plugin.Optional}, // Supports $filter (eq, ne, NOT, ge, le, in).
 			},
 		},
 
@@ -60,7 +45,6 @@ func tableAzureAdDomain() *plugin.Table {
 			// {Name: "tags", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTags, Transform: transform.From(applicationTags)},
 			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Transform: transform.FromField("DisplayName", "ID")},
 			{Name: "tenant_id", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTenant, Hydrate: plugin.HydrateFunc(getTenantId).WithCache(), Transform: transform.FromValue()},
-			// {Name: "data", Type: proto.ColumnType_JSON, Description: "The unique ID that identifies an active directory user.", Transform: transform.FromValue()}, // For debugging
 		},
 	}
 }
@@ -81,24 +65,16 @@ func listAdDomain(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	filter := ""
 	input.Filter = filter
 
-	// if input.Filter != "" {
-	// 	plugin.Logger(ctx).Debug("Filter", "input.Filter", input.Filter)
-	// }
-
-	pagesLeft := true
-	for pagesLeft {
-		domains, _, err := client.List(ctx, input)
-		if err != nil {
-			if isNotFoundError(err) {
-				return nil, nil
-			}
-			return nil, err
+	domains, _, err := client.List(ctx, input)
+	if err != nil {
+		if isNotFoundError(err) {
+			return nil, nil
 		}
+		return nil, err
+	}
 
-		for _, domain := range *domains {
-			d.StreamListItem(ctx, domain)
-		}
-		pagesLeft = false
+	for _, domain := range *domains {
+		d.StreamListItem(ctx, domain)
 	}
 
 	return nil, err
@@ -106,34 +82,4 @@ func listAdDomain(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 
 // Hydrate Functions
 
-func getAdDomain(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	session, err := GetNewSession(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-
-	client := msgraph.NewDomainsClient(session.TenantID)
-	client.BaseClient.Authorizer = session.Authorizer
-
-	var domainId string
-	if h.Item != nil {
-		domainId = *h.Item.(msgraph.ServicePrincipal).ID
-	} else {
-		domainId = d.KeyColumnQuals["id"].GetStringValue()
-	}
-
-	// TODO filters
-	input := odata.Query{}
-	filter := ""
-	input.Filter = filter
-
-	// if input.Filter != "" {
-	// 	plugin.Logger(ctx).Debug("Filter", "input.Filter", input.Filter)
-	// }
-
-	domain, _, err := client.Get(ctx, domainId, input)
-	if err != nil {
-		return nil, err
-	}
-	return domain, nil
-}
+// we didn't add the get function as it retries 5 times on 404 errors

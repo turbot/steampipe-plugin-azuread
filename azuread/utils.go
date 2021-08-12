@@ -13,12 +13,16 @@ func isNotFoundError(err error) bool {
 	return strings.Contains(err.Error(), "Request_ResourceNotFound")
 }
 
-// func isNotFoundError(err error, notFoundErrors []string) bool {
-// 	errorString := err.Error()
-// 	for _, errorCode := range notFoundErrors {
-// 		if strings.Contains(errorString, errorCode) {
-// 			return true
-// 		}
-// 	}
-// 	return false
-// }
+func TagsToMap(tags []string) (*map[string]bool, error) {
+	var turbotTagsMap map[string]bool
+	if tags == nil {
+		return nil, nil
+	}
+
+	turbotTagsMap = map[string]bool{}
+	for _, i := range tags {
+		turbotTagsMap[i] = true
+	}
+
+	return &turbotTagsMap, nil
+}

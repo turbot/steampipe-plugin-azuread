@@ -15,7 +15,7 @@ from
   azuread_application;
 ```
 
-### List groups where service authorization is disabled
+### List applications where service authorization is disabled
 
 ```sql
 select

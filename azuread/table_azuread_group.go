@@ -18,11 +18,6 @@ func tableAzureAdGroup() *plugin.Table {
 	return &plugin.Table{
 		Name:        "azuread_group",
 		Description: "Represents an Azure Active Directory (Azure AD) group, which can be a Microsoft 365 group, or a security group.",
-		Get: &plugin.GetConfig{
-			Hydrate:           getAdGroup,
-			KeyColumns:        plugin.SingleColumn("id"),
-			ShouldIgnoreError: isNotFoundError,
-		},
 		List: &plugin.ListConfig{
 			Hydrate: listAdGroups,
 			KeyColumns: plugin.KeyColumnSlice{
@@ -117,62 +112,22 @@ func listAdGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		input.Filter = strings.Join(filter, " and ")
 	}
 
-	// if input.Filter != "" {
-	// 	plugin.Logger(ctx).Debug("Filter", "input.Filter", input.Filter)
-	// }
-
-	pagesLeft := true
-	for pagesLeft {
-		groups, _, err := client.List(ctx, input)
-		if err != nil {
-			if isNotFoundError(err) {
-				return nil, nil
-			}
-			return nil, err
+	groups, _, err := client.List(ctx, input)
+	if err != nil {
+		if isNotFoundError(err) {
+			return nil, nil
 		}
+		return nil, err
+	}
 
-		for _, group := range *groups {
-			d.StreamListItem(ctx, group)
-		}
-		pagesLeft = false
+	for _, group := range *groups {
+		d.StreamListItem(ctx, group)
 	}
 
 	return nil, err
 }
 
 //// Hydrate Functions
-
-func getAdGroup(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	session, err := GetNewSession(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-
-	client := msgraph.NewGroupsClient(session.TenantID)
-	client.BaseClient.Authorizer = session.Authorizer
-
-	var groupId string
-	if h.Item != nil {
-		groupId = *h.Item.(msgraph.ServicePrincipal).ID
-	} else {
-		groupId = d.KeyColumnQuals["id"].GetStringValue()
-	}
-
-	// TODO filters
-	input := odata.Query{}
-	filter := ""
-	input.Filter = filter
-
-	// if input.Filter != "" {
-	// 	plugin.Logger(ctx).Debug("Filter", "input.Filter", input.Filter)
-	// }
-
-	group, _, err := client.Get(ctx, groupId, input)
-	if err != nil {
-		return nil, err
-	}
-	return *group, nil
-}
 
 func getGroupMembers(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	group := h.Item.(msgraph.Group)
