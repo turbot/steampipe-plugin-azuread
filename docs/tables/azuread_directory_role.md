@@ -1,6 +1,6 @@
 # Table: azuread_directory_role
 
-Azure Active Directory (Azure AD) lets you use directory roles to manage access to your cloud-based resources.
+Azure Active Directory (Azure AD) lets you use directory roles to manage access to your cloud-based resources. Azure AD directory roles are also known as administrator roles.
 
 ## Examples
 
@@ -15,7 +15,7 @@ from
   azuread_directory_role;
 ```
 
-### List domains which are verified
+### List directory roles with member ids
 
 ```sql
 select
