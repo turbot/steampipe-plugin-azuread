@@ -114,11 +114,11 @@ func getAdApplication(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	client.BaseClient.DisableRetries = true
 
 
-	applications, _, err := client.Get(ctx, applicationId, odata.Query{})
+	application, _, err := client.Get(ctx, applicationId, odata.Query{})
 	if err != nil {
 		return nil, err
 	}
-	return *applications, nil
+	return *application, nil
 }
 
 func getApplicationOwners(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
