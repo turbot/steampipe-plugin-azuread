@@ -14,13 +14,21 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 	p := &plugin.Plugin{
 		Name:             pluginName,
 		DefaultTransform: transform.FromCamel(),
+		DefaultGetConfig: &plugin.GetConfig{
+			ShouldIgnoreError: isNotFoundErrorPredicate([]string{"Request_ResourceNotFound"}),
+		},
 		ConnectionConfigSchema: &plugin.ConnectionConfigSchema{
 			NewInstance: ConfigInstance,
 			Schema:      ConfigSchema,
 		},
 		TableMap: map[string]*plugin.Table{
-			"azuread_user":  tableAzureAdUser(),
-			"azuread_group": tableAzureAdGroup(),
+			"azuread_application":       tableAzureAdApplication(),
+			"azuread_directory_role":    tableAzureAdDirectoryRole(),
+			"azuread_domain":            tableAzureAdDomain(),
+			"azuread_group":             tableAzureAdGroup(),
+			"azuread_identity_provider": tableAzureAdIdentityProvider(),
+			"azuread_service_principal": tableAzureAdServicePrincipal(),
+			"azuread_user":              tableAzureAdUser(),
 		},
 	}
 

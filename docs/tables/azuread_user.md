@@ -42,7 +42,7 @@ select
 from
   azuread_user
 where
-  not account_enabled
+  not account_enabled;
 ```
 
 ### List users with access to directory roles

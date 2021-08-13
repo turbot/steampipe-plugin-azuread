@@ -21,6 +21,10 @@ func tableAzureAdUser() *plugin.Table {
 	return &plugin.Table{
 		Name:        "azuread_user",
 		Description: "Represents an Azure AD user account.",
+		Get: &plugin.GetConfig{
+			Hydrate:           getAdUser,
+			KeyColumns:        plugin.SingleColumn("id"),
+		},
 		List: &plugin.ListConfig{
 			Hydrate: listAdUsers,
 			KeyColumns: plugin.KeyColumnSlice{
@@ -56,9 +60,6 @@ func tableAzureAdUser() *plugin.Table {
 			{Name: "refresh_tokens_valid_from_date_time", Type: proto.ColumnType_TIMESTAMP, Description: "Any refresh tokens or sessions tokens (session cookies) issued before this time are invalid, and applications will get an error when using an invalid refresh or sessions token to acquire a delegated access token (to access APIs such as Microsoft Graph)."},
 			{Name: "sign_in_sessions_valid_from_date_time", Type: proto.ColumnType_TIMESTAMP, Description: "Any refresh tokens or sessions tokens (session cookies) issued before this time are invalid, and applications will get an error when using an invalid refresh or sessions token to acquire a delegated access token (to access APIs such as Microsoft Graph)."},
 			{Name: "usage_location", Type: proto.ColumnType_STRING, Description: "A two letter country code (ISO standard 3166), required for users that will be assigned licenses due to legal requirement to check for availability of services in countries."},
-			// {Name: "about_me", Type: proto.ColumnType_TIMESTAMP, Description: "A freeform text entry field for the user to describe themselves."},
-			// {Name: "deleted_date_time", Type: proto.ColumnType_TIMESTAMP, Description: " The time at which the directory object was deleted."},
-			// {Name: "is_resource_account", Type: proto.ColumnType_BOOL, Description: "Do not use – reserved for future use."},
 
 			// Json fields
 			{Name: "member_of", Type: proto.ColumnType_JSON, Description: "A list the groups and directory roles that the user is a direct member of."},
@@ -66,8 +67,6 @@ func tableAzureAdUser() *plugin.Table {
 			{Name: "im_addresses", Type: proto.ColumnType_JSON, Description: "The instant message voice over IP (VOIP) session initiation protocol (SIP) addresses for the user."},
 			{Name: "other_mails", Type: proto.ColumnType_JSON, Description: "A list of additional email addresses for the user."},
 			{Name: "password_profile", Type: proto.ColumnType_JSON, Description: "Specifies the password profile for the user. The profile contains the user’s password. This property is required when a user is created."},
-			// {Name: "sign_in_activity", Type: proto.ColumnType_JSON, Description: ""},
-			// {Name: "data", Type: proto.ColumnType_JSON, Description: "The unique ID that identifies an active directory user.", Transform: transform.FromValue()}, // For debugging
 
 			// Standard columns
 			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Transform: transform.FromField("DisplayName", "UserPrincipalName")},
@@ -112,30 +111,58 @@ func listAdUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		input.Filter = strings.Join(filter, " and ")
 	}
 
-	// if input.Filter != "" {
-	// 	plugin.Logger(ctx).Debug("Filter", "input.Filter", input.Filter)
-	// }
-
-	pagesLeft := true
-	for pagesLeft {
-		users, _, err := client.List(ctx, input)
-		if err != nil {
-			if isNotFoundError(err) {
-				return nil, nil
-			}
-			return nil, err
+	users, _, err := client.List(ctx, input)
+	if err != nil {
+		if isNotFoundError(err) {
+			return nil, nil
 		}
+		return nil, err
+	}
 
-		for _, user := range *users {
-			d.StreamListItem(ctx, user)
-		}
-		pagesLeft = false
+	for _, user := range *users {
+		d.StreamListItem(ctx, user)
 	}
 
 	return nil, err
 }
 
 //// HYDRATE FUNCTIONS
+
+func getAdUser(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+
+	var userId string
+	if h.Item != nil {
+		userId = *h.Item.(msgraph.User).ID
+	} else {
+		userId = d.KeyColumnQuals["id"].GetStringValue()
+	}
+
+	if userId == "" {
+		return nil, nil
+	}
+	session, err := GetNewSession(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+
+	client := msgraph.NewUsersClient(session.TenantID)
+	client.BaseClient.Authorizer = session.Authorizer
+	client.BaseClient.DisableRetries = true
+
+	input := odata.Query{}
+	if helpers.StringSliceContains(d.QueryContext.Columns, "member_of") {
+		input.Expand = odata.Expand{
+			Relationship: "memberOf",
+			Select:       []string{"id", "displayName"},
+		}
+	}
+
+	user, _, err := client.Get(ctx, userId, input)
+	if err != nil {
+		return nil, err
+	}
+	return *user, nil
+}
 
 func getTenantId(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Debug("getTenantId")
