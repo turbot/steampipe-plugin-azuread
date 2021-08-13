@@ -73,5 +73,5 @@ where
   owner_id = u.id and
   gr.display_name = 'turbot'
 order by
-  user_name
+  user_name;
 ```

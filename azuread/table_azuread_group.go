@@ -127,7 +127,7 @@ func listAdGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	return nil, err
 }
 
-//// Hydrate Functions
+// Hydrate Functions
 
 func getGroupMembers(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	group := h.Item.(msgraph.Group)
@@ -163,7 +163,7 @@ func getGroupOwners(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 	return owners, nil
 }
 
-//// Transform Function
+// Transform Function
 
 func groupTags(ctx context.Context, d *transform.TransformData) (interface{}, error) {
 	group := d.HydrateItem.(msgraph.Group)

@@ -15,7 +15,7 @@ from
   azuread_service_principal;
 ```
 
-### List service principals where account is disabled
+### List disabled service principals
 
 ```sql
 select

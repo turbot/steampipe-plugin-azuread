@@ -10,17 +10,7 @@ Azure Active Directory (Azure AD) lets you use directory roles to manage access 
 select
   id,
   display_name,
-  description
-from
-  azuread_directory_role;
-```
-
-### List directory roles with member ids
-
-```sql
-select
-  id,
-  display_name,
+  description,
   member_ids
 from
   azuread_directory_role;
@@ -37,5 +27,5 @@ from
   jsonb_array_elements_text(member_ids) as m_id,
   azuread_user as u
 where
-  u.id = m_id
+  u.id = m_id;
 ```

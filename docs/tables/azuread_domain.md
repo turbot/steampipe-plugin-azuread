@@ -11,12 +11,12 @@ select
   id,
   is_admin_managed,
   is_verified,
-  supportedServices
+  supported_services
 from
   azuread_domain;
 ```
 
-### List domains which are verified
+### List verified domains
 
 ```sql
 select

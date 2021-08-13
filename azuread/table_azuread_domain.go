@@ -18,7 +18,7 @@ func tableAzureAdDomain() *plugin.Table {
 		Name:        "azuread_domain",
 		Description: "Represents an Azure Active Directory (Azure AD) domain",
 		List: &plugin.ListConfig{
-			Hydrate: listAdDomain,
+			Hydrate: listAdDomains,
 			KeyColumns: plugin.KeyColumnSlice{
 				// Key fields
 				{Name: "id", Require: plugin.Optional},
@@ -42,16 +42,15 @@ func tableAzureAdDomain() *plugin.Table {
 			{Name: "supported_services", Type: proto.ColumnType_JSON, Description: "The capabilities assigned to the domain. Can include 0, 1 or more of following values: Email, Sharepoint, EmailInternalRelayOnly, OfficeCommunicationsOnline, SharePointDefaultDomain, FullRedelegation, SharePointPublic, OrgIdAuthentication, Yammer, Intune. The values which you can add/remove using Graph API include: Email, OfficeCommunicationsOnline, Yammer."},
 
 			// // Standard columns
-			// {Name: "tags", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTags, Transform: transform.From(applicationTags)},
 			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Transform: transform.FromField("DisplayName", "ID")},
 			{Name: "tenant_id", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTenant, Hydrate: plugin.HydrateFunc(getTenantId).WithCache(), Transform: transform.FromValue()},
 		},
 	}
 }
 
-// LIST FUNCTION
+//// LIST FUNCTION
 
-func listAdDomain(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listAdDomains(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	session, err := GetNewSession(ctx, d)
 	if err != nil {
 		return nil, err
@@ -79,7 +78,3 @@ func listAdDomain(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 
 	return nil, err
 }
-
-// Hydrate Functions
-
-// we didn't add the get function as it retries 5 times on 404 errors

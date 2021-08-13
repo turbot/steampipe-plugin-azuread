@@ -28,16 +28,16 @@ func tableAzureAdServicePrincipal() *plugin.Table {
 
 		Columns: []*plugin.Column{
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "The unique identifier for the service principal.", Transform: transform.FromGo()},
-			{Name: "display_name", Type: proto.ColumnType_STRING, Description: "The display name for the service principal"},
+			{Name: "display_name", Type: proto.ColumnType_STRING, Description: "The display name for the service principal."},
 			{Name: "filter", Type: proto.ColumnType_STRING, Transform: transform.FromQual("filter"), Description: "Odata query to search for service principals."},
 
 			// Other fields
-			{Name: "account_enabled", Type: proto.ColumnType_BOOL, Description: "true if the service principal account is enabled; otherwise, false"},
+			{Name: "account_enabled", Type: proto.ColumnType_BOOL, Description: "true if the service principal account is enabled; otherwise, false."},
 			{Name: "app_display_name", Type: proto.ColumnType_STRING, Description: "The display name exposed by the associated application."},
 			{Name: "app_owner_organization_id", Type: proto.ColumnType_STRING, Description: "Contains the tenant id where the application is registered. This is applicable only to service principals backed by applications."},
 			{Name: "app_role_assignment_required", Type: proto.ColumnType_BOOL, Description: "Specifies whether users or other service principals need to be granted an app role assignment for this service principal before users can sign in or apps can get tokens. The default value is false."},
 			{Name: "service_principal_type", Type: proto.ColumnType_STRING, Description: "Identifies whether the service principal represents an application, a managed identity, or a legacy application. This is set by Azure AD internally."},
-			{Name: "sign_in_audience", Type: proto.ColumnType_STRING, Description: "Specifies the Microsoft accounts that are supported for the current application. Supported values are: AzureADMyOrg, AzureADMultipleOrgs, AzureADandPersonalMicrosoftAccount, PersonalMicrosoftAccount"},
+			{Name: "sign_in_audience", Type: proto.ColumnType_STRING, Description: "Specifies the Microsoft accounts that are supported for the current application. Supported values are: AzureADMyOrg, AzureADMultipleOrgs, AzureADandPersonalMicrosoftAccount, PersonalMicrosoftAccount."},
 
 			// // Json fields
 			{Name: "add_ins", Type: proto.ColumnType_JSON, Description: "Defines custom behavior that a consuming service can use to call an app in specific contexts."},
@@ -94,8 +94,6 @@ func listAdServicePrincipals(ctx context.Context, d *plugin.QueryData, _ *plugin
 }
 
 // Hydrate Functions
-
-// we didn't add the get function as it retries 5 times on 404 errors
 
 func getAdServicePrincipalOwners(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	servicePrincipalId := *h.Item.(msgraph.ServicePrincipal).ID

@@ -124,8 +124,6 @@ func listAdUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 
 // HYDRATE FUNCTIONS
 
-// we didn't add the get function as it retries 5 times on 404 errors
-
 func getTenantId(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Debug("getTenantId")
 

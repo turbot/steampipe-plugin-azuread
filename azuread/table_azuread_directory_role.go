@@ -41,7 +41,6 @@ func tableAzureAdDirectoryRole() *plugin.Table {
 			// // Json fields
 			{Name: "member_ids", Type: proto.ColumnType_JSON, Hydrate: getAdDirectoryRoleMembers, Transform: transform.FromValue(), Description: "Id of the owners of the application. The owners are a set of non-admin users who are allowed to modify this object."},
 			// // Standard columns
-			// {Name: "tags", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTags, Transform: transform.From(applicationTags)},
 			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Transform: transform.FromField("DisplayName", "ID")},
 			{Name: "tenant_id", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTenant, Hydrate: plugin.HydrateFunc(getTenantId).WithCache(), Transform: transform.FromValue()},
 		},
@@ -74,9 +73,7 @@ func listAdDirectoryRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	return nil, err
 }
 
-// Hydrate Functions
-
-// we didn't add the get function as it retries 5 times on 404 errors
+////Hydrate Functions
 
 func getAdDirectoryRole(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	session, err := GetNewSession(ctx, d)
