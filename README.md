@@ -1,20 +1,16 @@
-# WIP
-
 ![image](https://hub.steampipe.io/images/plugins/turbot/azuread-social-graphic.png)
 
-# Azure AD Plugin for Steampipe
+# Azure Active Directory Plugin for Steampipe
 
 Use SQL to query infrastructure including users, groups, applications and more from Azure Active Directory.
 
-<!-- Uncomment before release -->
-<!-- - **[Get started →](https://hub.steampipe.io/plugins/turbot/azuread)** -->
-<!-- - Documentation: [Table definitions & examples](https://hub.steampipe.io/plugins/turbot/azuread/tables) -->
+- **[Get started →](https://hub.steampipe.io/plugins/turbot/azuread)**
+- Documentation: [Table definitions & examples](https://hub.steampipe.io/plugins/turbot/azuread/tables)
 
 - Community: [Slack Channel](https://join.slack.com/t/steampipe/shared_invite/zt-oij778tv-lYyRTWOTMQYBVAbtPSWs3g)
 - Get involved: [Issues](https://github.com/turbot/steampipe-plugin-azuread/issues)
 
-<!-- Uncomment before release -->
-<!-- ## Quick start
+## Quick start
 
 Install the plugin with [Steampipe](https://steampipe.io):
 
@@ -26,7 +22,7 @@ Run a query:
 
 ```sql
 select user_principal_name, id, created_date_time from azuread_user;
-``` -->
+```
 
 ## Developing
 
@@ -38,7 +34,7 @@ Prerequisites:
 Clone:
 
 ```sh
-git clone git@github.com:turbot/steampipe-plugin-azuread
+git clone https://github.com/turbot/steampipe-plugin-azuread.git
 cd steampipe-plugin-azuread
 ```
 
@@ -74,4 +70,4 @@ Please see the [contribution guidelines](https://github.com/turbot/steampipe/blo
 `help wanted` issues:
 
 - [Steampipe](https://github.com/turbot/steampipe/labels/help%20wanted)
-- [AzureAD Plugin](https://github.com/turbot/steampipe-plugin-azuread/labels/help%20wanted)
+- [Azure Active Directory Plugin](https://github.com/turbot/steampipe-plugin-azuread/labels/help%20wanted)
