@@ -1,6 +1,10 @@
 package azuread
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/turbot/steampipe-plugin-sdk/plugin"
+)
 
 // Constants for Standard Column Descriptions
 const (
@@ -11,6 +15,19 @@ const (
 
 func isNotFoundError(err error) bool {
 	return strings.Contains(err.Error(), "Request_ResourceNotFound")
+}
+
+func isNotFoundErrorPredicate(notFoundErrors []string) plugin.ErrorPredicate {
+	return func(err error) bool {
+		if err != nil {
+			for _, item := range notFoundErrors {
+				if strings.Contains(err.Error(), item) {
+					return true
+				}
+			}
+		}
+		return false
+	}
 }
 
 func TagsToMap(tags []string) (*map[string]bool, error) {

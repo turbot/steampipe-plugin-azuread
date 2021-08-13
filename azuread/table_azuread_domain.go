@@ -17,19 +17,22 @@ func tableAzureAdDomain() *plugin.Table {
 	return &plugin.Table{
 		Name:        "azuread_domain",
 		Description: "Represents an Azure Active Directory (Azure AD) domain",
+		Get: &plugin.GetConfig{
+			Hydrate:           getAdDomain,
+			KeyColumns:        plugin.SingleColumn("id"),
+		},
 		List: &plugin.ListConfig{
 			Hydrate: listAdDomains,
+			// TODO: Add filter as optional key column
 			KeyColumns: plugin.KeyColumnSlice{
 				// Key fields
 				{Name: "id", Require: plugin.Optional},
-				{Name: "filter", Require: plugin.Optional},
 			},
 		},
 
 		Columns: []*plugin.Column{
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "The fully qualified name of the domain.", Transform: transform.FromGo()},
 			{Name: "authentication_type", Type: proto.ColumnType_STRING, Description: "Indicates the configured authentication type for the domain. The value is either Managed or Federated. Managed indicates a cloud managed domain where Azure AD performs user authentication. Federated indicates authentication is federated with an identity provider such as the tenant's on-premises Active Directory via Active Directory Federation Services."},
-			{Name: "filter", Type: proto.ColumnType_STRING, Transform: transform.FromQual("filter"), Description: "Odata query to search for groups."},
 
 			// Other fields
 			{Name: "is_default", Type: proto.ColumnType_BOOL, Description: "true if this is the default domain that is used for user creation. There is only one default domain per company."},
@@ -59,12 +62,7 @@ func listAdDomains(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 	client := msgraph.NewDomainsClient(session.TenantID)
 	client.BaseClient.Authorizer = session.Authorizer
 
-	// TODO filters
-	input := odata.Query{}
-	filter := ""
-	input.Filter = filter
-
-	domains, _, err := client.List(ctx, input)
+	domains, _, err := client.List(ctx, odata.Query{})
 	if err != nil {
 		if isNotFoundError(err) {
 			return nil, nil
@@ -77,4 +75,34 @@ func listAdDomains(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 	}
 
 	return nil, err
+}
+
+//// Hydrate Functions
+
+func getAdDomain(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	var domainId string
+	if h.Item != nil {
+		domainId = *h.Item.(msgraph.ServicePrincipal).ID
+	} else {
+		domainId = d.KeyColumnQuals["id"].GetStringValue()
+	}
+
+	if domainId == "" {
+		return nil, nil
+	}
+	session, err := GetNewSession(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+
+	client := msgraph.NewDomainsClient(session.TenantID)
+	client.BaseClient.Authorizer = session.Authorizer
+	client.BaseClient.DisableRetries = true
+
+
+	domain, _, err := client.Get(ctx, domainId, odata.Query{})
+	if err != nil {
+		return nil, err
+	}
+	return *domain, nil
 }

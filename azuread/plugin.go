@@ -14,6 +14,9 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 	p := &plugin.Plugin{
 		Name:             pluginName,
 		DefaultTransform: transform.FromCamel(),
+		DefaultGetConfig: &plugin.GetConfig{
+			ShouldIgnoreError: isNotFoundErrorPredicate([]string{"Request_ResourceNotFound"}),
+		},
 		ConnectionConfigSchema: &plugin.ConnectionConfigSchema{
 			NewInstance: ConfigInstance,
 			Schema:      ConfigSchema,

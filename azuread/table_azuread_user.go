@@ -21,6 +21,10 @@ func tableAzureAdUser() *plugin.Table {
 	return &plugin.Table{
 		Name:        "azuread_user",
 		Description: "Represents an Azure AD user account.",
+		Get: &plugin.GetConfig{
+			Hydrate:           getAdUser,
+			KeyColumns:        plugin.SingleColumn("id"),
+		},
 		List: &plugin.ListConfig{
 			Hydrate: listAdUsers,
 			KeyColumns: plugin.KeyColumnSlice{
@@ -122,7 +126,43 @@ func listAdUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	return nil, err
 }
 
-// HYDRATE FUNCTIONS
+//// HYDRATE FUNCTIONS
+
+func getAdUser(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+
+	var userId string
+	if h.Item != nil {
+		userId = *h.Item.(msgraph.User).ID
+	} else {
+		userId = d.KeyColumnQuals["id"].GetStringValue()
+	}
+
+	if userId == "" {
+		return nil, nil
+	}
+	session, err := GetNewSession(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+
+	client := msgraph.NewUsersClient(session.TenantID)
+	client.BaseClient.Authorizer = session.Authorizer
+	client.BaseClient.DisableRetries = true
+
+	input := odata.Query{}
+	if helpers.StringSliceContains(d.QueryContext.Columns, "member_of") {
+		input.Expand = odata.Expand{
+			Relationship: "memberOf",
+			Select:       []string{"id", "displayName"},
+		}
+	}
+
+	user, _, err := client.Get(ctx, userId, input)
+	if err != nil {
+		return nil, err
+	}
+	return *user, nil
+}
 
 func getTenantId(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Debug("getTenantId")

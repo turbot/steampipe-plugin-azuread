@@ -19,7 +19,6 @@ func tableAzureAdDirectoryRole() *plugin.Table {
 		Get: &plugin.GetConfig{
 			Hydrate:           getAdDirectoryRole,
 			KeyColumns:        plugin.SingleColumn("id"),
-			ShouldIgnoreError: isNotFoundError,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listAdDirectoryRoles,
@@ -33,7 +32,6 @@ func tableAzureAdDirectoryRole() *plugin.Table {
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "The unique identifier for the directory role.", Transform: transform.FromGo()},
 			{Name: "description", Type: proto.ColumnType_STRING, Description: "The description for the directory role."},
 			{Name: "display_name", Type: proto.ColumnType_STRING, Description: "The display name for the directory role."},
-			{Name: "filter", Type: proto.ColumnType_STRING, Transform: transform.FromQual("filter"), Description: "Odata query to search for groups."},
 
 			// Other fields
 			{Name: "role_template_id", Type: proto.ColumnType_STRING, Description: "The id of the directoryRoleTemplate that this role is based on. The property must be specified when activating a directory role in a tenant with a POST operation. After the directory role has been activated, the property is read only."},
@@ -73,14 +71,9 @@ func listAdDirectoryRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	return nil, err
 }
 
-////Hydrate Functions
+//// Hydrate Functions
 
 func getAdDirectoryRole(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	session, err := GetNewSession(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-
 	var directoryRoleId string
 	if h.Item != nil {
 		directoryRoleId = *h.Item.(msgraph.DirectoryRole).ID
@@ -90,6 +83,11 @@ func getAdDirectoryRole(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 
 	if directoryRoleId == "" {
 		return nil, nil
+	}
+
+	session, err := GetNewSession(ctx, d)
+	if err != nil {
+		return nil, err
 	}
 
 	client := msgraph.NewDirectoryRolesClient(session.TenantID)
@@ -103,11 +101,6 @@ func getAdDirectoryRole(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 }
 
 func getAdDirectoryRoleMembers(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	session, err := GetNewSession(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-
 	var directoryRoleId string
 	if h.Item != nil {
 		directoryRoleId = *h.Item.(msgraph.DirectoryRole).ID
@@ -117,6 +110,11 @@ func getAdDirectoryRoleMembers(ctx context.Context, d *plugin.QueryData, h *plug
 
 	if directoryRoleId == "" {
 		return nil, nil
+	}
+
+	session, err := GetNewSession(ctx, d)
+	if err != nil {
+		return nil, err
 	}
 
 	client := msgraph.NewDirectoryRolesClient(session.TenantID)

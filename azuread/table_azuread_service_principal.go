@@ -17,19 +17,22 @@ func tableAzureAdServicePrincipal() *plugin.Table {
 	return &plugin.Table{
 		Name:        "azuread_service_principal",
 		Description: "Represents an Azure Active Directory (Azure AD) service principal",
+		Get: &plugin.GetConfig{
+			Hydrate:           getAdServicePrincipal,
+			KeyColumns:        plugin.SingleColumn("id"),
+		},
 		List: &plugin.ListConfig{
 			Hydrate: listAdServicePrincipals,
+			// TODO: Add filter as optional key column
 			KeyColumns: plugin.KeyColumnSlice{
 				// Key fields
 				{Name: "id", Require: plugin.Optional},
-				{Name: "filter", Require: plugin.Optional},
 			},
 		},
 
 		Columns: []*plugin.Column{
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "The unique identifier for the service principal.", Transform: transform.FromGo()},
 			{Name: "display_name", Type: proto.ColumnType_STRING, Description: "The display name for the service principal."},
-			{Name: "filter", Type: proto.ColumnType_STRING, Transform: transform.FromQual("filter"), Description: "Odata query to search for service principals."},
 
 			// Other fields
 			{Name: "account_enabled", Type: proto.ColumnType_BOOL, Description: "true if the service principal account is enabled; otherwise, false."},
@@ -73,12 +76,7 @@ func listAdServicePrincipals(ctx context.Context, d *plugin.QueryData, _ *plugin
 	client := msgraph.NewServicePrincipalsClient(session.TenantID)
 	client.BaseClient.Authorizer = session.Authorizer
 
-	// TODO filters
-	input := odata.Query{}
-	filter := ""
-	input.Filter = filter
-
-	servicePrincipals, _, err := client.List(ctx, input)
+	servicePrincipals, _, err := client.List(ctx, odata.Query{})
 	if err != nil {
 		if isNotFoundError(err) {
 			return nil, nil
@@ -93,7 +91,35 @@ func listAdServicePrincipals(ctx context.Context, d *plugin.QueryData, _ *plugin
 	return nil, err
 }
 
-// Hydrate Functions
+//// Hydrate Functions
+
+func getAdServicePrincipal(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	var servicePrincipalId string
+	if h.Item != nil {
+		servicePrincipalId = *h.Item.(msgraph.ServicePrincipal).ID
+	} else {
+		servicePrincipalId = d.KeyColumnQuals["id"].GetStringValue()
+	}
+
+	if servicePrincipalId == "" {
+		return nil, nil
+	}
+
+	session, err := GetNewSession(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+
+	client := msgraph.NewServicePrincipalsClient(session.TenantID)
+	client.BaseClient.Authorizer = session.Authorizer
+	client.BaseClient.DisableRetries = true
+
+	servicePrincipal, _, err := client.Get(ctx, servicePrincipalId, odata.Query{})
+	if err != nil {
+		return nil, err
+	}
+	return *servicePrincipal, nil
+}
 
 func getAdServicePrincipalOwners(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	servicePrincipalId := *h.Item.(msgraph.ServicePrincipal).ID
@@ -112,7 +138,7 @@ func getAdServicePrincipalOwners(ctx context.Context, d *plugin.QueryData, h *pl
 	return owners, nil
 }
 
-// Transform Function
+//// Transform Function
 
 func servicePrincipalTags(ctx context.Context, d *transform.TransformData) (interface{}, error) {
 	servicePrincipal := d.HydrateItem.(msgraph.ServicePrincipal)

@@ -17,13 +17,17 @@ func tableAzureAdApplication() *plugin.Table {
 	return &plugin.Table{
 		Name:        "azuread_application",
 		Description: "Represents an Azure Active Directory (Azure AD) application",
+		Get: &plugin.GetConfig{
+			Hydrate:           getAdApplication,
+			KeyColumns:        plugin.SingleColumn("id"),
+		},
 		List: &plugin.ListConfig{
 			Hydrate: listAdApplications,
+			// TODO: Add filter as optional key column
 			KeyColumns: plugin.KeyColumnSlice{
 				// Key fields
 				{Name: "id", Require: plugin.Optional},
 				{Name: "display_name", Require: plugin.Optional},
-				{Name: "filter", Require: plugin.Optional},
 			},
 		},
 
@@ -31,7 +35,6 @@ func tableAzureAdApplication() *plugin.Table {
 			{Name: "display_name", Type: proto.ColumnType_STRING, Description: "The display name for the application."},
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "The unique identifier for the application.", Transform: transform.FromGo()},
 			{Name: "app_id", Type: proto.ColumnType_STRING, Description: "The unique identifier for the application that is assigned to an application by Azure AD."},
-			{Name: "filter", Type: proto.ColumnType_STRING, Transform: transform.FromQual("filter"), Description: "Odata query to search for applications."},
 
 			// // Other fields
 			{Name: "created_date_time", Type: proto.ColumnType_TIMESTAMP, Description: "The date and time the application was registered. The DateTimeOffset type represents date and time information using ISO 8601 format and is always in UTC time."},
@@ -49,7 +52,7 @@ func tableAzureAdApplication() *plugin.Table {
 			{Name: "parental_control_settings", Type: proto.ColumnType_JSON, Description: "Specifies parental control settings for an application."},
 			{Name: "password_credentials", Type: proto.ColumnType_JSON, Description: "The collection of password credentials associated with the application."},
 			{Name: "spa", Type: proto.ColumnType_JSON, Description: "Specifies settings for a single-page application, including sign out URLs and redirect URIs for authorization codes and access tokens."},
-			{Name: "tags_src", Type: proto.ColumnType_JSON, Description: "Custom strings that can be used to categorize and identify the application.", Transform: transform.FromField("Tags"),},
+			{Name: "tags_src", Type: proto.ColumnType_JSON, Description: "Custom strings that can be used to categorize and identify the application.", Transform: transform.FromField("Tags")},
 			{Name: "web", Type: proto.ColumnType_JSON, Description: "Specifies settings for a web application."},
 
 			// // Standard columns
@@ -71,10 +74,7 @@ func listAdApplications(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	client := msgraph.NewApplicationsClient(session.TenantID)
 	client.BaseClient.Authorizer = session.Authorizer
 
-	// TODO filters
 	input := odata.Query{}
-	filter := ""
-	input.Filter = filter
 
 	applications, _, err := client.List(ctx, input)
 	if err != nil {
@@ -90,14 +90,44 @@ func listAdApplications(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	return nil, err
 }
 
-// Hydrate Functions
+//// Hydrate Functions
 
-// we didn't add the get function as it retries 5 times on 404 errors
+func getAdApplication(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+
+	var applicationId string
+	if h.Item != nil {
+		applicationId = *h.Item.(msgraph.Application).ID
+	} else {
+		applicationId = d.KeyColumnQuals["id"].GetStringValue()
+	}
+
+	if applicationId == "" {
+		return nil, nil
+	}
+	session, err := GetNewSession(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+
+	client := msgraph.NewApplicationsClient(session.TenantID)
+	client.BaseClient.Authorizer = session.Authorizer
+	client.BaseClient.DisableRetries = true
+
+
+	applications, _, err := client.Get(ctx, applicationId, odata.Query{})
+	if err != nil {
+		return nil, err
+	}
+	return *applications, nil
+}
 
 func getApplicationOwners(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	application := h.Item.(msgraph.Application)
 	session, err := GetNewSession(ctx, d)
 	if err != nil {
+		if isNotFoundError(err) {
+			return nil, nil
+		}
 		return nil, err
 	}
 
@@ -111,7 +141,7 @@ func getApplicationOwners(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	return owners, nil
 }
 
-// Transform Function
+//// Transform Function
 
 func applicationTags(ctx context.Context, d *transform.TransformData) (interface{}, error) {
 	application := d.HydrateItem.(msgraph.Application)

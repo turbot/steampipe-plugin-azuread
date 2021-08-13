@@ -16,6 +16,10 @@ func tableAzureAdIdentityProvider() *plugin.Table {
 	return &plugin.Table{
 		Name:        "azuread_identity_provider",
 		Description: "Represents an Azure Active Directory (Azure AD) identity provider",
+		Get: &plugin.GetConfig{
+			Hydrate:           getAdIdentityProvider,
+			KeyColumns:        plugin.SingleColumn("id"),
+		},
 		List: &plugin.ListConfig{
 			Hydrate: listAdIdentityProviders,
 			KeyColumns: plugin.KeyColumnSlice{
@@ -64,4 +68,34 @@ func listAdIdentityProviders(ctx context.Context, d *plugin.QueryData, _ *plugin
 	}
 
 	return nil, err
+}
+
+//// Hydrate Functions
+
+func getAdIdentityProvider(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	var identityProviderId string
+	if h.Item != nil {
+		identityProviderId = *h.Item.(msgraph.IdentityProvider).ID
+	} else {
+		identityProviderId = d.KeyColumnQuals["id"].GetStringValue()
+	}
+
+	if identityProviderId == "" {
+		return nil, nil
+	}
+
+	session, err := GetNewSession(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+
+	client := msgraph.NewIdentityProvidersClient(session.TenantID)
+	client.BaseClient.Authorizer = session.Authorizer
+	client.BaseClient.DisableRetries = true
+
+	identityProvider, _, err := client.Get(ctx, identityProviderId)
+	if err != nil {
+		return nil, err
+	}
+	return *identityProvider, nil
 }
