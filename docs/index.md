@@ -73,20 +73,20 @@ connection "azuread" {
   plugin = "azuread"
 
   # You may connect to azure using more than one option
-  # 1. client certificate authentication, specify TenantID, ClientID and ClientCertData / ClientCertPath.
+  # 1. For client secret authentication, specify TenantID, ClientID and ClientSecret.
+  # required options:
+  # tenant_id             = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
+  # client_id             = "YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY"
+  # client_secret         = "ZZZZZZZZZZZZZZZZZZZZZZZZ"
+
+
+  # 2. client certificate authentication, specify TenantID, ClientID and ClientCertData / ClientCertPath.
   # required options:
   # tenant_id             = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
   # client_id             = "YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY"
   # certificate_path      = "~/home/azure_cert.pem"
   # certificate_password  = "notreal~pwd"
   #
-
-
-  # 2. For client secret authentication, specify TenantID, ClientID and ClientSecret.
-  # required options:
-  # tenant_id             = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
-  # client_id             = "YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY"
-  # client_secret         = "ZZZZZZZZZZZZZZZZZZZZZZZZ"
 
   # 3. MSI authentication (if enabled) using the Azure Metadata Service is then attempted
   # Useful for virtual machine hosted in azure
@@ -111,8 +111,8 @@ By default, all options are commented out in the default connection, thus Steamp
 
 The Azure AD plugin support multiple formats / authentication mechanisms, and they are tried in the below order:
 
-1. [Client Certificate Credentials](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-certificate-credentials#register-your-certificate-with-microsoft-identity-platform) if set; otherwise
-2. [Client Secret Credentials](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-saml-bearer-assertion#prerequisites) if set; otherwise
+1. [Client Secret Credentials](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-saml-bearer-assertion#prerequisites) if set; otherwise
+2. [Client Certificate Credentials](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-certificate-credentials#register-your-certificate-with-microsoft-identity-platform) if set; otherwise
 3. Azure [Managed System Identity](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-managed-identities-work-vm#system-assigned-managed-identity) useful for virtual machines if set; otherwise
 4. If no credentials are supplied, then the [az cli](https://docs.microsoft.com/en-us/cli/azure/#:~:text=The%20Azure%20command%2Dline%20interface,with%20an%20emphasis%20on%20automation.) credentials are used
 

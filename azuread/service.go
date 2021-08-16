@@ -22,8 +22,8 @@ type Session struct {
 }
 
 /* GetNewSession creates an session configured from (~/.steampipe/config, environment variables and CLI) in the order:
-1. Client certificate
-2. Client credentials
+1. Client Secret
+2. Client Certificate
 3. MSI
 4. CLI
 */
@@ -101,7 +101,7 @@ func getApplicableAuthorizationDetails(ctx context.Context, config azureADConfig
 		authConfig.Environment = environments.Global
 	}
 
-	// 1. Client credentials
+	// 1. Client Secret Credentials
 	if config.ClientID != nil {
 		clientID = *config.ClientID
 	} else {
@@ -114,7 +114,7 @@ func getApplicableAuthorizationDetails(ctx context.Context, config azureADConfig
 		clientSecret = os.Getenv("AZURE_CLIENT_SECRET")
 	}
 
-	// 2. Client certificate
+	// 2. Client Certificate Credentials
 	if config.CertificatePath != nil {
 		certificatePath = *config.CertificatePath
 	} else {
@@ -127,6 +127,7 @@ func getApplicableAuthorizationDetails(ctx context.Context, config azureADConfig
 		certificatePassword = os.Getenv("AZURE_CERTIFICATE_PASSWORD")
 	}
 
+	// 3. MSI Credentials
 	if config.EnableMsi != nil {
 		enableMsi = *config.EnableMsi
 
