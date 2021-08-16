@@ -57,12 +57,12 @@ steampipe plugin install azuread
 
 ### Credentials
 
-| Item        | Description                                                                                                                                                                  |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Credentials | Use the `az login` command to setup your [Azure AD Default Connection](https://docs.microsoft.com/en-us/cli/azure/authenticate-azure-cli)                                    |
-| Permissions | Grant the `Global Reader` permission to your user.                                                                                                                           |
-| Radius      | Each connection represents a single Azure Tenant.                                                                                                                            |
-| Resolution  | 1. Credentials explicitly set in a steampipe config file (`~/.steampipe/config/azuread.spc`).<br />2. Credentials specified in environment variables e.g. `AZURE_TENANT_ID`. |
+| Item        | Description                                                                                                                                                                                                             |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Credentials | Use the `az login` command to setup your [Azure AD Default Connection](https://docs.microsoft.com/en-us/cli/azure/authenticate-azure-cli)                                                                               |
+| Permissions | Grant the `Global Reader` permission to your user.                                                                                                                                                                      |
+| Radius      | Each connection represents a single Azure Tenant.                                                                                                                                                                       |
+| Resolution  | 1. Credentials explicitly set in a steampipe config file (`~/.steampipe/config/azuread.spc`).<br />2. Credentials specified in [environment variables](#credentials-from-environment-variables) e.g. `AZURE_TENANT_ID`. |
 
 ### Configuration
 
@@ -163,6 +163,16 @@ connection "azure_msi" {
 }
 ```
 
+### Azure CLI: If no credentials are specified
+
+If no credentials are specified and the SDK environment variables are not set, the plugin will use the active credentials from the `az` cli. You can run `az login` to set up these credentials.
+
+```hcl
+connection "azuread" {
+  plugin = "azuread"
+}
+```
+
 ### Credentials from Environment Variables
 
 The Azure AD plugin will use the standard Azure environment variables to obtain credentials **only if other arguments (`tenant_id`, `client_id`, `client_secret`, `certificate_path`, etc..) are not specified** in the connection:
@@ -174,16 +184,6 @@ export AZURE_CLIENT_SECRET="my plaintext secret"
 export AZURE_CERTIFICATE_PATH=path/to/file.pem
 export AZURE_CERTIFICATE_PASSWORD="my plaintext password"
 ```
-
-```hcl
-connection "azuread" {
-  plugin = "azuread"
-}
-```
-
-### Azure CLI: If no credentials are specified
-
-If no credentials are specified and the SDK environment variables are not set, the plugin will use the active credentials from the `az` cli. You can run `az login` to set up these credentials.
 
 ```hcl
 connection "azuread" {
