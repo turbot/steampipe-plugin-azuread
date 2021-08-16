@@ -116,7 +116,22 @@ The Azure AD plugin support multiple formats / authentication mechanisms, and th
 3. Azure [Managed System Identity](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-managed-identities-work-vm#system-assigned-managed-identity) useful for virtual machines if set; otherwise
 4. If no credentials are supplied, then the [az cli](https://docs.microsoft.com/en-us/cli/azure/#:~:text=The%20Azure%20command%2Dline%20interface,with%20an%20emphasis%20on%20automation.) credentials are used
 
-### Client Certificate: Azure AD Application ID and X.509 Certificate
+### Client Secret Credentials: Azure AD Application ID and Secret
+
+- `tenant_id`: Specifies the Tenant to which to authenticate.
+- `client_id`: Specifies the app client ID to use.
+- `client_secret`: Specifies the app secret to use.
+  </br></br>
+  ```hcl
+    connection "azuread_via_sp_secret" {
+      plugin        = "azuread"
+      tenant_id     = "00000000-0000-0000-0000-000000000000"
+      client_id     = "00000000-0000-0000-0000-000000000000"
+      client_secret = "my plaintext password"
+    }
+  ```
+
+### Client Certificate Credentials: Azure AD Application ID and X.509 Certificate
 
 - `tenant_id`: Specifies the Tenant to which to authenticate.
 - `client_id`: Specifies the app client ID to use.
@@ -130,21 +145,6 @@ The Azure AD plugin support multiple formats / authentication mechanisms, and th
       client_id            = "00000000-0000-0000-0000-000000000000"
       certificate_path     = "path/to/file.pem"
       certificate_password = "my plaintext password"
-    }
-  ```
-
-### Client Credentials: Azure AD Application ID and Secret
-
-- `tenant_id`: Specifies the Tenant to which to authenticate.
-- `client_id`: Specifies the app client ID to use.
-- `client_secret`: Specifies the app secret to use.
-  </br></br>
-  ```hcl
-    connection "azuread_via_sp_secret" {
-      plugin        = "azuread"
-      tenant_id     = "00000000-0000-0000-0000-000000000000"
-      client_id     = "00000000-0000-0000-0000-000000000000"
-      client_secret = "my plaintext password"
     }
   ```
 
