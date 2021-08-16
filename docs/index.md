@@ -104,7 +104,7 @@ By default, all options are commented out in the default connection, thus Steamp
 
 ## Get involved
 
-- Open source: https://github.com/turbot/steampipe-plugin-azure
+- Open source: https://github.com/turbot/steampipe-plugin-azuread
 - Community: [Slack Channel](https://join.slack.com/t/steampipe/shared_invite/zt-oij778tv-lYyRTWOTMQYBVAbtPSWs3g)
 
 ## Configuring Active Directory Credentials

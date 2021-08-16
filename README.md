@@ -21,7 +21,7 @@ steampipe plugin install azuread
 Run a query:
 
 ```sql
-select user_principal_name, id, created_date_time from azuread_user;
+select display_name, user_principal_name, user_type from azuread_user;
 ```
 
 ## Developing
