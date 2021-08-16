@@ -121,15 +121,15 @@ The Azure AD plugin support multiple formats / authentication mechanisms, and th
 - `tenant_id`: Specifies the Tenant to which to authenticate.
 - `client_id`: Specifies the app client ID to use.
 - `client_secret`: Specifies the app secret to use.
-  </br></br>
-  ```hcl
-    connection "azuread_via_sp_secret" {
-      plugin        = "azuread"
-      tenant_id     = "00000000-0000-0000-0000-000000000000"
-      client_id     = "00000000-0000-0000-0000-000000000000"
-      client_secret = "my plaintext password"
-    }
-  ```
+
+```hcl
+  connection "azuread_via_sp_secret" {
+    plugin        = "azuread"
+    tenant_id     = "00000000-0000-0000-0000-000000000000"
+    client_id     = "00000000-0000-0000-0000-000000000000"
+    client_secret = "my plaintext password"
+  }
+```
 
 ### Client Certificate Credentials: Azure AD Application ID and X.509 Certificate
 
@@ -137,16 +137,16 @@ The Azure AD plugin support multiple formats / authentication mechanisms, and th
 - `client_id`: Specifies the app client ID to use.
 - `certificate_path`: Specifies the certificate path to use.
 - `certificate_password`: Specifies the certificate password to use.
-  </br></br>
-  ```hcl
-    connection "azuread_via_sp_cert" {
-      plugin               = "azuread"
-      tenant_id            = "00000000-0000-0000-0000-000000000000"
-      client_id            = "00000000-0000-0000-0000-000000000000"
-      certificate_path     = "path/to/file.pem"
-      certificate_password = "my plaintext password"
-    }
-  ```
+
+```hcl
+  connection "azuread_via_sp_cert" {
+    plugin               = "azuread"
+    tenant_id            = "00000000-0000-0000-0000-000000000000"
+    client_id            = "00000000-0000-0000-0000-000000000000"
+    certificate_path     = "path/to/file.pem"
+    certificate_password = "my plaintext password"
+  }
+```
 
 ### Azure Managed Service Identity: Delegate credential management to the platform.
 
