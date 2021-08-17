@@ -1,6 +1,9 @@
 connection "azuread" {
   plugin = "azuread"
 
+  # "Defaults to "AZUREPUBLICCLOUD". Can be one of "AZUREPUBLICCLOUD", "AZURECHINACLOUD", "AZUREGERMANCLOUD" and "AZUREUSGOVERNMENTCLOUD"
+  # environment = "AZUREPUBLICCLOUD"
+
   # You may connect to azure using more than one option
   # 1. For client secret authentication, specify TenantID, ClientID and ClientSecret.
   # required options:

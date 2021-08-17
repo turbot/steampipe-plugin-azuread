@@ -41,14 +41,6 @@ var ConfigSchema = map[string]*schema.Attribute{
 	"msi_endpoint": {
 		Type: schema.TypeString,
 	},
-
-	// TODO
-	// "username": {
-	// 	Type: schema.TypeString,
-	// },
-	// "password": {
-	// 	Type: schema.TypeString,
-	// },
 }
 
 func ConfigInstance() interface{} {
