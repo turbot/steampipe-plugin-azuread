@@ -186,6 +186,7 @@ export AZURE_CLIENT_ID="00000000-0000-0000-0000-000000000000"
 export AZURE_CLIENT_SECRET="my plaintext secret"
 export AZURE_CERTIFICATE_PATH=path/to/file.pem
 export AZURE_CERTIFICATE_PASSWORD="my plaintext password"
+export AZURE_ENVIRONMENT="AZUREPUBLICCLOUD"
 ```
 
 ```hcl
