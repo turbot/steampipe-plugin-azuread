@@ -9,4 +9,4 @@ require (
 	github.com/turbot/steampipe-plugin-sdk v1.4.1
 )
 
-replace github.com/manicminer/hamilton => github.com/LalitTurbot/hamilton v0.23.2
+replace github.com/manicminer/hamilton => github.com/LalitTurbot/hamilton v0.23.3-0.20210817113406-61b961de4cb1
