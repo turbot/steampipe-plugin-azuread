@@ -22,15 +22,17 @@ type Session struct {
 }
 
 /* GetNewSession creates an session configured from (~/.steampipe/config, environment variables and CLI) in the order:
-1. Client Secret
-2. Client Certificate
-3. MSI
-4. CLI
+1. Client secret
+2. Client certificate
+3. Username and password
+4. MSI
+5. CLI
 */
 func GetNewSession(ctx context.Context, d *plugin.QueryData) (sess *Session, err error) {
 	logger := plugin.Logger(ctx)
 
-	// have we already created and cached the session?
+	// Have we already created and cached the session?
+	// Hamilton SDK already acquires a new token when expired, so don't handle here again
 	sessionCacheKey := "GetNewSession"
 	if cachedData, ok := d.ConnectionManager.Cache.Get(sessionCacheKey); ok {
 		return cachedData.(*Session), nil
@@ -89,7 +91,7 @@ func getApplicableAuthorizationDetails(ctx context.Context, config azureADConfig
 		environment = os.Getenv("AZURE_ENVIRONMENT")
 	}
 
-	// Can be	"AZURECHINACLOUD", "AZUREGERMANCLOUD", "AZUREPUBLICCLOUD", "AZUREUSGOVERNMENTCLOUD"
+	// Can be "AZURECHINACLOUD", "AZUREGERMANCLOUD", "AZUREPUBLICCLOUD", "AZUREUSGOVERNMENTCLOUD"
 	switch environment {
 	case "AZURECHINACLOUD":
 		authConfig.Environment = environments.China
@@ -101,7 +103,7 @@ func getApplicableAuthorizationDetails(ctx context.Context, config azureADConfig
 		authConfig.Environment = environments.Global
 	}
 
-	// 1. Client Secret Credentials
+	// 1. Client secret credentials
 	if config.ClientID != nil {
 		clientID = *config.ClientID
 	} else {
@@ -114,7 +116,7 @@ func getApplicableAuthorizationDetails(ctx context.Context, config azureADConfig
 		clientSecret = os.Getenv("AZURE_CLIENT_SECRET")
 	}
 
-	// 2. Client Certificate Credentials
+	// 2. Client certificate credentials
 	if config.CertificatePath != nil {
 		certificatePath = *config.CertificatePath
 	} else {
@@ -127,17 +129,8 @@ func getApplicableAuthorizationDetails(ctx context.Context, config azureADConfig
 		certificatePassword = os.Getenv("AZURE_CERTIFICATE_PASSWORD")
 	}
 
-	// 3. MSI Credentials
-	if config.EnableMsi != nil {
-		enableMsi = *config.EnableMsi
-
-		if config.MsiEndpoint != nil {
-			msiEndpoint = *config.MsiEndpoint
-		}
-	}
-
 	// TODO
-	// 3. Username password
+	// 3. Username and password
 	// if config.Username != nil {
 	// 	username = *config.Username
 	// } else {
@@ -150,7 +143,18 @@ func getApplicableAuthorizationDetails(ctx context.Context, config azureADConfig
 	// 	password = os.Getenv("AZURE_PASSWORD")
 	// }
 
+	// 4. MSI credentials
+	if config.EnableMsi != nil {
+		enableMsi = *config.EnableMsi
+
+		if config.MsiEndpoint != nil {
+			msiEndpoint = *config.MsiEndpoint
+		}
+	}
+
+	// 5. Default to CLI credentials
 	authMethod = "CLI"
+
 	if tenantID == "" {
 		authMethod = "CLI"
 		authConfig.EnableAzureCliToken = true
