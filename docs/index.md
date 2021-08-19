@@ -118,9 +118,9 @@ The Azure AD plugin support multiple formats and authentication mechanisms, and 
 
 You may specify the tenant ID, client ID, and client secret to authenticate:
 
-- `tenant_id`: Specifies the Tenant to which to authenticate.
-- `client_id`: Specifies the app client ID to use.
-- `client_secret`: Specifies the app secret to use.
+- `tenant_id`: Specify the tenant to authenticate with.
+- `client_id`: Specify the app client ID to use.
+- `client_secret`: Specify the app secret to use.
 
 ```hcl
   connection "azuread_via_sp_secret" {
@@ -135,10 +135,10 @@ You may specify the tenant ID, client ID, and client secret to authenticate:
 
 You may specify the tenant ID, client ID, certificate path, and certificate password to authenticate:
 
-- `tenant_id`: Specifies the Tenant to which to authenticate.
-- `client_id`: Specifies the app client ID to use.
-- `certificate_path`: Specifies the certificate path to use.
-- `certificate_password`: Specifies the certificate password to use.
+- `tenant_id`: Specify the tenant to authenticate with.
+- `client_id`: Specify the app client ID to use.
+- `certificate_path`: Specify the certificate path to use.
+- `certificate_password`: Specify the certificate password to use.
 
 ```hcl
   connection "azuread_via_sp_cert" {
@@ -154,8 +154,8 @@ You may specify the tenant ID, client ID, certificate path, and certificate pass
 
 Steampipe works with managed identities (formerly known as Managed Service Identity), provided it is running in Azure, e.g., on a VM. All configuration is handled by Azure. See [Azure Managed Identities](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview) for more details.
 
-- `enable_msi`: Pass `true` to use managed identity credentials
-- `msi_endpoint`: Use the specified MSI endpoint, otherwise use the default Azure Instance Metadata Service (IMDS) endpoint http://169.254.169.254/metadata/identity/oauth2/token.
+- `enable_msi`: Specify `true` to use managed identity credentials.
+- `msi_endpoint`: Specify the MSI endpoint to connect to, otherwise use the default Azure Instance Metadata Service (IMDS) endpoint.
 
 ```hcl
 connection "azure_msi" {
