@@ -144,6 +144,7 @@ func getApplicableAuthorizationDetails(ctx context.Context, config azureADConfig
 	// }
 
 	// 4. MSI credentials
+	msiEndpoint = "http://169.254.169.254/metadata/identity/oauth2/token"
 	if config.EnableMsi != nil {
 		enableMsi = *config.EnableMsi
 
@@ -174,6 +175,9 @@ func getApplicableAuthorizationDetails(ctx context.Context, config azureADConfig
 	} else if enableMsi {
 		authConfig.EnableMsiAuth = true
 		authConfig.MsiEndpoint = msiEndpoint
+		authConfig.TenantID = tenantID
+		authConfig.ClientID = clientID
+		authMethod = "EnableMsiAuth"
 	}
 	return
 }

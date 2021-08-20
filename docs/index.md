@@ -57,11 +57,11 @@ steampipe plugin install azuread
 
 ### Credentials
 
-| Item        | Description                                                                                                                                                                                                                     |
-| ----------- | -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------        |
-| Credentials | Use the `az login` command to setup your [Azure AD Default Connection](https://docs.microsoft.com/en-us/cli/azure/authenticate-azure-cli)                                                                                       |
-| Permissions | Grant the `Global Reader` permission to your user.                                                                                                                                                                             |
-| Radius      | Each connection represents a single Azure Tenant.                                                                                                                                                                               |
+| Item        | Description                                                                                                                                                                                                             |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Credentials | Use the `az login` command to setup your [Azure AD Default Connection](https://docs.microsoft.com/en-us/cli/azure/authenticate-azure-cli)                                                                               |
+| Permissions | Grant the `Global Reader` permission to your user.                                                                                                                                                                      |
+| Radius      | Each connection represents a single Azure Tenant.                                                                                                                                                                       |
 | Resolution  | 1. Credentials explicitly set in a steampipe config file (`~/.steampipe/config/azuread.spc`).<br />2. Credentials specified in [environment variables](#credentials-from-environment-variables) e.g. `AZURE_TENANT_ID`. |
 
 ### Configuration
@@ -91,6 +91,8 @@ connection "azuread" {
 
   # Use a managed identity (https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview)
   # This method is useful with Azure virtual machines
+  # tenant_id  = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
+  # client_id  = "YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY"
   # enable_msi = true
   # msi_endpoint = "http://169.254.169.254/metadata/identity/oauth2/token"
 
@@ -155,11 +157,15 @@ You may specify the tenant ID, client ID, certificate path, and certificate pass
 Steampipe works with managed identities (formerly known as Managed Service Identity), provided it is running in Azure, e.g., on a VM. All configuration is handled by Azure. See [Azure Managed Identities](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview) for more details.
 
 - `enable_msi`: Specify `true` to use managed identity credentials.
+- `tenant_id`: Specify the tenant to authenticate with.
+- `client_id`: Specify the app client ID of managed identity to use.
 - `msi_endpoint`: Specify the MSI endpoint to connect to, otherwise use the default Azure Instance Metadata Service (IMDS) endpoint.
 
 ```hcl
 connection "azure_msi" {
   plugin       = "azuread"
+  tenant_id    = "00000000-0000-0000-0000-000000000000"
+  client_id    = "00000000-0000-0000-0000-000000000000"
   enable_msi   = true
   msi_endpoint = "http://169.254.169.254/metadata/identity/oauth2/token"
 }
@@ -181,7 +187,7 @@ The Azure AD plugin will use the standard Azure environment variables to obtain 
 
 ```sh
 export AZURE_TENANT_ID="00000000-0000-0000-0000-000000000000"
-export AZURE_ENVIRONMENT="AZUREPUBLICCLOUD"
+export AZURE_ENVIRONMENT="AZUREPUBLICCLOUD" # Defaults to "AZUREPUBLICCLOUD". Valid environments are "AZUREPUBLICCLOUD", "AZURECHINACLOUD", "AZUREGERMANCLOUD" and "AZUREUSGOVERNMENTCLOUD"
 export AZURE_CLIENT_ID="00000000-0000-0000-0000-000000000000"
 export AZURE_CLIENT_SECRET="my plaintext secret"
 export AZURE_CERTIFICATE_PATH=path/to/file.pem
