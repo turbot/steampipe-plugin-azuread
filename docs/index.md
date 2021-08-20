@@ -157,6 +157,8 @@ You may specify the tenant ID, client ID, certificate path, and certificate pass
 Steampipe works with managed identities (formerly known as Managed Service Identity), provided it is running in Azure, e.g., on a VM. All configuration is handled by Azure. See [Azure Managed Identities](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview) for more details.
 
 - `enable_msi`: Specify `true` to use managed identity credentials.
+- `tenant_id`: Specify the tenant to authenticate with.
+- `client_id`: Specify the app client ID of managed identity to use.
 - `msi_endpoint`: Specify the MSI endpoint to connect to, otherwise use the default Azure Instance Metadata Service (IMDS) endpoint.
 
 ```hcl
