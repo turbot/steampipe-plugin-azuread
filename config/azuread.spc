@@ -20,6 +20,8 @@ connection "azuread" {
 
   # Use a managed identity (https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview)
   # This method is useful with Azure virtual machines
+  # tenant_id  = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
+  # client_id  = "YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY"
   # enable_msi = true
   # msi_endpoint = "http://169.254.169.254/metadata/identity/oauth2/token"
 
