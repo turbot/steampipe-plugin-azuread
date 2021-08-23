@@ -49,36 +49,32 @@ where
 
 ```sql
 select
-  memberof ->> 'displayName' as directory_role,
-  memberof ->> 'id' as directory_role_id,
-  display_name as user_display_name,
-  user_principal_name,
-  id as user_id
+  u.display_name as username,
+  role.display_name as directory_role
 from
-  azuread_user,
-  jsonb_array_elements(member_of) as memberof
+  azuread_directory_role as role,
+  jsonb_array_elements_text(member_ids) as m_id,
+  azuread_user as u
 where
-  split_part(memberof ->> '@odata.type', '.', 3) = 'directoryRole'
-order by
-  directory_role_id,
-  user_display_name;
+  u.id = m_id;
 ```
 
 ### List users with information of groups they are attached
 
 ```sql
 select
-  memberof ->> 'displayName' as group_name,
-  memberof ->> 'id' as group_id,
-  display_name as user_display_name,
-  user_principal_name,
-  id as user_id
+  grp.display_name as group_name,
+  grp.id as group_id,
+  u.display_name as username,
+  u.user_principal_name as user_principal_name,
+  u.id as user_id
 from
-  azuread_user,
-  jsonb_array_elements(member_of) as memberof
+  azuread_group as grp,
+  jsonb_array_elements_text(member_ids) as m_id,
+  azuread_user as u
 where
-  split_part(memberof ->> '@odata.type', '.', 3) = 'group'
+  u.id = m_id
 order by
   group_id,
-  user_display_name;
+  username;
 ```
