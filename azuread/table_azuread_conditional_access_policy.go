@@ -2,7 +2,6 @@ package azuread
 
 import (
 	"context"
-	"time"
 
 	"github.com/manicminer/hamilton/msgraph"
 	"github.com/manicminer/hamilton/odata"
