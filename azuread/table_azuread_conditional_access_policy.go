@@ -57,17 +57,6 @@ func tableAzureAdConditionalAccessPolicy() *plugin.Table {
 	}
 }
 
-type ConditionalPolicyInfo struct {
-	Conditions       interface{}
-	CreatedDateTime  *time.Time
-	DisplayName      *string
-	GrantControls    interface{}
-	ID               *string
-	ModifiedDateTime *time.Time
-	SessionControls  interface{}
-	State            *string
-}
-
 //// LIST FUNCTION
 
 func listAdConditionalAccessPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
@@ -89,16 +78,7 @@ func listAdConditionalAccessPolicies(ctx context.Context, d *plugin.QueryData, _
 	}
 
 	for _, conditionalAccesPolicy := range *conditionalAccessPolicies {
-		d.StreamListItem(ctx, ConditionalPolicyInfo{
-			Conditions: conditionalAccesPolicy.Conditions,
-			CreatedDateTime: conditionalAccesPolicy.CreatedDateTime,
-			DisplayName: conditionalAccesPolicy.DisplayName,
-			GrantControls: conditionalAccesPolicy.GrantControls,
-			ID: conditionalAccesPolicy.ID,
-			ModifiedDateTime: conditionalAccesPolicy.ModifiedDateTime,
-			SessionControls: conditionalAccesPolicy.SessionControls,
-			State: conditionalAccesPolicy.State,
-		})
+		d.StreamListItem(ctx, conditionalAccesPolicy)
 	}
 	return nil, err
 }
@@ -134,14 +114,5 @@ func getAdConditionalAccessPolicy(ctx context.Context, d *plugin.QueryData, h *p
 		}
 		return nil, err
 	}
-	return ConditionalPolicyInfo{
-		Conditions: conditionalAccessPolicy.Conditions,
-		CreatedDateTime: conditionalAccessPolicy.CreatedDateTime,
-		DisplayName: conditionalAccessPolicy.DisplayName,
-		GrantControls: conditionalAccessPolicy.GrantControls,
-		ID: conditionalAccessPolicy.ID,
-		ModifiedDateTime: conditionalAccessPolicy.ModifiedDateTime,
-		SessionControls: conditionalAccessPolicy.SessionControls,
-		State: conditionalAccessPolicy.State,
-	}, nil
+	return conditionalAccessPolicy, nil
 }
