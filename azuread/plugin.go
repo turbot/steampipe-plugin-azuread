@@ -22,13 +22,14 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			Schema:      ConfigSchema,
 		},
 		TableMap: map[string]*plugin.Table{
-			"azuread_application":       tableAzureAdApplication(),
-			"azuread_directory_role":    tableAzureAdDirectoryRole(),
-			"azuread_domain":            tableAzureAdDomain(),
-			"azuread_group":             tableAzureAdGroup(),
-			"azuread_identity_provider": tableAzureAdIdentityProvider(),
-			"azuread_service_principal": tableAzureAdServicePrincipal(),
-			"azuread_user":              tableAzureAdUser(),
+			"azuread_application":               tableAzureAdApplication(),
+			"azuread_conditional_access_policy": tableAzureAdConditionalAccessPolicy(),
+			"azuread_directory_role":            tableAzureAdDirectoryRole(),
+			"azuread_domain":                    tableAzureAdDomain(),
+			"azuread_group":                     tableAzureAdGroup(),
+			"azuread_identity_provider":         tableAzureAdIdentityProvider(),
+			"azuread_service_principal":         tableAzureAdServicePrincipal(),
+			"azuread_user":                      tableAzureAdUser(),
 		},
 	}
 
