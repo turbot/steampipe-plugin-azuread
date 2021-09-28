@@ -26,3 +26,15 @@ from
 where
   not account_enabled;
 ```
+
+### List service principals related to applications
+
+select
+  id,
+  app_display_name,
+  account_enabled
+from
+  azuread_service_principal
+where
+  service_principal_type = 'Application'
+  and tenant_id = app_owner_organization_id;
