@@ -10,7 +10,7 @@ Azure Active Directory (Azure AD) lets you use service principal to manage acces
 select
   display_name,
   id,
-  app_id
+  app_display_name
 from
   azuread_service_principal;
 ```
