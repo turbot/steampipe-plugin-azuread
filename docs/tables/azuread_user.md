@@ -1,4 +1,4 @@
-# Table: azure_ad_user
+# Table: azuread_user
 
 An Azure AD user account, which helps employees sign in and access resources.
 
