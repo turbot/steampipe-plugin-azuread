@@ -1,3 +1,18 @@
+## v0.0.3 [2021-11-03]
+
+_What's new?_
+
+- New tables added
+  - [azuread_sign_in_report](https://hub.steampipe.io/plugins/turbot/azuread/tables/azuread_sign_in_report) ([#26](https://github.com/turbot/steampipe-plugin-azuread/pull/26))
+
+_Enhancements_
+
+- Recompiled plugin with [steampipe-plugin-sdk v1.7.1](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v171--2021-11-01) ([#33](https://github.com/turbot/steampipe-plugin-azuread/pull/33))
+
+_Bug fixes_
+
+- Fixed the title of the `azuread_user` table in the documentation file ([#32](https://github.com/turbot/steampipe-plugin-azuread/pull/32))
+
 ## v0.0.2 [2021-09-28]
   
 _What's new?_
