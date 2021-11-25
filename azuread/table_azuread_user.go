@@ -111,6 +111,7 @@ func listAdUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	} else if len(filter) > 0 {
 		input.Filter = strings.Join(filter, " and ")
 	}
+
 	users, _, err := client.List(ctx, input)
 	if err != nil {
 		if isNotFoundError(err) {
