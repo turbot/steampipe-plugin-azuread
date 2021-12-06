@@ -53,6 +53,7 @@ func tableAzureAdUser() *plugin.Table {
 			{Name: "filter", Type: proto.ColumnType_STRING, Transform: transform.FromQual("filter"), Description: "Odata query to search for resources."},
 
 			// Other fields
+			{Name: "on_premises_immutable_id", Type: proto.ColumnType_STRING, Description: "Used to associate an on-premises Active Directory user account with their Azure AD user object."},
 			{Name: "created_date_time", Type: proto.ColumnType_TIMESTAMP, Description: "The time at which the user was created."},
 			{Name: "mail", Type: proto.ColumnType_STRING, Description: "The SMTP address for the user, for example, jeff@contoso.onmicrosoft.com."},
 			{Name: "mail_nickname", Type: proto.ColumnType_STRING, Description: "The mail alias for the user."},
