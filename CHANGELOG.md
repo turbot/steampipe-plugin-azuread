@@ -1,3 +1,11 @@
+## v0.1.0 [2021-12-08]
+
+_Enhancements_
+
+- Recompiled plugin with Go version 1.17 ([#40](https://github.com/turbot/steampipe-plugin-azuread/pull/40))
+- Recompiled plugin with [steampipe-plugin-sdk v1.8.2](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v182--2021-11-22) ([#39](https://github.com/turbot/steampipe-plugin-azuread/pull/39))
+- Added `on_premises_immutable_id` column to the `azuread_user` table ([#37](https://github.com/turbot/steampipe-plugin-azuread/pull/37))
+
 ## v0.0.3 [2021-11-03]
 
 _What's new?_
