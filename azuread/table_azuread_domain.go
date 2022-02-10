@@ -19,15 +19,11 @@ func tableAzureAdDomain() *plugin.Table {
 		Description: "Represents an Azure Active Directory (Azure AD) domain",
 		Get: &plugin.GetConfig{
 			Hydrate:           getAdDomain,
+			ShouldIgnoreError: isNotFoundErrorPredicate([]string{"Invalid object identifier"}),
 			KeyColumns:        plugin.SingleColumn("id"),
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listAdDomains,
-			// TODO: Add filter as optional key column
-			KeyColumns: plugin.KeyColumnSlice{
-				// Key fields
-				{Name: "id", Require: plugin.Optional},
-			},
 		},
 
 		Columns: []*plugin.Column{
@@ -62,7 +58,18 @@ func listAdDomains(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 	client := msgraph.NewDomainsClient(session.TenantID)
 	client.BaseClient.Authorizer = session.Authorizer
 
-	domains, _, err := client.List(ctx, odata.Query{})
+	input := odata.Query{
+		Top: 999,
+	}
+
+	limit := d.QueryContext.Limit
+	if limit != nil {
+		if *limit < 999 {
+			input.Top = int(*limit)
+		}
+	}
+
+	domains, _, err := client.List(ctx, input)
 	if err != nil {
 		if isNotFoundError(err) {
 			return nil, nil
@@ -98,7 +105,6 @@ func getAdDomain(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 	client := msgraph.NewDomainsClient(session.TenantID)
 	client.BaseClient.Authorizer = session.Authorizer
 	client.BaseClient.DisableRetries = true
-
 
 	domain, _, err := client.Get(ctx, domainId, odata.Query{})
 	if err != nil {

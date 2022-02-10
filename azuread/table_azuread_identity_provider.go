@@ -18,14 +18,11 @@ func tableAzureAdIdentityProvider() *plugin.Table {
 		Description: "Represents an Azure Active Directory (Azure AD) identity provider",
 		Get: &plugin.GetConfig{
 			Hydrate:           getAdIdentityProvider,
+			ShouldIgnoreError: isNotFoundErrorPredicate([]string{"Invalid object identifier"}),
 			KeyColumns:        plugin.SingleColumn("id"),
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listAdIdentityProviders,
-			KeyColumns: plugin.KeyColumnSlice{
-				// Key fields
-				{Name: "id", Require: plugin.Optional},
-			},
 		},
 
 		Columns: []*plugin.Column{
@@ -65,6 +62,11 @@ func listAdIdentityProviders(ctx context.Context, d *plugin.QueryData, _ *plugin
 
 	for _, identityProviders := range *identityProviders {
 		d.StreamListItem(ctx, identityProviders)
+
+		// Context can be cancelled due to manual cancellation or the limit has been hit
+		if d.QueryStatus.RowsRemaining(ctx) == 0 {
+			return nil, nil
+		}
 	}
 
 	return nil, err

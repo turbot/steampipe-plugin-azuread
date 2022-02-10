@@ -18,14 +18,11 @@ func tableAzureAdDirectoryRole() *plugin.Table {
 		Description: "Represents an Azure Active Directory (Azure AD) directory role",
 		Get: &plugin.GetConfig{
 			Hydrate:           getAdDirectoryRole,
+			ShouldIgnoreError: isNotFoundErrorPredicate([]string{"Invalid object identifier"}),
 			KeyColumns:        plugin.SingleColumn("id"),
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listAdDirectoryRoles,
-			KeyColumns: plugin.KeyColumnSlice{
-				// Key fields
-				{Name: "id", Require: plugin.Optional},
-			},
 		},
 
 		Columns: []*plugin.Column{
@@ -66,6 +63,11 @@ func listAdDirectoryRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 
 	for _, directoryRoles := range *directoryRoles {
 		d.StreamListItem(ctx, directoryRoles)
+
+		// Context can be cancelled due to manual cancellation or the limit has been hit
+		if d.QueryStatus.RowsRemaining(ctx) == 0 {
+			return nil, nil
+		}
 	}
 
 	return nil, err

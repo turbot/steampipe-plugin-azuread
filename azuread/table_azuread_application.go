@@ -2,6 +2,7 @@ package azuread
 
 import (
 	"context"
+	"strings"
 
 	"github.com/manicminer/hamilton/msgraph"
 	"github.com/manicminer/hamilton/odata"
@@ -18,16 +19,18 @@ func tableAzureAdApplication() *plugin.Table {
 		Name:        "azuread_application",
 		Description: "Represents an Azure Active Directory (Azure AD) application",
 		Get: &plugin.GetConfig{
-			Hydrate:           getAdApplication,
-			KeyColumns:        plugin.SingleColumn("id"),
+			Hydrate:    getAdApplication,
+			ShouldIgnoreError: isNotFoundErrorPredicate([]string{"Invalid object identifier"}),
+			KeyColumns: plugin.SingleColumn("id"),
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listAdApplications,
-			// TODO: Add filter as optional key column
+			ShouldIgnoreError: isNotFoundErrorPredicate([]string{"Request_UnsupportedQuery"}),
 			KeyColumns: plugin.KeyColumnSlice{
 				// Key fields
-				{Name: "id", Require: plugin.Optional},
+				{Name: "app_id", Require: plugin.Optional},
 				{Name: "display_name", Require: plugin.Optional},
+				{Name: "publisher_domain", Require: plugin.Optional},
 			},
 		},
 
@@ -74,7 +77,27 @@ func listAdApplications(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	client := msgraph.NewApplicationsClient(session.TenantID)
 	client.BaseClient.Authorizer = session.Authorizer
 
-	input := odata.Query{}
+	input := odata.Query{
+		Top: 999,
+	}
+
+	qualsColumnMap := []QualsColumn{
+		{"app_id", "string", "appId"},
+		{"display_name", "string", "displayName"},
+		{"publisher_domain", "string", "publisherDomain"},
+	}
+
+	filter := buildCommaonQueryFilter(qualsColumnMap, d.Quals)
+	if len(filter) > 0 {
+		input.Filter = strings.Join(filter, " and ")
+	}
+
+	limit := d.QueryContext.Limit
+	if limit != nil {
+		if *limit < 999 {
+			input.Top = int(*limit)
+		}
+	}
 
 	applications, _, err := client.List(ctx, input)
 	if err != nil {
@@ -86,6 +109,11 @@ func listAdApplications(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 
 	for _, application := range *applications {
 		d.StreamListItem(ctx, application)
+
+		// Context can be cancelled due to manual cancellation or the limit has been hit
+		if d.QueryStatus.RowsRemaining(ctx) == 0 {
+			return nil, nil
+		}
 	}
 	return nil, err
 }
@@ -113,9 +141,11 @@ func getAdApplication(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	client.BaseClient.Authorizer = session.Authorizer
 	client.BaseClient.DisableRetries = true
 
-
 	application, _, err := client.Get(ctx, applicationId, odata.Query{})
 	if err != nil {
+		if isNotFoundError(err){
+			return nil, nil
+		}
 		return nil, err
 	}
 	return *application, nil

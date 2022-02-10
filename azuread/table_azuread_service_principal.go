@@ -2,6 +2,7 @@ package azuread
 
 import (
 	"context"
+	"strings"
 
 	"github.com/manicminer/hamilton/msgraph"
 	"github.com/manicminer/hamilton/odata"
@@ -19,14 +20,17 @@ func tableAzureAdServicePrincipal() *plugin.Table {
 		Description: "Represents an Azure Active Directory (Azure AD) service principal",
 		Get: &plugin.GetConfig{
 			Hydrate:           getAdServicePrincipal,
+			ShouldIgnoreError: isNotFoundErrorPredicate([]string{"Invalid object identifier"}),
 			KeyColumns:        plugin.SingleColumn("id"),
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listAdServicePrincipals,
-			// TODO: Add filter as optional key column
+			Hydrate:           listAdServicePrincipals,
+			ShouldIgnoreError: isNotFoundErrorPredicate([]string{"Request_UnsupportedQuery"}),
 			KeyColumns: plugin.KeyColumnSlice{
 				// Key fields
-				{Name: "id", Require: plugin.Optional},
+				{Name: "display_name", Require: plugin.Optional},
+				{Name: "account_enabled", Require: plugin.Optional},
+				{Name: "service_principal_type", Require: plugin.Optional},
 			},
 		},
 
@@ -54,11 +58,11 @@ func tableAzureAdServicePrincipal() *plugin.Table {
 			{Name: "published_permission_scopes", Type: proto.ColumnType_JSON, Description: "The published permission scopes."},
 			{Name: "reply_urls", Type: proto.ColumnType_JSON, Description: "The URLs that user tokens are sent to for sign in with the associated application, or the redirect URIs that OAuth 2.0 authorization codes and access tokens are sent to for the associated application."},
 			{Name: "service_principal_names", Type: proto.ColumnType_JSON, Description: "Contains the list of identifiersUris, copied over from the associated application. Additional values can be added to hybrid applications. These values can be used to identify the permissions exposed by this app within Azure AD."},
-			{Name: "tags_src", Type: proto.ColumnType_JSON, Description: "Custom strings that can be used to categorize and identify the service principal.", Transform: transform.FromField("Tags"),},
+			{Name: "tags_src", Type: proto.ColumnType_JSON, Description: "Custom strings that can be used to categorize and identify the service principal.", Transform: transform.FromField("Tags")},
 			{Name: "verified_publisher", Type: proto.ColumnType_JSON, Description: "Specifies the verified publisher of the application which this service principal represents."},
 
 			// // Standard columns
-			{Name: "tags", Type: proto.ColumnType_JSON, Description: ColumnDescriptionTags, Transform: transform.From(servicePrincipalTags),},
+			{Name: "tags", Type: proto.ColumnType_JSON, Description: ColumnDescriptionTags, Transform: transform.From(servicePrincipalTags)},
 			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Transform: transform.FromField("DisplayName", "ID")},
 			{Name: "tenant_id", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTenant, Hydrate: plugin.HydrateFunc(getTenantId).WithCache(), Transform: transform.FromValue()},
 		},
@@ -76,7 +80,29 @@ func listAdServicePrincipals(ctx context.Context, d *plugin.QueryData, _ *plugin
 	client := msgraph.NewServicePrincipalsClient(session.TenantID)
 	client.BaseClient.Authorizer = session.Authorizer
 
-	servicePrincipals, _, err := client.List(ctx, odata.Query{})
+	input := odata.Query{
+		Top: 999,
+	}
+
+	qualsColumnMap := []QualsColumn{
+		{"display_name", "string", "displayName"},
+		{"account_enabled", "bool", "accountEnabled"},
+		{"service_principal_type", "string", "servicePrincipalType"},
+	}
+
+	filter := buildCommaonQueryFilter(qualsColumnMap, d.Quals)
+	if len(filter) > 0 {
+		input.Filter = strings.Join(filter, " and ")
+	}
+
+	limit := d.QueryContext.Limit
+	if limit != nil {
+		if *limit < 999 {
+			input.Top = int(*limit)
+		}
+	}
+
+	servicePrincipals, _, err := client.List(ctx, input)
 	if err != nil {
 		if isNotFoundError(err) {
 			return nil, nil
@@ -86,6 +112,11 @@ func listAdServicePrincipals(ctx context.Context, d *plugin.QueryData, _ *plugin
 
 	for _, servicePrincipal := range *servicePrincipals {
 		d.StreamListItem(ctx, servicePrincipal)
+
+		// Context can be cancelled due to manual cancellation or the limit has been hit
+		if d.QueryStatus.RowsRemaining(ctx) == 0 {
+			return nil, nil
+		}
 	}
 
 	return nil, err
