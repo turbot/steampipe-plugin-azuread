@@ -23,7 +23,6 @@ func tableAzureAdSignInReport() *plugin.Table {
 			KeyColumns:        plugin.SingleColumn("id"),
 		},
 		List: &plugin.ListConfig{
-			// TODO: Optional quals
 			Hydrate: listAdSigninReports,
 		},
 
