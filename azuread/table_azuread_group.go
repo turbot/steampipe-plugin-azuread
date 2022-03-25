@@ -95,7 +95,18 @@ func listAdGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	client := msgraph.NewGroupsClient(session.TenantID)
 	client.BaseClient.Authorizer = session.Authorizer
 
-	input := odata.Query{}
+	// As per our test result we have set the max limit to 999
+	input := odata.Query{
+		Top: 999,
+	}
+
+	limit := d.QueryContext.Limit
+	if limit != nil {
+		if *limit < 999 {
+			input.Top = int(*limit)
+		}
+	}
+
 	equalQuals := d.KeyColumnQuals
 	quals := d.Quals
 

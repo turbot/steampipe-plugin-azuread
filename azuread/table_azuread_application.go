@@ -77,6 +77,7 @@ func listAdApplications(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	client := msgraph.NewApplicationsClient(session.TenantID)
 	client.BaseClient.Authorizer = session.Authorizer
 
+	// As per our test result we have set the max limit to 999
 	input := odata.Query{
 		Top: 999,
 	}
