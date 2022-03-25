@@ -2,7 +2,7 @@
 
 _Enhancements_
 
-- Added additional optional key quals, filter support, max records parameter value, lower limit and context cancellation handling to `azuread_application`, `azuread_conditional_access_policy`, `azuread_directory_role`, `azuread_domain`, `azuread_group`, `azuread_identity_provider`, `azuread_service_principal`, `azuread_sign_in_report`, and `azuread_user` tables ([#43](https://github.com/turbot/steampipe-plugin-azuread/pull/43))
+- Added additional optional key quals, filter support, page limit and context cancellation handling to `azuread_application`, `azuread_conditional_access_policy`, `azuread_directory_role`, `azuread_domain`, `azuread_group`, `azuread_identity_provider`, `azuread_service_principal`, `azuread_sign_in_report`, and `azuread_user` tables ([#43](https://github.com/turbot/steampipe-plugin-azuread/pull/43))
 
 ## v0.2.0 [2022-03-23]
 
