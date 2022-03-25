@@ -2,6 +2,7 @@ package azuread
 
 import (
 	"context"
+	"strings"
 
 	"github.com/manicminer/hamilton/msgraph"
 	"github.com/manicminer/hamilton/odata"
@@ -18,11 +19,17 @@ func tableAzureAdConditionalAccessPolicy() *plugin.Table {
 		Name:        "azuread_conditional_access_policy",
 		Description: "Represents an Azure Active Directory (Azure AD) Conditional Access Policy",
 		Get: &plugin.GetConfig{
-			Hydrate:    getAdConditionalAccessPolicy,
-			KeyColumns: plugin.SingleColumn("id"),
+			Hydrate:           getAdConditionalAccessPolicy,
+			ShouldIgnoreError: isNotFoundErrorPredicate([]string{"Invalid object identifier"}),
+			KeyColumns:        plugin.SingleColumn("id"),
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listAdConditionalAccessPolicies,
+			Hydrate:           listAdConditionalAccessPolicies,
+			ShouldIgnoreError: isNotFoundErrorPredicate([]string{"Request_UnsupportedQuery"}),
+			KeyColumns: []*plugin.KeyColumn{
+				{Name: "display_name", Require: plugin.Optional},
+				{Name: "state", Require: plugin.Optional},
+			},
 		},
 
 		Columns: []*plugin.Column{
@@ -39,7 +46,7 @@ func tableAzureAdConditionalAccessPolicy() *plugin.Table {
 			{Name: "built_in_controls", Type: proto.ColumnType_JSON, Description: "List of values of built-in controls required by the policy. Possible values: block, mfa, compliantDevice, domainJoinedDevice, approvedApplication, compliantApplication, passwordChange, unknownFutureValue.", Transform: transform.FromField("GrantControls.BuiltInControls")},
 			{Name: "client_app_types", Type: proto.ColumnType_JSON, Description: "Client application types included in the policy. Possible values are: all, browser, mobileAppsAndDesktopClients, exchangeActiveSync, easSupported, other.", Transform: transform.FromField("Conditions.ClientAppTypes")},
 			{Name: "custom_authentication_factors", Type: proto.ColumnType_JSON, Description: "List of custom controls IDs required by the policy.", Transform: transform.FromField("GrantControls.CustomAuthenticationFactors")},
-			{Name: "cloud_app_security", Type: proto.ColumnType_JSON,	Description: "Session control to apply cloud app security.", Transform: transform.FromField("SessionControls.CloudAppSecurity")},
+			{Name: "cloud_app_security", Type: proto.ColumnType_JSON, Description: "Session control to apply cloud app security.", Transform: transform.FromField("SessionControls.CloudAppSecurity")},
 			{Name: "locations", Type: proto.ColumnType_JSON, Description: "Locations included in and excluded from the policy.", Transform: transform.FromField("Conditions.Locations")},
 			{Name: "persistent_browser", Type: proto.ColumnType_JSON, Description: "Session control to define whether to persist cookies or not. All apps should be selected for this session control to work correctly.", Transform: transform.FromField("SessionControls.PersistentBrowser")},
 			{Name: "platforms", Type: proto.ColumnType_JSON, Description: "Platforms included in and excluded from the policy.", Transform: transform.FromField("Conditions.Platforms")},
@@ -48,7 +55,7 @@ func tableAzureAdConditionalAccessPolicy() *plugin.Table {
 			{Name: "terms_of_use", Type: proto.ColumnType_JSON, Description: "List of terms of use IDs required by the policy.", Transform: transform.FromField("GrantControls.TermsOfUse")},
 			{Name: "users", Type: proto.ColumnType_JSON, Description: "Users, groups, and roles included in and excluded from the policy.", Transform: transform.FromField("Conditions.Users")},
 			{Name: "user_risk_levels", Type: proto.ColumnType_JSON, Description: "User risk levels included in the policy. Possible values are: low, medium, high, hidden, none, unknownFutureValue.", Transform: transform.FromField("Conditions.UserRiskLevels")},
-			
+
 			// Standard columns
 			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Transform: transform.FromField("DisplayName", "ID")},
 			{Name: "tenant_id", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTenant, Hydrate: plugin.HydrateFunc(getTenantId).WithCache(), Transform: transform.FromValue()},
@@ -67,7 +74,29 @@ func listAdConditionalAccessPolicies(ctx context.Context, d *plugin.QueryData, _
 	client := msgraph.NewConditionalAccessPolicyClient(session.TenantID)
 	client.BaseClient.Authorizer = session.Authorizer
 
-	conditionalAccessPolicies, _, err := client.List(ctx, odata.Query{})
+	// As per our test result we have set the max limit to 999
+	input := odata.Query{
+		Top: 999,
+	}
+
+	qualsColumnMap := []QualsColumn{
+		{"display_name", "string", "displayName"},
+		{"state", "string", "state"},
+	}
+
+	filter := buildCommaonQueryFilter(qualsColumnMap, d.Quals)
+	if len(filter) > 0 {
+		input.Filter = strings.Join(filter, " and ")
+	}
+
+	limit := d.QueryContext.Limit
+	if limit != nil {
+		if *limit < 999 {
+			input.Top = int(*limit)
+		}
+	}
+
+	conditionalAccessPolicies, _, err := client.List(ctx, input)
 	if err != nil {
 		if isNotFoundError(err) {
 			plugin.Logger(ctx).Error("listAdConditionalAccessPolicies", "Resource not found", err)
@@ -78,6 +107,11 @@ func listAdConditionalAccessPolicies(ctx context.Context, d *plugin.QueryData, _
 
 	for _, conditionalAccesPolicy := range *conditionalAccessPolicies {
 		d.StreamListItem(ctx, conditionalAccesPolicy)
+
+		// Context can be cancelled due to manual cancellation or the limit has been hit
+		if d.QueryStatus.RowsRemaining(ctx) == 0 {
+			return nil, nil
+		}
 	}
 	return nil, err
 }
@@ -98,6 +132,9 @@ func getAdConditionalAccessPolicy(ctx context.Context, d *plugin.QueryData, h *p
 
 	session, err := GetNewSession(ctx, d)
 	if err != nil {
+		if isNotFoundError(err) {
+			return nil, nil
+		}
 		return nil, err
 	}
 

@@ -23,6 +23,7 @@ func tableAzureAdUser() *plugin.Table {
 		Description: "Represents an Azure AD user account.",
 		Get: &plugin.GetConfig{
 			Hydrate:           getAdUser,
+			ShouldIgnoreError: isNotFoundErrorPredicate([]string{"Invalid object identifier"}),
 			KeyColumns:        plugin.SingleColumn("id"),
 		},
 		List: &plugin.ListConfig{
@@ -87,7 +88,18 @@ func listAdUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	client := msgraph.NewUsersClient(session.TenantID)
 	client.BaseClient.Authorizer = session.Authorizer
 
-	input := odata.Query{}
+	// As per our test result we have set the max limit to 999
+	input := odata.Query{
+		Top: 999,
+	}
+
+	limit := d.QueryContext.Limit
+	if limit != nil {
+		if *limit < 999 {
+			input.Top = int(*limit)
+		}
+	}
+
 	if helpers.StringSliceContains(d.QueryContext.Columns, "member_of") {
 		input.Expand = odata.Expand{
 			Relationship: "memberOf",
@@ -122,6 +134,11 @@ func listAdUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 
 	for _, user := range *users {
 		d.StreamListItem(ctx, user)
+
+		// Context can be cancelled due to manual cancellation or the limit has been hit
+		if d.QueryStatus.RowsRemaining(ctx) == 0 {
+			return nil, nil
+		}
 	}
 
 	return nil, err

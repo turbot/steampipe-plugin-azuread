@@ -18,8 +18,9 @@ func tableAzureAdSignInReport() *plugin.Table {
 		Name:        "azuread_sign_in_report",
 		Description: "Represents an Azure Active Directory (Azure AD) sign in report",
 		Get: &plugin.GetConfig{
-			Hydrate:    getAdSigninReport,
-			KeyColumns: plugin.SingleColumn("id"),
+			Hydrate:           getAdSigninReport,
+			ShouldIgnoreError: isNotFoundErrorPredicate([]string{"Invalid object identifier"}),
+			KeyColumns:        plugin.SingleColumn("id"),
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listAdSigninReports,
@@ -71,7 +72,19 @@ func listAdSigninReports(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 	client := msgraph.NewSignInLogsClient(session.TenantID)
 	client.BaseClient.Authorizer = session.Authorizer
 
-	signInReports, _, err := client.List(ctx, odata.Query{})
+	// As per our test result we have set the max limit to 999
+	input := odata.Query{
+		Top: 999,
+	}
+
+	limit := d.QueryContext.Limit
+	if limit != nil {
+		if *limit < 999 {
+			input.Top = int(*limit)
+		}
+	}
+
+	signInReports, _, err := client.List(ctx, input)
 	if err != nil {
 		if isNotFoundError(err) {
 			return nil, nil
@@ -82,6 +95,11 @@ func listAdSigninReports(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 
 	for _, report := range *signInReports {
 		d.StreamListItem(ctx, report)
+
+		// Context can be cancelled due to manual cancellation or the limit has been hit
+		if d.QueryStatus.RowsRemaining(ctx) == 0 {
+			return nil, nil
+		}
 	}
 
 	return nil, err
