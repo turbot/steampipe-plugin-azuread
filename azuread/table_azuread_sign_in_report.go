@@ -72,17 +72,7 @@ func listAdSigninReports(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 	client := msgraph.NewSignInLogsClient(session.TenantID)
 	client.BaseClient.Authorizer = session.Authorizer
 
-	// As per our test result we have set the max limit to 999
-	input := odata.Query{
-		Top: 999,
-	}
-
-	limit := d.QueryContext.Limit
-	if limit != nil {
-		if *limit < 999 {
-			input.Top = int(*limit)
-		}
-	}
+	input := odata.Query{}
 
 	signInReports, _, err := client.List(ctx, input)
 	if err != nil {

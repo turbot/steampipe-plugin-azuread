@@ -80,10 +80,7 @@ func listAdServicePrincipals(ctx context.Context, d *plugin.QueryData, _ *plugin
 	client := msgraph.NewServicePrincipalsClient(session.TenantID)
 	client.BaseClient.Authorizer = session.Authorizer
 
-	// As per our test result we have set the max limit to 999
-	input := odata.Query{
-		Top: 999,
-	}
+	input := odata.Query{}
 
 	qualsColumnMap := []QualsColumn{
 		{"display_name", "string", "displayName"},
@@ -94,13 +91,6 @@ func listAdServicePrincipals(ctx context.Context, d *plugin.QueryData, _ *plugin
 	filter := buildCommaonQueryFilter(qualsColumnMap, d.Quals)
 	if len(filter) > 0 {
 		input.Filter = strings.Join(filter, " and ")
-	}
-
-	limit := d.QueryContext.Limit
-	if limit != nil {
-		if *limit < 999 {
-			input.Top = int(*limit)
-		}
 	}
 
 	servicePrincipals, _, err := client.List(ctx, input)

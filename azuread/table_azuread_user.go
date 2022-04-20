@@ -88,17 +88,7 @@ func listAdUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	client := msgraph.NewUsersClient(session.TenantID)
 	client.BaseClient.Authorizer = session.Authorizer
 
-	// As per our test result we have set the max limit to 999
-	input := odata.Query{
-		Top: 999,
-	}
-
-	limit := d.QueryContext.Limit
-	if limit != nil {
-		if *limit < 999 {
-			input.Top = int(*limit)
-		}
-	}
+	input := odata.Query{}
 
 	if helpers.StringSliceContains(d.QueryContext.Columns, "member_of") {
 		input.Expand = odata.Expand{
