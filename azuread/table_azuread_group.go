@@ -19,8 +19,8 @@ func tableAzureAdGroup() *plugin.Table {
 		Name:        "azuread_group",
 		Description: "Represents an Azure Active Directory (Azure AD) group, which can be a Microsoft 365 group, or a security group.",
 		Get: &plugin.GetConfig{
-			Hydrate:           getAdGroup,
-			KeyColumns:        plugin.SingleColumn("id"),
+			Hydrate:    getAdGroup,
+			KeyColumns: plugin.SingleColumn("id"),
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listAdGroups,
@@ -96,6 +96,15 @@ func listAdGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	client.BaseClient.Authorizer = session.Authorizer
 
 	input := odata.Query{}
+
+	// Restrict the limit value to be passed in the query parameter which is not between 1 and 999, otherwise API will throw an error as follow
+	// unexpected status 400 with OData error: Request_UnsupportedQuery: Invalid page size specified: '1000'. Must be between 1 and 999 inclusive.
+	limit := d.QueryContext.Limit
+	if limit != nil {
+		if *limit > 0 && *limit <= 999 {
+			input.Top = int(*limit)
+		}
+	}
 
 	equalQuals := d.KeyColumnQuals
 	quals := d.Quals

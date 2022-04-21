@@ -74,6 +74,15 @@ func listAdSigninReports(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 
 	input := odata.Query{}
 
+	// Restrict the limit value to be passed in the query parameter which is not between 1 and 999, otherwise API will throw an error as follow
+	// unexpected status 400 with OData error: Request_UnsupportedQuery: Invalid page size specified: '1000'. Must be between 1 and 999 inclusive.
+	limit := d.QueryContext.Limit
+	if limit != nil {
+		if *limit > 0 && *limit <= 999 {
+			input.Top = int(*limit)
+		}
+	}
+
 	signInReports, _, err := client.List(ctx, input)
 	if err != nil {
 		if isNotFoundError(err) {
