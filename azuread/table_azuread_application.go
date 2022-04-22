@@ -77,9 +77,15 @@ func listAdApplications(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	client := msgraph.NewApplicationsClient(session.TenantID)
 	client.BaseClient.Authorizer = session.Authorizer
 
-	// As per our test result we have set the max limit to 999
-	input := odata.Query{
-		Top: 999,
+	input := odata.Query{}
+
+	// Restrict the limit value to be passed in the query parameter which is not between 1 and 999, otherwise API will throw an error as follow
+	// unexpected status 400 with OData error: Request_UnsupportedQuery: Invalid page size specified: '1000'. Must be between 1 and 999 inclusive.
+	limit := d.QueryContext.Limit
+	if limit != nil {
+		if *limit > 0 && *limit <= 999 {
+			input.Top = int(*limit)
+		}
 	}
 
 	qualsColumnMap := []QualsColumn{
@@ -91,13 +97,6 @@ func listAdApplications(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	filter := buildCommaonQueryFilter(qualsColumnMap, d.Quals)
 	if len(filter) > 0 {
 		input.Filter = strings.Join(filter, " and ")
-	}
-
-	limit := d.QueryContext.Limit
-	if limit != nil {
-		if *limit < 999 {
-			input.Top = int(*limit)
-		}
 	}
 
 	applications, _, err := client.List(ctx, input)
