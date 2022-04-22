@@ -1,3 +1,16 @@
+## v0.3.1 [2022-04-22]
+
+_Bug fixes_
+
+- Fixed the invalid page size error in the following tables when limit passed is more than 1000: ([#50](https://github.com/turbot/steampipe-plugin-azuread/pull/50))
+  - azuread_application
+  - azuread_conditional_access_policy
+  - azuread_domain
+  - azuread_group
+  - azuread_service_principal
+  - azuread_sign_in_report
+  - azuread_user
+
 ## v0.3.0 [2022-03-25]
 
 _Enhancements_
