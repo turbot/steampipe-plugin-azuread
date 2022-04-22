@@ -2,7 +2,7 @@
 
 _Bug fixes_
 
-- Fixed the invalid page size error in the following tables when limit passed is more than 1000: ([#50](https://github.com/turbot/steampipe-plugin-azuread/pull/50))
+- Fixed the invalid page size error in the following tables when limit passed is more than 999: ([#50](https://github.com/turbot/steampipe-plugin-azuread/pull/50))
   - azuread_application
   - azuread_conditional_access_policy
   - azuread_domain
