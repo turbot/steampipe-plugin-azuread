@@ -1,3 +1,10 @@
+## v0.4.0 [2022-04-27]
+
+_Enhancements_
+
+- Added support for native Linux ARM and Mac M1 builds. ([#52](https://github.com/turbot/steampipe-plugin-azuread/pull/52))
+- Recompiled plugin with [steampipe-plugin-sdk v3.1.0](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v310--2022-03-30) and Go version `1.18`. ([#48](https://github.com/turbot/steampipe-plugin-azuread/pull/48))
+
 ## v0.3.1 [2022-04-22]
 
 _Bug fixes_
