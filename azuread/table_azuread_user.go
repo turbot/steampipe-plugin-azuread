@@ -88,14 +88,13 @@ func listAdUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	client := msgraph.NewUsersClient(session.TenantID)
 	client.BaseClient.Authorizer = session.Authorizer
 
-	// As per our test result we have set the max limit to 999
-	input := odata.Query{
-		Top: 999,
-	}
-
+	input := odata.Query{}
+	
+	// Restrict the limit value to be passed in the query parameter which is not between 1 and 999, otherwise API will throw an error as follow
+	// unexpected status 400 with OData error: Request_UnsupportedQuery: Invalid page size specified: '1000'. Must be between 1 and 999 inclusive.
 	limit := d.QueryContext.Limit
 	if limit != nil {
-		if *limit < 999 {
+		if *limit > 0 && *limit <= 999 {
 			input.Top = int(*limit)
 		}
 	}

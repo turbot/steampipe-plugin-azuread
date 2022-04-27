@@ -1,3 +1,16 @@
+## v0.3.1 [2022-04-22]
+
+_Bug fixes_
+
+- Fixed the following tables' results being limited to 999 rows unintentionally: ([#50](https://github.com/turbot/steampipe-plugin-azuread/pull/50))
+  - azuread_application
+  - azuread_conditional_access_policy
+  - azuread_domain
+  - azuread_group
+  - azuread_service_principal
+  - azuread_sign_in_report
+  - azuread_user
+
 ## v0.3.0 [2022-03-25]
 
 _Enhancements_
