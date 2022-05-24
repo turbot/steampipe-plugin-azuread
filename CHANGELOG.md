@@ -1,3 +1,9 @@
+## v0.4.1 [2022-05-23]
+
+_Bug fixes_
+
+- Fixed the Slack community links in README and docs/index.md files. ([#54](https://github.com/turbot/steampipe-plugin-azuread/pull/54))
+
 ## v0.4.0 [2022-04-27]
 
 _Enhancements_
