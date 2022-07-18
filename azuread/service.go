@@ -3,15 +3,24 @@ package azuread
 import (
 	"bytes"
 	"context"
+	"crypto/x509"
 	"encoding/json"
+	"encoding/pem"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"runtime"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/cloud"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
+	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/manicminer/hamilton/auth"
 	"github.com/manicminer/hamilton/environments"
+	a "github.com/microsoft/kiota-authentication-azure-go"
+	msgraphsdkgo "github.com/microsoftgraph/msgraph-sdk-go"
 	"github.com/turbot/steampipe-plugin-sdk/v3/plugin"
 )
 
@@ -228,4 +237,141 @@ func getTenantFromCLI() (string, error) {
 	}
 
 	return tokenResponse.Tenant, nil
+}
+
+func GetGraphClient(ctx context.Context, d *plugin.QueryData) (*msgraphsdkgo.GraphServiceClient, *msgraphsdkgo.GraphRequestAdapter, error) {
+	logger := plugin.Logger(ctx)
+
+	// Have we already created and cached the session?
+	// Hamilton SDK already acquires a new token when expired, so don't handle here again
+	sessionCacheKey := "GetNewSession"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(sessionCacheKey); ok {
+		return cachedData.(*msgraphsdkgo.GraphServiceClient), nil, nil
+	}
+
+	var tenantID, environment, clientID, clientSecret, certificatePath, certificatePassword string
+
+	azureADConfig := GetConfig(d.Connection)
+	if azureADConfig.TenantID != nil {
+		tenantID = *azureADConfig.TenantID
+	} else {
+		tenantID = os.Getenv("AZURE_TENANT_ID")
+	}
+
+	if azureADConfig.Environment != nil {
+		environment = *azureADConfig.Environment
+	} else {
+		environment = os.Getenv("AZURE_ENVIRONMENT")
+	}
+
+	var enableMsi bool
+	if azureADConfig.EnableMsi != nil {
+		enableMsi = *azureADConfig.EnableMsi
+	}
+
+	// 1. Client secret credentials
+	if azureADConfig.ClientID != nil {
+		clientID = *azureADConfig.ClientID
+	} else {
+		clientID = os.Getenv("AZURE_CLIENT_ID")
+	}
+
+	if azureADConfig.ClientSecret != nil {
+		clientSecret = *azureADConfig.ClientSecret
+	} else {
+		clientSecret = os.Getenv("AZURE_CLIENT_SECRET")
+	}
+
+	// 2. Client certificate credentials
+	if azureADConfig.CertificatePath != nil {
+		certificatePath = *azureADConfig.CertificatePath
+	} else {
+		certificatePath = os.Getenv("AZURE_CERTIFICATE_PATH")
+	}
+
+	if azureADConfig.CertificatePassword != nil {
+		certificatePassword = *azureADConfig.CertificatePassword
+	} else {
+		certificatePassword = os.Getenv("AZURE_CERTIFICATE_PASSWORD")
+	}
+
+	var cloudConfiguration cloud.Configuration
+	switch environment {
+	case "AZURECHINACLOUD":
+		cloudConfiguration = cloud.AzureChina
+	case "AZUREUSGOVERNMENTCLOUD":
+		cloudConfiguration = cloud.AzureGovernment
+	// case "AZUREGERMANCLOUD":
+	// 	cloudConfiguration = environments.Germany
+	default:
+		cloudConfiguration = cloud.AzurePublic
+	}
+
+	var cred azcore.TokenCredential
+	var err error
+	if tenantID == "" {
+		cred, err = azidentity.NewAzureCLICredential(
+			&azidentity.AzureCLICredentialOptions{},
+		)
+		if err != nil {
+			logger.Error("GetGraphClient", "credential_error", err)
+			return nil, nil, fmt.Errorf("error creating credentials: %w", err)
+		}
+	} else if tenantID != "" && clientID != "" && clientSecret != "" {
+		cred, err = azidentity.NewClientSecretCredential(
+			tenantID,
+			clientID,
+			clientSecret,
+			&azidentity.ClientSecretCredentialOptions{
+				ClientOptions: policy.ClientOptions{
+					Cloud: cloudConfiguration,
+				},
+			},
+		)
+		if err != nil {
+			logger.Error("GetGraphClient", "credential_error", err)
+			return nil, nil, fmt.Errorf("error creating credentials: %w", err)
+		}
+	} else if tenantID != "" && clientID != "" && certificatePath != "" && certificatePassword != "" { // Need to validate
+		loadFile, err := ioutil.ReadFile(certificatePath)
+		if err != nil {
+			return nil, nil, fmt.Errorf("error reading certificate from %s: %v", certificatePath, err)
+		}
+		block, _ := pem.Decode(loadFile)
+		cert, err := x509.ParseCertificate(block.Bytes)
+		var certs []*x509.Certificate
+		certs = append(certs, cert)
+
+		cred, err = azidentity.NewClientCertificateCredential(
+			tenantID,
+			clientID,
+			certs,
+			"",
+			&azidentity.ClientCertificateCredentialOptions{
+				ClientOptions: policy.ClientOptions{
+					Cloud: cloudConfiguration,
+				},
+			},
+		)
+	} else if enableMsi {
+		cred, err = azidentity.NewManagedIdentityCredential(
+			&azidentity.ManagedIdentityCredentialOptions{},
+		)
+	}
+
+	auth, err := a.NewAzureIdentityAuthenticationProvider(cred)
+	if err != nil {
+		panic(fmt.Errorf("error creating authentication provider: %w", err))
+	}
+
+	adapter, err := msgraphsdkgo.NewGraphRequestAdapter(auth)
+	if err != nil {
+		panic(fmt.Errorf("error creating graph adapter: %w", err))
+	}
+	client := msgraphsdkgo.NewGraphServiceClient(adapter)
+
+	// Save session into cache
+	d.ConnectionManager.Cache.Set(sessionCacheKey, client)
+
+	return client, adapter, nil
 }
