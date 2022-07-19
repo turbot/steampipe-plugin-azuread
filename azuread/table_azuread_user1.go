@@ -271,7 +271,7 @@ func getTenant(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) 
 	}
 
 	// If not set in config, get tenantID from CLI
-	if tenantID != "" {
+	if tenantID == "" {
 		tenantID, err = getTenantFromCLI()
 		if err != nil {
 			return nil, err
