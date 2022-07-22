@@ -3,11 +3,11 @@ package azuread
 import (
 	"bytes"
 	"context"
+	"crypto"
 	"crypto/x509"
 	"encoding/json"
-	"encoding/pem"
+	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -243,8 +243,7 @@ func GetGraphClient(ctx context.Context, d *plugin.QueryData) (*msgraphsdkgo.Gra
 	logger := plugin.Logger(ctx)
 
 	// Have we already created and cached the session?
-	// Hamilton SDK already acquires a new token when expired, so don't handle here again
-	sessionCacheKey := "GetNewSession"
+	sessionCacheKey := "GetGraphClient"
 	if cachedData, ok := d.ConnectionManager.Cache.Get(sessionCacheKey); ok {
 		return cachedData.(*msgraphsdkgo.GraphServiceClient), nil, nil
 	}
@@ -309,7 +308,7 @@ func GetGraphClient(ctx context.Context, d *plugin.QueryData) (*msgraphsdkgo.Gra
 
 	var cred azcore.TokenCredential
 	var err error
-	if tenantID == "" {
+	if tenantID == "" { // CLI authentication
 		cred, err = azidentity.NewAzureCLICredential(
 			&azidentity.AzureCLICredentialOptions{},
 		)
@@ -317,7 +316,7 @@ func GetGraphClient(ctx context.Context, d *plugin.QueryData) (*msgraphsdkgo.Gra
 			logger.Error("GetGraphClient", "credential_error", err)
 			return nil, nil, fmt.Errorf("error creating credentials: %w", err)
 		}
-	} else if tenantID != "" && clientID != "" && clientSecret != "" {
+	} else if tenantID != "" && clientID != "" && clientSecret != "" { // Client secret authentication
 		cred, err = azidentity.NewClientSecretCredential(
 			tenantID,
 			clientID,
@@ -332,28 +331,37 @@ func GetGraphClient(ctx context.Context, d *plugin.QueryData) (*msgraphsdkgo.Gra
 			logger.Error("GetGraphClient", "credential_error", err)
 			return nil, nil, fmt.Errorf("error creating credentials: %w", err)
 		}
-	} else if tenantID != "" && clientID != "" && certificatePath != "" && certificatePassword != "" { // Need to validate
-		loadFile, err := ioutil.ReadFile(certificatePath)
+	} else if tenantID != "" && clientID != "" && certificatePath != "" { // Client certificate authentication
+		// Load certificate from given path
+		loadFile, err := os.ReadFile(certificatePath)
 		if err != nil {
 			return nil, nil, fmt.Errorf("error reading certificate from %s: %v", certificatePath, err)
 		}
-		block, _ := pem.Decode(loadFile)
-		cert, err := x509.ParseCertificate(block.Bytes)
+
 		var certs []*x509.Certificate
-		certs = append(certs, cert)
+		var key crypto.PrivateKey
+		if certificatePassword == "" {
+			certs, key, err = azidentity.ParseCertificates(loadFile, nil)
+		} else {
+			certs, key, err = azidentity.ParseCertificates(loadFile, []byte(certificatePassword))
+		}
+
+		if err != nil {
+			return nil, nil, fmt.Errorf("error parsing certificate from %s: %v", certificatePath, err)
+		}
 
 		cred, err = azidentity.NewClientCertificateCredential(
 			tenantID,
 			clientID,
 			certs,
-			"",
+			key,
 			&azidentity.ClientCertificateCredentialOptions{
 				ClientOptions: policy.ClientOptions{
 					Cloud: cloudConfiguration,
 				},
 			},
 		)
-	} else if enableMsi {
+	} else if enableMsi { // Managed identity authentication
 		cred, err = azidentity.NewManagedIdentityCredential(
 			&azidentity.ManagedIdentityCredentialOptions{},
 		)
@@ -361,12 +369,12 @@ func GetGraphClient(ctx context.Context, d *plugin.QueryData) (*msgraphsdkgo.Gra
 
 	auth, err := a.NewAzureIdentityAuthenticationProvider(cred)
 	if err != nil {
-		panic(fmt.Errorf("error creating authentication provider: %w", err))
+		return nil, nil, errors.New(fmt.Sprintf("error creating authentication provider: %v", err))
 	}
 
 	adapter, err := msgraphsdkgo.NewGraphRequestAdapter(auth)
 	if err != nil {
-		panic(fmt.Errorf("error creating graph adapter: %w", err))
+		return nil, nil, errors.New(fmt.Sprintf("error creating graph adapter: %v", err))
 	}
 	client := msgraphsdkgo.NewGraphServiceClient(adapter)
 

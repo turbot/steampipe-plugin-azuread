@@ -33,6 +33,12 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"azuread_user":                      tableAzureAdUser(),
 			"azuread_user_test":                 tableAzureAdUserTest(),
 			"azuread_group_test":                tableAzureAdGroupTest(),
+			"azuread_domain_test":               tableAzureAdDomainTest(),
+			"azuread_identity_provider_test":    tableAzureAdIdentityProviderTest(),
+			"azuread_directory_role_test":       tableAzureAdDirectoryRoleTest(),
+			"azuread_application_test":          tableAzureAdApplicationTest(),
+			"azuread_service_principal_test":    tableAzureAdServicePrincipalTest(),
+			"azuread_sign_in_report_test":       tableAzureAdSignInReportTest(),
 		},
 	}
 
