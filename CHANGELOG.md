@@ -2,7 +2,7 @@
 
 _Bug fixes_
 
-- Added the missing `</li>` list item element tag in the credentials section of `docs/index.md` page which would cause the plugin build to fail. ([#60](https://github.com/turbot/steampipe-plugin-azuread/pull/60))
+- Added the missing `</li>` list item element tag in the credentials section of `docs/index.md` page which would cause the plugin build process to fail. ([#60](https://github.com/turbot/steampipe-plugin-azuread/pull/60))
 
 ## v0.5.0 [2022-07-22]
 
