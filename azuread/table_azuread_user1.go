@@ -25,7 +25,10 @@ func tableAzureAdUserTest() *plugin.Table {
 		Name:        "azuread_user_test",
 		Description: "Represents an Azure AD user account.",
 		Get: &plugin.GetConfig{
-			Hydrate:    getAdUserTest,
+			Hydrate: getAdUserTest,
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isIgnorableErrorPredicate([]string{"Request_ResourceNotFound", "Invalid object identifier"}),
+			},
 			KeyColumns: plugin.SingleColumn("id"),
 		},
 		List: &plugin.ListConfig{
@@ -130,7 +133,7 @@ func listAdUsersTest(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 	result, err := client.Users().GetWithRequestConfigurationAndResponseHandler(options, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
-		return nil, errors.New(fmt.Sprintf("failed to list users. Code: %s Message: %s", errObj.Code, errObj.Message))
+		return nil, errObj
 	}
 
 	pageIterator, err := msgraphcore.NewPageIterator(result, adapter, models.CreateUserCollectionResponseFromDiscriminatorValue)
@@ -181,11 +184,7 @@ func getAdUserTest(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 	user, err := client.UsersById(userId).GetWithRequestConfigurationAndResponseHandler(options, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
-		if isResourceNotFound(errObj) {
-			return nil, nil
-		}
-
-		return nil, errors.New(fmt.Sprintf("failed to get user. Code: %s Message: %s", errObj.Code, errObj.Message))
+		return nil, errObj
 	}
 
 	return &ADUserInfo{user}, nil

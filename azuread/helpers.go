@@ -6,6 +6,10 @@ type ADApplicationInfo struct {
 	models.Applicationable
 }
 
+type ADConditionalAccessPolicyInfo struct {
+	models.ConditionalAccessPolicyable
+}
+
 type ADGroupInfo struct {
 	models.Groupable
 }
@@ -227,6 +231,193 @@ func (application *ADApplicationInfo) ApplicationWeb() map[string]interface{} {
 	}
 
 	return webData
+}
+
+func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyConditionsApplications() map[string]interface{} {
+	if conditionalAccessPolicy.GetConditions() == nil {
+		return nil
+	}
+
+	if conditionalAccessPolicy.GetConditions().GetApplications() == nil {
+		return nil
+	}
+
+	return map[string]interface{}{
+		"excludeApplications":                         conditionalAccessPolicy.GetConditions().GetApplications().GetExcludeApplications(),
+		"includeApplications":                         conditionalAccessPolicy.GetConditions().GetApplications().GetIncludeApplications(),
+		"includeAuthenticationContextClassReferences": conditionalAccessPolicy.GetConditions().GetApplications().GetIncludeAuthenticationContextClassReferences(),
+		"includeUserActions":                          conditionalAccessPolicy.GetConditions().GetApplications().GetIncludeUserActions(),
+	}
+}
+
+func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyConditionsClientAppTypes() []string {
+	if conditionalAccessPolicy.GetConditions() == nil {
+		return nil
+	}
+	return conditionalAccessPolicy.GetConditions().GetClientAppTypes()
+}
+
+func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyConditionsLocations() map[string]interface{} {
+	if conditionalAccessPolicy.GetConditions() == nil {
+		return nil
+	}
+
+	if conditionalAccessPolicy.GetConditions().GetLocations() == nil {
+		return nil
+	}
+
+	return map[string]interface{}{
+		"excludeLocations": conditionalAccessPolicy.GetConditions().GetLocations().GetExcludeLocations(),
+		"includeLocations": conditionalAccessPolicy.GetConditions().GetLocations().GetIncludeLocations(),
+	}
+}
+
+func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyConditionsPlatforms() map[string]interface{} {
+	if conditionalAccessPolicy.GetConditions() == nil {
+		return nil
+	}
+
+	if conditionalAccessPolicy.GetConditions().GetPlatforms() == nil {
+		return nil
+	}
+
+	return map[string]interface{}{
+		"excludePlatforms": conditionalAccessPolicy.GetConditions().GetPlatforms().GetExcludePlatforms(),
+		"includePlatforms": conditionalAccessPolicy.GetConditions().GetPlatforms().GetIncludePlatforms(),
+	}
+}
+
+func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyConditionsSignInRiskLevels() []string {
+	if conditionalAccessPolicy.GetConditions() == nil {
+		return nil
+	}
+	return conditionalAccessPolicy.GetConditions().GetSignInRiskLevels()
+}
+
+func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyConditionsUsers() map[string]interface{} {
+	if conditionalAccessPolicy.GetConditions() == nil {
+		return nil
+	}
+
+	if conditionalAccessPolicy.GetConditions().GetUsers() == nil {
+		return nil
+	}
+
+	return map[string]interface{}{
+		"excludeGroups": conditionalAccessPolicy.GetConditions().GetUsers().GetExcludeGroups(),
+		"excludeRoles":  conditionalAccessPolicy.GetConditions().GetUsers().GetExcludeRoles(),
+		"excludeUsers":  conditionalAccessPolicy.GetConditions().GetUsers().GetExcludeUsers(),
+		"includeGroups": conditionalAccessPolicy.GetConditions().GetUsers().GetIncludeGroups(),
+		"includeRoles":  conditionalAccessPolicy.GetConditions().GetUsers().GetIncludeRoles(),
+		"includeUsers":  conditionalAccessPolicy.GetConditions().GetUsers().GetIncludeUsers(),
+	}
+}
+
+func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyConditionsUserRiskLevels() []string {
+	if conditionalAccessPolicy.GetConditions() == nil {
+		return nil
+	}
+	return conditionalAccessPolicy.GetConditions().GetUserRiskLevels()
+}
+
+func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyGrantControlsBuiltInControls() []string {
+	if conditionalAccessPolicy.GetGrantControls() == nil {
+		return nil
+	}
+	return conditionalAccessPolicy.GetGrantControls().GetBuiltInControls()
+}
+
+func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyGrantControlsCustomAuthenticationFactors() []string {
+	if conditionalAccessPolicy.GetGrantControls() == nil {
+		return nil
+	}
+	return conditionalAccessPolicy.GetGrantControls().GetCustomAuthenticationFactors()
+}
+
+func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyGrantControlsOperator() *string {
+	if conditionalAccessPolicy.GetGrantControls() == nil {
+		return nil
+	}
+	return conditionalAccessPolicy.GetGrantControls().GetOperator()
+}
+
+func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyGrantControlsTermsOfUse() []string {
+	if conditionalAccessPolicy.GetGrantControls() == nil {
+		return nil
+	}
+	return conditionalAccessPolicy.GetGrantControls().GetTermsOfUse()
+}
+
+func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicySessionControlsApplicationEnforcedRestrictions() map[string]interface{} {
+	if conditionalAccessPolicy.GetSessionControls() == nil {
+		return nil
+	}
+	if conditionalAccessPolicy.GetSessionControls().GetApplicationEnforcedRestrictions() == nil {
+		return nil
+	}
+
+	data := map[string]interface{}{}
+	if conditionalAccessPolicy.GetSessionControls().GetApplicationEnforcedRestrictions().GetIsEnabled() != nil {
+		data["isEnabled"] = conditionalAccessPolicy.GetSessionControls().GetApplicationEnforcedRestrictions().GetIsEnabled()
+	}
+	if conditionalAccessPolicy.GetSessionControls().GetApplicationEnforcedRestrictions().GetType() != nil {
+		data["type"] = conditionalAccessPolicy.GetSessionControls().GetApplicationEnforcedRestrictions().GetType()
+	}
+	return data
+}
+
+func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicySessionControlsCloudAppSecurity() map[string]interface{} {
+	if conditionalAccessPolicy.GetSessionControls() == nil {
+		return nil
+	}
+	if conditionalAccessPolicy.GetSessionControls().GetCloudAppSecurity() == nil {
+		return nil
+	}
+
+	data := map[string]interface{}{}
+	if conditionalAccessPolicy.GetSessionControls().GetCloudAppSecurity().GetIsEnabled() != nil {
+		data["isEnabled"] = conditionalAccessPolicy.GetSessionControls().GetCloudAppSecurity().GetIsEnabled()
+	}
+	if conditionalAccessPolicy.GetSessionControls().GetCloudAppSecurity().GetCloudAppSecurityType() != nil {
+		data["cloudAppSecurityType"] = conditionalAccessPolicy.GetSessionControls().GetCloudAppSecurity().GetCloudAppSecurityType()
+	}
+	return data
+}
+
+func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicySessionControlsPersistentBrowser() map[string]interface{} {
+	if conditionalAccessPolicy.GetSessionControls() == nil {
+		return nil
+	}
+	if conditionalAccessPolicy.GetSessionControls().GetPersistentBrowser() == nil {
+		return nil
+	}
+
+	data := map[string]interface{}{}
+	if conditionalAccessPolicy.GetSessionControls().GetPersistentBrowser().GetIsEnabled() != nil {
+		data["isEnabled"] = conditionalAccessPolicy.GetSessionControls().GetPersistentBrowser().GetIsEnabled()
+	}
+	if conditionalAccessPolicy.GetSessionControls().GetPersistentBrowser().GetMode() != nil {
+		data["mode"] = conditionalAccessPolicy.GetSessionControls().GetPersistentBrowser().GetMode()
+	}
+	return data
+}
+
+func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicySessionControlsSignInFrequency() map[string]interface{} {
+	if conditionalAccessPolicy.GetSessionControls() == nil {
+		return nil
+	}
+	if conditionalAccessPolicy.GetSessionControls().GetSignInFrequency() == nil {
+		return nil
+	}
+
+	data := map[string]interface{}{}
+	if conditionalAccessPolicy.GetSessionControls().GetSignInFrequency().GetIsEnabled() != nil {
+		data["isEnabled"] = conditionalAccessPolicy.GetSessionControls().GetSignInFrequency().GetIsEnabled()
+	}
+	if conditionalAccessPolicy.GetSessionControls().GetSignInFrequency().GetValue() != nil {
+		data["value"] = conditionalAccessPolicy.GetSessionControls().GetSignInFrequency().GetValue()
+	}
+	return data
 }
 
 func (group *ADGroupInfo) GroupAssignedLabels() []map[string]*string {

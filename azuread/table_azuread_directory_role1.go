@@ -21,7 +21,10 @@ func tableAzureAdDirectoryRoleTest() *plugin.Table {
 		Name:        "azuread_directory_role_test",
 		Description: "Represents an Azure Active Directory (Azure AD) directory role",
 		Get: &plugin.GetConfig{
-			Hydrate:    getAdDirectoryRoleTest,
+			Hydrate: getAdDirectoryRoleTest,
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isIgnorableErrorPredicate([]string{"Request_ResourceNotFound", "Invalid object identifier"}),
+			},
 			KeyColumns: plugin.SingleColumn("id"),
 		},
 		List: &plugin.ListConfig{
@@ -62,7 +65,7 @@ func listAdDirectoryRolesTest(ctx context.Context, d *plugin.QueryData, _ *plugi
 	result, err := client.DirectoryRoles().Get()
 	if err != nil {
 		errObj := getErrorObject(err)
-		return nil, errors.New(fmt.Sprintf("failed to list groups. Code: %s Message: %s", errObj.Code, errObj.Message))
+		return nil, errObj
 	}
 
 	for _, directoryRole := range result.GetValue() {
@@ -94,10 +97,7 @@ func getAdDirectoryRoleTest(ctx context.Context, d *plugin.QueryData, h *plugin.
 	directoryRole, err := client.DirectoryRolesById(directoryRoleId).Get()
 	if err != nil {
 		errObj := getErrorObject(err)
-		if isResourceNotFound(errObj) {
-			return nil, nil
-		}
-		return nil, errors.New(fmt.Sprintf("failed to get directory role. Code: %s Message: %s", errObj.Code, errObj.Message))
+		return nil, errObj
 	}
 
 	return &ADDirectoryRoleInfo{directoryRole}, nil
@@ -131,7 +131,7 @@ func getDirectoryRoleMembers(ctx context.Context, d *plugin.QueryData, h *plugin
 	members, err := client.DirectoryRolesById(*directoryRoleID).Members().GetWithRequestConfigurationAndResponseHandler(config, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
-		return nil, errors.New(fmt.Sprintf("failed to list directory role members. Code: %s Message: %s", errObj.Code, errObj.Message))
+		return nil, errObj
 	}
 
 	pageIterator, err := msgraphcore.NewPageIterator(members, adapter, models.CreateDirectoryObjectCollectionResponseFromDiscriminatorValue)

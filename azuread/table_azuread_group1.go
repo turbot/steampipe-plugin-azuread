@@ -27,9 +27,11 @@ func tableAzureAdGroupTest() *plugin.Table {
 		Name:        "azuread_group_test",
 		Description: "Represents an Azure AD user account.",
 		Get: &plugin.GetConfig{
-			Hydrate:           getAdGroupTest,
-			ShouldIgnoreError: isNotFoundErrorPredicate([]string{"Invalid object identifier"}),
-			KeyColumns:        plugin.SingleColumn("id"),
+			Hydrate: getAdGroupTest,
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isIgnorableErrorPredicate([]string{"Request_ResourceNotFound"}),
+			},
+			KeyColumns: plugin.SingleColumn("id"),
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listAdGroupsTest,
@@ -154,7 +156,7 @@ func listAdGroupsTest(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 	result, err := client.Groups().GetWithRequestConfigurationAndResponseHandler(options, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
-		return nil, errors.New(fmt.Sprintf("failed to list groups. Code: %s Message: %s", errObj.Code, errObj.Message))
+		return nil, errObj
 	}
 
 	pageIterator, err := msgraphcore.NewPageIterator(result, adapter, models.CreateGroupCollectionResponseFromDiscriminatorValue)
@@ -204,11 +206,7 @@ func getAdGroupTest(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 	group, err := client.GroupsById(groupId).GetWithRequestConfigurationAndResponseHandler(options, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
-		if isResourceNotFound(errObj) {
-			return nil, nil
-		}
-
-		return nil, errors.New(fmt.Sprintf("failed to get group. Code: %s Message: %s", errObj.Code, errObj.Message))
+		return nil, errObj
 	}
 
 	return &ADGroupInfo{group}, nil
@@ -242,7 +240,7 @@ func getAdGroupMembers(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	members, err := client.GroupsById(*groupID).Members().GetWithRequestConfigurationAndResponseHandler(config, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
-		return nil, errors.New(fmt.Sprintf("failed to list group members. Code: %s Message: %s", errObj.Code, errObj.Message))
+		return nil, errObj
 	}
 
 	pageIterator, err := msgraphcore.NewPageIterator(members, adapter, models.CreateDirectoryObjectCollectionResponseFromDiscriminatorValue)
@@ -284,7 +282,7 @@ func getAdGroupOwners(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	owners, err := client.GroupsById(*groupID).Owners().GetWithRequestConfigurationAndResponseHandler(config, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
-		return nil, errors.New(fmt.Sprintf("failed to list group owners. Code: %s Message: %s", errObj.Code, errObj.Message))
+		return nil, errObj
 	}
 
 	pageIterator, err := msgraphcore.NewPageIterator(owners, adapter, models.CreateDirectoryObjectCollectionResponseFromDiscriminatorValue)

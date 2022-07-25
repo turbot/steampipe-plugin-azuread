@@ -24,12 +24,17 @@ func tableAzureAdServicePrincipalTest() *plugin.Table {
 		Name:        "azuread_service_principal_test",
 		Description: "Represents an Azure Active Directory (Azure AD) service principal",
 		Get: &plugin.GetConfig{
-			Hydrate:    getAdServicePrincipalTest,
+			Hydrate: getAdServicePrincipalTest,
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isIgnorableErrorPredicate([]string{"Request_ResourceNotFound", "Invalid object identifier"}),
+			},
 			KeyColumns: plugin.SingleColumn("id"),
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listAdServicePrincipalsTest,
-			//ShouldIgnoreError: isNotFoundErrorPredicate([]string{"Request_UnsupportedQuery"}),
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isIgnorableErrorPredicate([]string{"Request_UnsupportedQuery"}),
+			},
 			KeyColumns: plugin.KeyColumnSlice{
 				// Key fields
 				{Name: "display_name", Require: plugin.Optional},
@@ -124,7 +129,7 @@ func listAdServicePrincipalsTest(ctx context.Context, d *plugin.QueryData, _ *pl
 	result, err := client.ServicePrincipals().GetWithRequestConfigurationAndResponseHandler(options, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
-		return nil, errors.New(fmt.Sprintf("failed to list service principals. Code: %s Message: %s", errObj.Code, errObj.Message))
+		return nil, errObj
 	}
 
 	pageIterator, err := msgraphcore.NewPageIterator(result, adapter, models.CreateServicePrincipalCollectionResponseFromDiscriminatorValue)
@@ -145,7 +150,7 @@ func listAdServicePrincipalsTest(ctx context.Context, d *plugin.QueryData, _ *pl
 	return nil, nil
 }
 
-//// Hydrate Functions
+//// HYDRATE FUNCTIONS
 
 func getAdServicePrincipalTest(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 
@@ -163,11 +168,7 @@ func getAdServicePrincipalTest(ctx context.Context, d *plugin.QueryData, h *plug
 	servicePrincipal, err := client.ServicePrincipalsById(servicePrincipalID).Get()
 	if err != nil {
 		errObj := getErrorObject(err)
-		if isResourceNotFound(errObj) {
-			return nil, nil
-		}
-
-		return nil, errors.New(fmt.Sprintf("failed to get service principal. Code: %s Message: %s", errObj.Code, errObj.Message))
+		return nil, errObj
 	}
 
 	return &ADServicePrincipalInfo{servicePrincipal}, nil
@@ -182,6 +183,10 @@ func getServicePrincipalOwners(ctx context.Context, d *plugin.QueryData, h *plug
 
 	servicePrincipal := h.Item.(*ADServicePrincipalInfo)
 	servicePrincipalID := servicePrincipal.GetId()
+
+	if servicePrincipalID == nil {
+		return nil, nil
+	}
 
 	headers := map[string]string{
 		"ConsistencyLevel": "eventual",
@@ -201,7 +206,7 @@ func getServicePrincipalOwners(ctx context.Context, d *plugin.QueryData, h *plug
 	owners, err := client.ServicePrincipalsById(*servicePrincipalID).Owners().GetWithRequestConfigurationAndResponseHandler(config, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
-		return nil, errors.New(fmt.Sprintf("failed to list service principal owners. Code: %s Message: %s", errObj.Code, errObj.Message))
+		return nil, errObj
 	}
 
 	pageIterator, err := msgraphcore.NewPageIterator(owners, adapter, models.CreateDirectoryObjectCollectionResponseFromDiscriminatorValue)
@@ -215,7 +220,7 @@ func getServicePrincipalOwners(ctx context.Context, d *plugin.QueryData, h *plug
 	return ownerIds, nil
 }
 
-//// Transform Function
+//// TRANSFORM FUNCTIONS
 
 func adServicePrincipalTags(ctx context.Context, d *transform.TransformData) (interface{}, error) {
 	servicePrincipal := d.HydrateItem.(*ADServicePrincipalInfo)

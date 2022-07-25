@@ -22,7 +22,10 @@ func tableAzureAdDomainTest() *plugin.Table {
 		Name:        "azuread_domain_test",
 		Description: "Represents an Azure Active Directory (Azure AD) domain",
 		Get: &plugin.GetConfig{
-			Hydrate:    getAdDomainTest,
+			Hydrate: getAdDomainTest,
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isIgnorableErrorPredicate([]string{"Request_ResourceNotFound", "Invalid object identifier"}),
+			},
 			KeyColumns: plugin.SingleColumn("id"),
 		},
 		List: &plugin.ListConfig{
@@ -83,7 +86,7 @@ func listAdDomainsTest(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 	result, err := client.Domains().GetWithRequestConfigurationAndResponseHandler(options, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
-		return nil, errors.New(fmt.Sprintf("failed to list domains. Code: %s Message: %s", errObj.Code, errObj.Message))
+		return nil, errObj
 	}
 
 	pageIterator, err := msgraphcore.NewPageIterator(result, adapter, models.CreateDomainCollectionResponseFromDiscriminatorValue)
@@ -121,10 +124,7 @@ func getAdDomainTest(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	domain, err := client.DomainsById(domainId).Get()
 	if err != nil {
 		errObj := getErrorObject(err)
-		if isResourceNotFound(errObj) {
-			return nil, nil
-		}
-		return nil, errors.New(fmt.Sprintf("failed to get domain. Code: %s Message: %s", errObj.Code, errObj.Message))
+		return nil, errObj
 	}
 
 	return &ADDomainInfo{domain}, nil

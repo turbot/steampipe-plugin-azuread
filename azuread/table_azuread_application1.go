@@ -24,12 +24,17 @@ func tableAzureAdApplicationTest() *plugin.Table {
 		Name:        "azuread_application_test",
 		Description: "Represents an Azure Active Directory (Azure AD) application",
 		Get: &plugin.GetConfig{
-			Hydrate:    getAdApplicationTest,
+			Hydrate: getAdApplicationTest,
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isIgnorableErrorPredicate([]string{"Request_ResourceNotFound", "Invalid object identifier"}),
+			},
 			KeyColumns: plugin.SingleColumn("id"),
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listAdApplicationsTest,
-			//ShouldIgnoreError: isNotFoundErrorPredicate([]string{"Request_UnsupportedQuery"}),
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isIgnorableErrorPredicate([]string{"Request_UnsupportedQuery"}),
+			},
 			KeyColumns: plugin.KeyColumnSlice{
 				// Key fields
 				{Name: "app_id", Require: plugin.Optional},
@@ -115,7 +120,7 @@ func listAdApplicationsTest(ctx context.Context, d *plugin.QueryData, _ *plugin.
 	result, err := client.Applications().GetWithRequestConfigurationAndResponseHandler(options, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
-		return nil, errors.New(fmt.Sprintf("failed to list applications. Code: %s Message: %s", errObj.Code, errObj.Message))
+		return nil, errObj
 	}
 
 	pageIterator, err := msgraphcore.NewPageIterator(result, adapter, models.CreateApplicationCollectionResponseFromDiscriminatorValue)
@@ -154,11 +159,7 @@ func getAdApplicationTest(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	application, err := client.ApplicationsById(applicationId).Get()
 	if err != nil {
 		errObj := getErrorObject(err)
-		if isResourceNotFound(errObj) {
-			return nil, nil
-		}
-
-		return nil, errors.New(fmt.Sprintf("failed to get application. Code: %s Message: %s", errObj.Code, errObj.Message))
+		return nil, errObj
 	}
 
 	return &ADApplicationInfo{application}, nil
@@ -192,7 +193,7 @@ func getAdApplicationOwners(ctx context.Context, d *plugin.QueryData, h *plugin.
 	owners, err := client.ApplicationsById(*applicationID).Owners().GetWithRequestConfigurationAndResponseHandler(config, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
-		return nil, errors.New(fmt.Sprintf("failed to list application owners. Code: %s Message: %s", errObj.Code, errObj.Message))
+		return nil, errObj
 	}
 
 	pageIterator, err := msgraphcore.NewPageIterator(owners, adapter, models.CreateDirectoryObjectCollectionResponseFromDiscriminatorValue)
@@ -237,7 +238,7 @@ func buildApplicationQueryFilter(equalQuals plugin.KeyColumnEqualsQualMap) []str
 		"publisher_domain": "string",
 	}
 
-	for qual, _ := range filterQuals {
+	for qual := range filterQuals {
 		if equalQuals[qual] != nil {
 			filters = append(filters, fmt.Sprintf("%s eq '%s'", strcase.ToCamel(qual), equalQuals[qual].GetStringValue()))
 		}

@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/microsoftgraph/msgraph-sdk-go/models/odataerrors"
 	"github.com/turbot/steampipe-plugin-sdk/v3/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v3/plugin"
 )
@@ -19,32 +18,6 @@ const (
 
 func isNotFoundError(err error) bool {
 	return strings.Contains(err.Error(), "Request_ResourceNotFound")
-}
-
-// New
-type RequestError struct {
-	Code    string
-	Message string
-}
-
-func getErrorObject(err error) *RequestError {
-	if oDataError, ok := err.(*odataerrors.ODataError); ok {
-		if terr := oDataError.GetError(); terr != nil {
-			return &RequestError{
-				Code:    *terr.GetCode(),
-				Message: *terr.GetMessage(),
-			}
-		}
-	}
-
-	return nil
-}
-
-func isResourceNotFound(errObj *RequestError) bool {
-	if errObj != nil && errObj.Code == "Request_ResourceNotFound" {
-		return true
-	}
-	return false
 }
 
 func isNotFoundErrorPredicate(notFoundErrors []string) plugin.ErrorPredicate {

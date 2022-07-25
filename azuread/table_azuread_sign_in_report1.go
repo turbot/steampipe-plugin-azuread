@@ -21,7 +21,10 @@ func tableAzureAdSignInReportTest() *plugin.Table {
 		Name:        "azuread_sign_in_report_test",
 		Description: "Represents an Azure Active Directory (Azure AD) sign in report",
 		Get: &plugin.GetConfig{
-			Hydrate:    getAdSignInReportTest,
+			Hydrate: getAdSignInReportTest,
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isIgnorableErrorPredicate([]string{"Request_ResourceNotFound", "Invalid object identifier"}),
+			},
 			KeyColumns: plugin.SingleColumn("id"),
 		},
 		List: &plugin.ListConfig{
@@ -91,7 +94,7 @@ func listAdSignInReportsTest(ctx context.Context, d *plugin.QueryData, _ *plugin
 	result, err := client.AuditLogs().SignIns().GetWithRequestConfigurationAndResponseHandler(options, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
-		return nil, errors.New(fmt.Sprintf("failed to list groups. Code: %s Message: %s", errObj.Code, errObj.Message))
+		return nil, errObj
 	}
 
 	pageIterator, err := msgraphcore.NewPageIterator(result, adapter, models.CreateSignInCollectionResponseFromDiscriminatorValue)
@@ -129,10 +132,7 @@ func getAdSignInReportTest(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	signIn, err := client.AuditLogs().SignInsById(signInID).Get()
 	if err != nil {
 		errObj := getErrorObject(err)
-		if isResourceNotFound(errObj) {
-			return nil, nil
-		}
-		return nil, errors.New(fmt.Sprintf("failed to get signIn log. Code: %s Message: %s", errObj.Code, errObj.Message))
+		return nil, errObj
 	}
 
 	return &ADSignInReportInfo{signIn}, nil
