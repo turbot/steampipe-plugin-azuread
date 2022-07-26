@@ -553,6 +553,46 @@ func (servicePrincipal *ADServicePrincipalInfo) ServicePrincipalKeyCredentials()
 	return keyCredentials
 }
 
+func (servicePrincipal *ADServicePrincipalInfo) ServicePrincipalOauth2PermissionScopes() []map[string]interface{} {
+	if servicePrincipal.GetOauth2PermissionScopes() == nil {
+		return nil
+	}
+
+	oauth2PermissionScopes := []map[string]interface{}{}
+	for _, p := range servicePrincipal.GetOauth2PermissionScopes() {
+		data := map[string]interface{}{}
+		if p.GetAdminConsentDescription() != nil {
+			data["adminConsentDescription"] = *p.GetAdminConsentDescription()
+		}
+		if p.GetAdminConsentDisplayName() != nil {
+			data["adminConsentDisplayName"] = *p.GetAdminConsentDisplayName()
+		}
+		if p.GetId() != nil {
+			data["id"] = *p.GetId()
+		}
+		if p.GetIsEnabled() != nil {
+			data["isEnabled"] = *p.GetIsEnabled()
+		}
+		if p.GetType() != nil {
+			data["type"] = *p.GetType()
+		}
+		if p.GetOrigin() != nil {
+			data["origin"] = *p.GetOrigin()
+		}
+		if p.GetUserConsentDescription() != nil {
+			data["userConsentDescription"] = p.GetUserConsentDescription()
+		}
+		if p.GetUserConsentDisplayName() != nil {
+			data["userConsentDisplayName"] = p.GetUserConsentDisplayName()
+		}
+		if p.GetValue() != nil {
+			data["value"] = p.GetValue()
+		}
+		oauth2PermissionScopes = append(oauth2PermissionScopes, data)
+	}
+	return oauth2PermissionScopes
+}
+
 func (servicePrincipal *ADServicePrincipalInfo) ServicePrincipalPasswordCredentials() []map[string]interface{} {
 	if servicePrincipal.GetPasswordCredentials() == nil {
 		return nil

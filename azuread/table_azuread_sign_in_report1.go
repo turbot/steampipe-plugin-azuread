@@ -52,7 +52,7 @@ func tableAzureAdSignInReportTest() *plugin.Table {
 			{Name: "resource_id", Type: proto.ColumnType_STRING, Description: "ID of the resource that the user signed into.", Transform: transform.FromMethod("GetResourceId")},
 
 			// Json fields
-			{Name: "risk_event_types", Type: proto.ColumnType_JSON, Description: "Risk event types associated with the sign-in. The possible values are: unlikelyTravel, anonymizedIPAddress, maliciousIPAddress, unfamiliarFeatures, malwareInfectedIPAddress, suspiciousIPAddress, leakedCredentials, investigationsThreatIntelligence, generic, and unknownFutureValue.", Transform: transform.FromMethod("GetRiskEventTypes")},
+			{Name: "risk_event_types", Type: proto.ColumnType_JSON, Description: "Risk event types associated with the sign-in. The possible values are: unlikelyTravel, anonymizedIPAddress, maliciousIPAddress, unfamiliarFeatures, malwareInfectedIPAddress, suspiciousIPAddress, leakedCredentials, investigationsThreatIntelligence, generic, and unknownFutureValue.", Transform: transform.FromMethod("GetRiskEventTypes").Transform(formatSignInReportRiskEventTypes)},
 			{Name: "status", Type: proto.ColumnType_JSON, Description: "Sign-in status. Includes the error code and description of the error (in case of a sign-in failure).", Transform: transform.FromMethod("SignInStatus")},
 			{Name: "device_detail", Type: proto.ColumnType_JSON, Description: "Device information from where the sign-in occurred; includes device ID, operating system, and browser.", Transform: transform.FromMethod("SignInDeviceDetail")},
 			{Name: "location", Type: proto.ColumnType_JSON, Description: "	Provides the city, state, and country code where the sign-in originated.", Transform: transform.FromMethod("SignInLocation")},
@@ -115,7 +115,7 @@ func listAdSignInReportsTest(ctx context.Context, d *plugin.QueryData, _ *plugin
 	return nil, nil
 }
 
-//// Hydrate Functions
+//// HYDRATE FUNCTIONS
 
 func getAdSignInReportTest(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	signInID := d.KeyColumnQuals["id"].GetStringValue()
@@ -136,4 +136,16 @@ func getAdSignInReportTest(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	}
 
 	return &ADSignInReportInfo{signIn}, nil
+}
+
+//// TRANSFORM FUNCTIONS
+
+func formatSignInReportRiskEventTypes(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	data := d.HydrateItem.(*ADSignInReportInfo)
+	riskEventTypes := data.GetRiskEventTypes()
+	if riskEventTypes == nil || len(riskEventTypes) == 0 {
+		return nil, nil
+	}
+
+	return riskEventTypes, nil
 }

@@ -14,7 +14,6 @@ import (
 	"github.com/microsoftgraph/msgraph-sdk-go/groups/item/owners"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 
-	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/steampipe-plugin-sdk/v3/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v3/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v3/plugin/transform"
@@ -29,12 +28,15 @@ func tableAzureAdGroupTest() *plugin.Table {
 		Get: &plugin.GetConfig{
 			Hydrate: getAdGroupTest,
 			IgnoreConfig: &plugin.IgnoreConfig{
-				ShouldIgnoreErrorFunc: isIgnorableErrorPredicate([]string{"Request_ResourceNotFound"}),
+				ShouldIgnoreErrorFunc: isIgnorableErrorPredicate([]string{"Request_ResourceNotFound", "Invalid object identifier"}),
 			},
 			KeyColumns: plugin.SingleColumn("id"),
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listAdGroupsTest,
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isIgnorableErrorPredicate([]string{"Request_UnsupportedQuery", "Invalid filter clause"}),
+			},
 			KeyColumns: plugin.KeyColumnSlice{
 				// Key fields
 				{Name: "display_name", Require: plugin.Optional},
@@ -69,7 +71,7 @@ func tableAzureAdGroupTest() *plugin.Table {
 			// 				}
 			// 		}
 			// }
-			// {Name: "is_subscribed_by_mail", Type: proto.ColumnType_BOOL, Description: "Indicates whether the signed-in user is subscribed to receive email conversations. Default value is true."},
+			// {Name: "is_subscribed_by_mail", Type: proto.ColumnType_BOOL, Description: "Indicates whether the signed-in user is subscribed to receive email conversations. Default value is true.", Transform: transform.FromMethod("GetIsSubscribedByMail")},
 
 			{Name: "mail", Type: proto.ColumnType_STRING, Description: "The SMTP address for the group, for example, \"serviceadmins@contoso.onmicrosoft.com\".", Transform: transform.FromMethod("GetMail")},
 			{Name: "mail_enabled", Type: proto.ColumnType_BOOL, Description: "Specifies whether the group is mail-enabled.", Transform: transform.FromMethod("GetMailEnabled")},
@@ -127,12 +129,6 @@ func listAdGroupsTest(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 
 	equalQuals := d.KeyColumnQuals
 	quals := d.Quals
-
-	// Check for query context and requests only for queried columns
-	givenColumns := d.QueryContext.Columns
-	selectColumns := buildGroupRequestFields(ctx, givenColumns)
-
-	input.Select = selectColumns
 
 	var queryFilter string
 	filter := buildGroupQueryFilter(equalQuals)
@@ -192,12 +188,7 @@ func getAdGroupTest(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 		return nil, errors.New(fmt.Sprintf("error creating client: %v", err))
 	}
 
-	// Check for query context and requests only for queried columns
-	givenColumns := d.QueryContext.Columns
-	selectColumns := buildGroupRequestFields(ctx, givenColumns)
-
 	input := &item.GroupItemRequestBuilderGetQueryParameters{}
-	input.Select = selectColumns
 
 	options := &item.GroupItemRequestBuilderGetRequestConfiguration{
 		QueryParameters: input,
@@ -329,33 +320,6 @@ func adGroupTitle(_ context.Context, d *transform.TransformData) (interface{}, e
 	}
 
 	return title, nil
-}
-
-func buildGroupRequestFields(ctx context.Context, queryColumns []string) []string {
-	var selectColumns []string
-
-	if !helpers.StringSliceContains(queryColumns, "id") {
-		queryColumns = append(queryColumns, "id")
-	}
-
-	if !helpers.StringSliceContains(queryColumns, "assignedLabels") && helpers.StringSliceContains(queryColumns, "tags") {
-		queryColumns = append(queryColumns, "assignedLabels")
-	}
-
-	for _, columnName := range queryColumns {
-		if columnName == "title" || columnName == "tags" || columnName == "filter" || columnName == "tenant_id" {
-			continue
-		}
-
-		// Uses separate hydrate functions
-		if columnName == "member_ids" || columnName == "owner_ids" {
-			continue
-		}
-
-		selectColumns = append(selectColumns, strcase.ToLowerCamel(columnName))
-	}
-
-	return selectColumns
 }
 
 func buildGroupQueryFilter(equalQuals plugin.KeyColumnEqualsQualMap) []string {
