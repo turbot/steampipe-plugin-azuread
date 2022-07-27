@@ -5,13 +5,11 @@ go 1.18
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.1.0
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.1.0
-	github.com/ettle/strcase v0.1.1
 	github.com/iancoleman/strcase v0.2.0
 	github.com/manicminer/hamilton v0.24.0
 	github.com/microsoft/kiota-authentication-azure-go v0.3.1
 	github.com/microsoftgraph/msgraph-sdk-go v0.30.0
 	github.com/microsoftgraph/msgraph-sdk-go-core v0.26.2
-	github.com/turbot/go-kit v0.4.0
 	github.com/turbot/steampipe-plugin-sdk/v3 v3.3.2
 )
 
@@ -67,6 +65,7 @@ require (
 	github.com/stevenle/topsort v0.0.0-20130922064739-8130c1d7596b // indirect
 	github.com/stretchr/testify v1.7.2 // indirect
 	github.com/tkrajina/go-reflector v0.5.4 // indirect
+	github.com/turbot/go-kit v0.4.0 // indirect
 	github.com/yosida95/uritemplate/v3 v3.0.2 // indirect
 	github.com/zclconf/go-cty v1.10.0 // indirect
 	go.opentelemetry.io/otel v1.7.0 // indirect

@@ -15,14 +15,18 @@ from
   azuread_application;
 ```
 
-### List applications with service authorization disabled
+### List owners of an application
 
 ```sql
 select
-  display_name,
-  id
+  app.display_name as application_name,
+  app.id as application_id,
+  o as owner_id,
+  u.display_name as owner_display_name
 from
-  azuread_application
+  azuread_application as app,
+  jsonb_array_elements_text(owner_ids) as o
+  left join azuread_user as u on u.id = o
 where
-  not is_authorization_service_enabled;
+  app.id = 'a6656898-3879-4d35-8a58-b34237095a70';
 ```

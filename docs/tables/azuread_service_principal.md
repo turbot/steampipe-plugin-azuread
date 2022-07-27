@@ -29,6 +29,7 @@ where
 
 ### List service principals related to applications
 
+```sql
 select
   id,
   app_display_name,
@@ -38,3 +39,4 @@ from
 where
   service_principal_type = 'Application'
   and tenant_id = app_owner_organization_id;
+```
