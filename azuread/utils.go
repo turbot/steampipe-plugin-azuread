@@ -1,6 +1,7 @@
 package azuread
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"strings"
@@ -164,4 +165,15 @@ func buildCommaonQueryFilter(qualsColumns []QualsColumn, quals plugin.KeyColumnQ
 
 	}
 	return filter
+}
+
+func getTenantId(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Debug("getTenantId")
+
+	session, err := GetNewSession(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+
+	return session.TenantID, nil
 }
