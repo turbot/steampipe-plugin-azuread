@@ -51,7 +51,7 @@ func tableAzureAdSignInReportTest() *plugin.Table {
 			{Name: "resource_display_name", Type: proto.ColumnType_STRING, Description: "Name of the resource the user signed into.", Transform: transform.FromMethod("GetResourceDisplayName")},
 			{Name: "resource_id", Type: proto.ColumnType_STRING, Description: "ID of the resource that the user signed into.", Transform: transform.FromMethod("GetResourceId")},
 
-			// Json fields
+			// JSON fields
 			{Name: "risk_event_types", Type: proto.ColumnType_JSON, Description: "Risk event types associated with the sign-in. The possible values are: unlikelyTravel, anonymizedIPAddress, maliciousIPAddress, unfamiliarFeatures, malwareInfectedIPAddress, suspiciousIPAddress, leakedCredentials, investigationsThreatIntelligence, generic, and unknownFutureValue.", Transform: transform.FromMethod("GetRiskEventTypes").Transform(formatSignInReportRiskEventTypes)},
 			{Name: "status", Type: proto.ColumnType_JSON, Description: "Sign-in status. Includes the error code and description of the error (in case of a sign-in failure).", Transform: transform.FromMethod("SignInStatus")},
 			{Name: "device_detail", Type: proto.ColumnType_JSON, Description: "Device information from where the sign-in occurred; includes device ID, operating system, and browser.", Transform: transform.FromMethod("SignInDeviceDetail")},
