@@ -1,3 +1,19 @@
+## v0.5.1 [2022-07-25]
+
+_Bug fixes_
+
+- Added the missing `</li>` list item element tag in the credentials section of `docs/index.md` page which would cause the plugin build process to fail. ([#60](https://github.com/turbot/steampipe-plugin-azuread/pull/60))
+
+## v0.5.0 [2022-07-22]
+
+_Enhancements_
+
+- Improved `docs/index.md` file information about what permissions are required to query resources. ([#56](https://github.com/turbot/steampipe-plugin-azuread/pull/56))
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v3.3.2](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v332--2022-07-11) which includes several caching fixes. ([#58](https://github.com/turbot/steampipe-plugin-azuread/pull/58))
+
 ## v0.4.1 [2022-05-23]
 
 _Bug fixes_
