@@ -31,7 +31,6 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"azuread_service_principal":         tableAzureAdServicePrincipal(),
 			"azuread_sign_in_report":            tableAzureAdSignInReport(),
 			"azuread_user":                      tableAzureAdUser(),
-			"azuread_identity_provider_test":    tableAzureAdIdentityProviderTest(),
 		},
 	}
 
