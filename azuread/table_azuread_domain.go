@@ -2,7 +2,6 @@ package azuread
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/turbot/steampipe-plugin-sdk/v3/grpc/proto"
@@ -63,7 +62,7 @@ func listAdDomains(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 	// Create client
 	client, adapter, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("error creating client: %v", err))
+		return nil, fmt.Errorf("error creating client: %v", err)
 	}
 
 	// List operations
@@ -103,6 +102,9 @@ func listAdDomains(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 
 		return true
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	return nil, nil
 }
@@ -118,7 +120,7 @@ func getAdDomain(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 	// Create client
 	client, _, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("error creating client: %v", err))
+		return nil, fmt.Errorf("error creating client: %v", err)
 	}
 
 	domain, err := client.DomainsById(domainId).Get()

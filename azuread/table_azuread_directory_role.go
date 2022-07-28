@@ -2,7 +2,6 @@ package azuread
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
@@ -59,7 +58,7 @@ func listAdDirectoryRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	// Create client
 	client, _, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("error creating client: %v", err))
+		return nil, fmt.Errorf("error creating client: %v", err)
 	}
 
 	result, err := client.DirectoryRoles().Get()
@@ -91,7 +90,7 @@ func getAdDirectoryRole(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	// Create client
 	client, _, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("error creating client: %v", err))
+		return nil, fmt.Errorf("error creating client: %v", err)
 	}
 
 	directoryRole, err := client.DirectoryRolesById(directoryRoleId).Get()
@@ -107,7 +106,7 @@ func getDirectoryRoleMembers(ctx context.Context, d *plugin.QueryData, h *plugin
 	// Create client
 	client, adapter, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("error creating client: %v", err))
+		return nil, fmt.Errorf("error creating client: %v", err)
 	}
 
 	directoryRole := h.Item.(*ADDirectoryRoleInfo)
@@ -141,6 +140,9 @@ func getDirectoryRoleMembers(ctx context.Context, d *plugin.QueryData, h *plugin
 
 		return true
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	return memberIds, nil
 }

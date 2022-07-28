@@ -2,7 +2,6 @@ package azuread
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 
@@ -88,7 +87,7 @@ func listAdServicePrincipals(ctx context.Context, d *plugin.QueryData, _ *plugin
 	// Create client
 	client, adapter, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("error creating client: %v", err))
+		return nil, fmt.Errorf("error creating client: %v", err)
 	}
 
 	// List operations
@@ -145,6 +144,9 @@ func listAdServicePrincipals(ctx context.Context, d *plugin.QueryData, _ *plugin
 
 		return true
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	return nil, nil
 }
@@ -161,7 +163,7 @@ func getAdServicePrincipal(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	// Create client
 	client, _, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("error creating client: %v", err))
+		return nil, fmt.Errorf("error creating client: %v", err)
 	}
 
 	servicePrincipal, err := client.ServicePrincipalsById(servicePrincipalID).Get()
@@ -177,7 +179,7 @@ func getServicePrincipalOwners(ctx context.Context, d *plugin.QueryData, h *plug
 	// Create client
 	client, adapter, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("error creating client: %v", err))
+		return nil, fmt.Errorf("error creating client: %v", err)
 	}
 
 	servicePrincipal := h.Item.(*ADServicePrincipalInfo)
@@ -215,6 +217,9 @@ func getServicePrincipalOwners(ctx context.Context, d *plugin.QueryData, h *plug
 
 		return true
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	return ownerIds, nil
 }

@@ -2,7 +2,6 @@ package azuread
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -86,7 +85,7 @@ func listAdUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	// Create client
 	client, adapter, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("error creating client: %v", err))
+		return nil, fmt.Errorf("error creating client: %v", err)
 	}
 
 	// List operations
@@ -150,6 +149,9 @@ func listAdUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 
 		return true
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	return nil, nil
 }
@@ -161,7 +163,7 @@ func getAdUser(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) 
 	// Create client
 	client, _, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("error creating client: %v", err))
+		return nil, fmt.Errorf("error creating client: %v", err)
 	}
 
 	userId := d.KeyColumnQuals["id"].GetStringValue()

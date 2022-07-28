@@ -6,9 +6,7 @@ import (
 	"crypto"
 	"crypto/x509"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"runtime"
@@ -61,7 +59,8 @@ func GetNewSession(ctx context.Context, d *plugin.QueryData) (sess *Session, err
 
 	authorizer, err := authConfig.NewAuthorizer(ctx, auth.MsGraph)
 	if err != nil {
-		log.Fatal(err)
+		logger.Debug("GetNewSession__", "authorizer error", err)
+		return nil, err
 	}
 
 	if authMethod == "CLI" {
@@ -300,8 +299,6 @@ func GetGraphClient(ctx context.Context, d *plugin.QueryData) (*msgraphsdkgo.Gra
 		cloudConfiguration = cloud.AzureChina
 	case "AZUREUSGOVERNMENTCLOUD":
 		cloudConfiguration = cloud.AzureGovernment
-	// case "AZUREGERMANCLOUD":
-	// 	cloudConfiguration = environments.Germany
 	default:
 		cloudConfiguration = cloud.AzurePublic
 	}
@@ -369,12 +366,12 @@ func GetGraphClient(ctx context.Context, d *plugin.QueryData) (*msgraphsdkgo.Gra
 
 	auth, err := a.NewAzureIdentityAuthenticationProvider(cred)
 	if err != nil {
-		return nil, nil, errors.New(fmt.Sprintf("error creating authentication provider: %v", err))
+		return nil, nil, fmt.Errorf("error creating authentication provider: %v", err)
 	}
 
 	adapter, err := msgraphsdkgo.NewGraphRequestAdapter(auth)
 	if err != nil {
-		return nil, nil, errors.New(fmt.Sprintf("error creating graph adapter: %v", err))
+		return nil, nil, fmt.Errorf("error creating graph adapter: %v", err)
 	}
 	client := msgraphsdkgo.NewGraphServiceClient(adapter)
 

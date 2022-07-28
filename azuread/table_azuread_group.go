@@ -2,7 +2,6 @@ package azuread
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 
@@ -112,7 +111,7 @@ func listAdGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	// Create client
 	client, adapter, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("error creating client: %v", err))
+		return nil, fmt.Errorf("error creating client: %v", err)
 	}
 
 	// List operations
@@ -169,6 +168,9 @@ func listAdGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 
 		return true
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	return nil, nil
 }
@@ -185,7 +187,7 @@ func getAdGroup(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 	// Create client
 	client, _, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("error creating client: %v", err))
+		return nil, fmt.Errorf("error creating client: %v", err)
 	}
 
 	input := &item.GroupItemRequestBuilderGetQueryParameters{}
@@ -207,7 +209,7 @@ func getAdGroupMembers(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	// Create client
 	client, adapter, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("error creating client: %v", err))
+		return nil, fmt.Errorf("error creating client: %v", err)
 	}
 
 	group := h.Item.(*ADGroupInfo)
@@ -241,6 +243,9 @@ func getAdGroupMembers(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 
 		return true
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	return memberIds, nil
 }
@@ -249,7 +254,7 @@ func getAdGroupOwners(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	// Create client
 	client, adapter, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("error creating client: %v", err))
+		return nil, fmt.Errorf("error creating client: %v", err)
 	}
 
 	group := h.Item.(*ADGroupInfo)
@@ -283,6 +288,9 @@ func getAdGroupOwners(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 
 		return true
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	return ownerIds, nil
 }

@@ -2,7 +2,6 @@ package azuread
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
@@ -71,7 +70,7 @@ func listAdSignInReports(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 	// Create client
 	client, adapter, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("error creating client: %v", err))
+		return nil, fmt.Errorf("error creating client: %v", err)
 	}
 
 	// List operations
@@ -111,6 +110,9 @@ func listAdSignInReports(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 
 		return true
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	return nil, nil
 }
@@ -126,7 +128,7 @@ func getAdSignInReport(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	// Create client
 	client, _, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("error creating client: %v", err))
+		return nil, fmt.Errorf("error creating client: %v", err)
 	}
 
 	signIn, err := client.AuditLogs().SignInsById(signInID).Get()

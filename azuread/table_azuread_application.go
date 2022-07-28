@@ -2,7 +2,6 @@ package azuread
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 
@@ -82,7 +81,7 @@ func listAdApplications(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	// Create client
 	client, adapter, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("error creating client: %v", err))
+		return nil, fmt.Errorf("error creating client: %v", err)
 	}
 
 	// List operations
@@ -137,8 +136,11 @@ func listAdApplications(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 
 		return true
 	})
+	if err != nil {
+		return nil, err
+	}
 
-	return nil, err
+	return nil, nil
 }
 
 //// HYDRATE FUNCTIONS
@@ -153,7 +155,7 @@ func getAdApplication(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	// Create client
 	client, _, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("error creating client: %v", err))
+		return nil, fmt.Errorf("error creating client: %v", err)
 	}
 
 	application, err := client.ApplicationsById(applicationId).Get()
@@ -169,7 +171,7 @@ func getAdApplicationOwners(ctx context.Context, d *plugin.QueryData, h *plugin.
 	// Create client
 	client, adapter, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("error creating client: %v", err))
+		return nil, fmt.Errorf("error creating client: %v", err)
 	}
 
 	application := h.Item.(*ADApplicationInfo)
@@ -203,6 +205,9 @@ func getAdApplicationOwners(ctx context.Context, d *plugin.QueryData, h *plugin.
 
 		return true
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	return ownerIds, nil
 }

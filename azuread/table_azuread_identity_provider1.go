@@ -2,7 +2,6 @@ package azuread
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/turbot/steampipe-plugin-sdk/v3/grpc/proto"
@@ -54,7 +53,7 @@ func listAdIdentityProvidersTest(ctx context.Context, d *plugin.QueryData, _ *pl
 	// Create client
 	client, adapter, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("error creating client: %v", err))
+		return nil, fmt.Errorf("error creating client: %v", err)
 	}
 
 	// List operations
@@ -90,6 +89,9 @@ func listAdIdentityProvidersTest(ctx context.Context, d *plugin.QueryData, _ *pl
 
 		return true
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	return nil, nil
 }
@@ -106,7 +108,7 @@ func getAdIdentityProviderTest(ctx context.Context, d *plugin.QueryData, h *plug
 	// Create client
 	client, _, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("error creating client: %v", err))
+		return nil, fmt.Errorf("error creating client: %v", err)
 	}
 
 	identityProvider, err := client.Identity().IdentityProvidersById(identityProviderId).Get()

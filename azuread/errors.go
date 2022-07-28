@@ -15,7 +15,10 @@ type RequestError struct {
 }
 
 func (m *RequestError) Error() string {
-	errStr, _ := json.Marshal(m)
+	errStr, err := json.Marshal(m)
+	if err != nil {
+		return ""
+	}
 	return string(errStr)
 }
 
@@ -45,12 +48,4 @@ func isIgnorableErrorPredicate(ignoreErrorCodes []string) plugin.ErrorPredicateW
 		}
 		return false
 	}
-}
-
-// Remove after adding IgnoreConfig
-func isResourceNotFound(errObj *RequestError) bool {
-	if errObj != nil && errObj.Code == "Request_ResourceNotFound" {
-		return true
-	}
-	return false
 }

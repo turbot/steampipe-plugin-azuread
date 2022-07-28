@@ -2,7 +2,6 @@ package azuread
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 
@@ -78,7 +77,7 @@ func listAdConditionalAccessPolicies(ctx context.Context, d *plugin.QueryData, _
 	// Create client
 	client, adapter, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("error creating client: %v", err))
+		return nil, fmt.Errorf("error creating client: %v", err)
 	}
 
 	// List operations
@@ -126,8 +125,11 @@ func listAdConditionalAccessPolicies(ctx context.Context, d *plugin.QueryData, _
 
 		return true
 	})
+	if err != nil {
+		return nil, err
+	}
 
-	return nil, err
+	return nil, nil
 }
 
 //// HYDRATE FUNCTIONS
@@ -142,7 +144,7 @@ func getAdConditionalAccessPolicy(ctx context.Context, d *plugin.QueryData, h *p
 	// Create client
 	client, _, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("error creating client: %v", err))
+		return nil, fmt.Errorf("error creating client: %v", err)
 	}
 
 	policy, err := client.Identity().ConditionalAccess().PoliciesById(conditionalAccessPolicyId).Get()
