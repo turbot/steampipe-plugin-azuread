@@ -17,7 +17,7 @@ from
   azuread_conditional_access_policy;
 ```
 
-### List coditional access policies with mfa enabled
+### List conditional access policies with mfa enabled
 
 ```sql
 select
