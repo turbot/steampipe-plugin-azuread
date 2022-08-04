@@ -4,6 +4,7 @@ import "github.com/microsoftgraph/msgraph-sdk-go/models"
 
 type ADApplicationInfo struct {
 	models.Applicationable
+	IsAuthorizationServiceEnabled interface{}
 }
 
 type ADConditionalAccessPolicyInfo struct {
@@ -12,6 +13,8 @@ type ADConditionalAccessPolicyInfo struct {
 
 type ADGroupInfo struct {
 	models.Groupable
+	ResourceBehaviorOptions     []string
+	ResourceProvisioningOptions []string
 }
 
 type ADServicePrincipalInfo struct {
@@ -24,6 +27,7 @@ type ADSignInReportInfo struct {
 
 type ADUserInfo struct {
 	models.Userable
+	RefreshTokensValidFromDateTime interface{}
 }
 
 func (application *ADApplicationInfo) ApplicationAPI() map[string]interface{} {

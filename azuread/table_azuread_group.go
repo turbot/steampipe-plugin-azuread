@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	"github.com/iancoleman/strcase"
+
+	jsonserialization "github.com/microsoft/kiota-serialization-json-go"
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
 	"github.com/microsoftgraph/msgraph-sdk-go/groups"
 	"github.com/microsoftgraph/msgraph-sdk-go/groups/item"
@@ -94,8 +96,8 @@ func tableAzureAdGroup() *plugin.Table {
 			{Name: "member_ids", Type: proto.ColumnType_JSON, Hydrate: getAdGroupMembers, Transform: transform.FromValue(), Description: "Id of Users and groups that are members of this group."},
 			{Name: "owner_ids", Type: proto.ColumnType_JSON, Hydrate: getAdGroupOwners, Transform: transform.FromValue(), Description: "Id od the owners of the group. The owners are a set of non-admin users who are allowed to modify this object."},
 			{Name: "proxy_addresses", Type: proto.ColumnType_JSON, Description: "Email addresses for the group that direct to the same group mailbox. For example: [\"SMTP: bob@contoso.com\", \"smtp: bob@sales.contoso.com\"]. The any operator is required to filter expressions on multi-valued properties.", Transform: transform.FromMethod("GetProxyAddresses")},
-			// {Name: "resource_behavior_options", Type: proto.ColumnType_JSON, Description: "Specifies the group behaviors that can be set for a Microsoft 365 group during creation. Possible values are AllowOnlyMembersToPost, HideGroupInOutlook, SubscribeNewGroupMembers, WelcomeEmailDisabled."},
-			// {Name: "resource_provisioning_options", Type: proto.ColumnType_JSON, Description: "Specifies the group resources that are provisioned as part of Microsoft 365 group creation, that are not normally part of default group creation. Possible value is Team."},
+			{Name: "resource_behavior_options", Type: proto.ColumnType_JSON, Description: "Specifies the group behaviors that can be set for a Microsoft 365 group during creation. Possible values are AllowOnlyMembersToPost, HideGroupInOutlook, SubscribeNewGroupMembers, WelcomeEmailDisabled."},
+			{Name: "resource_provisioning_options", Type: proto.ColumnType_JSON, Description: "Specifies the group resources that are provisioned as part of Microsoft 365 group creation, that are not normally part of default group creation. Possible value is Team."},
 
 			// Standard columns
 			{Name: "tags", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTags, Transform: transform.From(adGroupTags)},
@@ -159,7 +161,10 @@ func listAdGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	err = pageIterator.Iterate(func(pageItem interface{}) bool {
 		group := pageItem.(models.Groupable)
 
-		d.StreamListItem(ctx, &ADGroupInfo{group})
+		resourceBehaviorOptions := formatResourceBehaviorOptions(ctx, group)
+		resourceProvisioningOptions := formatResourceProvisioningOptions(ctx, group)
+
+		d.StreamListItem(ctx, &ADGroupInfo{group, resourceBehaviorOptions, resourceProvisioningOptions})
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
 		if d.QueryStatus.RowsRemaining(ctx) == 0 {
@@ -201,8 +206,10 @@ func getAdGroup(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 		errObj := getErrorObject(err)
 		return nil, errObj
 	}
+	resourceBehaviorOptions := formatResourceBehaviorOptions(ctx, group)
+	resourceProvisioningOptions := formatResourceProvisioningOptions(ctx, group)
 
-	return &ADGroupInfo{group}, nil
+	return &ADGroupInfo{group, resourceBehaviorOptions, resourceProvisioningOptions}, nil
 }
 
 func getAdGroupMembers(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
@@ -379,4 +386,46 @@ func buildGroupBoolNEFilter(quals plugin.KeyColumnQualMap) []string {
 	}
 
 	return filters
+}
+
+func formatResourceBehaviorOptions(ctx context.Context, group models.Groupable) []string {
+	var resourceBehaviorOptions []string
+	data := group.GetAdditionalData()["resourceBehaviorOptions"]
+	if data != nil {
+		parsedData := group.GetAdditionalData()["resourceBehaviorOptions"].([]*jsonserialization.JsonParseNode)
+
+		for _, r := range parsedData {
+			val, err := r.GetStringValue()
+			if err != nil {
+				plugin.Logger(ctx).Error("failed to parse resourceBehaviorOptions: %v", err)
+				val = nil
+			}
+
+			if val != nil {
+				resourceBehaviorOptions = append(resourceBehaviorOptions, *val)
+			}
+		}
+	}
+	return resourceBehaviorOptions
+}
+
+func formatResourceProvisioningOptions(ctx context.Context, group models.Groupable) []string {
+	var resourceProvisioningOptions []string
+	data := group.GetAdditionalData()["resourceProvisioningOptions"]
+	if data != nil {
+		parsedData := data.([]*jsonserialization.JsonParseNode)
+
+		for _, r := range parsedData {
+			val, err := r.GetStringValue()
+			if err != nil {
+				plugin.Logger(ctx).Error("failed to parse resourceProvisioningOptions: %v", err)
+				val = nil
+			}
+
+			if val != nil {
+				resourceProvisioningOptions = append(resourceProvisioningOptions, *val)
+			}
+		}
+	}
+	return resourceProvisioningOptions
 }

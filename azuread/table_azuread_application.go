@@ -50,7 +50,7 @@ func tableAzureAdApplication() *plugin.Table {
 			// Other fields
 			{Name: "created_date_time", Type: proto.ColumnType_TIMESTAMP, Description: "The date and time the application was registered. The DateTimeOffset type represents date and time information using ISO 8601 format and is always in UTC time.", Transform: transform.FromMethod("GetCreatedDateTime")},
 			{Name: "description", Type: proto.ColumnType_STRING, Description: "Free text field to provide a description of the application object to end users.", Transform: transform.FromMethod("GetDescription")},
-			// {Name: "is_authorization_service_enabled", Type: proto.ColumnType_BOOL, Description: "Is authorization service enabled."},
+			{Name: "is_authorization_service_enabled", Type: proto.ColumnType_BOOL, Description: "Is authorization service enabled.", Default: false},
 			{Name: "oauth2_require_post_response", Type: proto.ColumnType_BOOL, Description: "Specifies whether, as part of OAuth 2.0 token requests, Azure AD allows POST requests, as opposed to GET requests. The default is false, which specifies that only GET requests are allowed.", Transform: transform.FromMethod("GetOauth2RequirePostResponse"), Default: false},
 			{Name: "publisher_domain", Type: proto.ColumnType_STRING, Description: "The verified publisher domain for the application.", Transform: transform.FromMethod("GetPublisherDomain")},
 			{Name: "sign_in_audience", Type: proto.ColumnType_STRING, Description: "Specifies the Microsoft accounts that are supported for the current application.", Transform: transform.FromMethod("GetSignInAudience")},
@@ -127,7 +127,9 @@ func listAdApplications(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	err = pageIterator.Iterate(func(pageItem interface{}) bool {
 		application := pageItem.(models.Applicationable)
 
-		d.StreamListItem(ctx, &ADApplicationInfo{application})
+		isAuthorizationServiceEnabled := application.GetAdditionalData()["isAuthorizationServiceEnabled"]
+
+		d.StreamListItem(ctx, &ADApplicationInfo{application, isAuthorizationServiceEnabled})
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
 		if d.QueryStatus.RowsRemaining(ctx) == 0 {
@@ -163,8 +165,9 @@ func getAdApplication(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 		errObj := getErrorObject(err)
 		return nil, errObj
 	}
+	isAuthorizationServiceEnabled := application.GetAdditionalData()["isAuthorizationServiceEnabled"]
 
-	return &ADApplicationInfo{application}, nil
+	return &ADApplicationInfo{application, isAuthorizationServiceEnabled}, nil
 }
 
 func getAdApplicationOwners(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
