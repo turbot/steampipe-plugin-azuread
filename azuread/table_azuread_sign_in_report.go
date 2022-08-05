@@ -97,6 +97,10 @@ func listAdSignInReports(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 	}
 
 	pageIterator, err := msgraphcore.NewPageIterator(result, adapter, models.CreateSignInCollectionResponseFromDiscriminatorValue)
+	if err != nil {
+		plugin.Logger(ctx).Error("listAdSignInReports", "create_iterator_instance_error", err)
+		return nil, err
+	}
 
 	err = pageIterator.Iterate(func(pageItem interface{}) bool {
 		signIn := pageItem.(models.SignInable)
@@ -104,11 +108,7 @@ func listAdSignInReports(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 		d.StreamListItem(ctx, &ADSignInReportInfo{signIn})
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
-		if d.QueryStatus.RowsRemaining(ctx) == 0 {
-			return false
-		}
-
-		return true
+		return d.QueryStatus.RowsRemaining(ctx) != 0
 	})
 	if err != nil {
 		return nil, err
@@ -145,7 +145,7 @@ func getAdSignInReport(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 func formatSignInReportRiskEventTypes(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	data := d.HydrateItem.(*ADSignInReportInfo)
 	riskEventTypes := data.GetRiskEventTypes()
-	if riskEventTypes == nil || len(riskEventTypes) == 0 {
+	if len(riskEventTypes) == 0 {
 		return nil, nil
 	}
 

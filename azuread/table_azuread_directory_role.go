@@ -134,6 +134,11 @@ func getDirectoryRoleMembers(ctx context.Context, d *plugin.QueryData, h *plugin
 	}
 
 	pageIterator, err := msgraphcore.NewPageIterator(members, adapter, models.CreateDirectoryObjectCollectionResponseFromDiscriminatorValue)
+	if err != nil {
+		plugin.Logger(ctx).Error("getDirectoryRoleMembers", "create_iterator_instance_error", err)
+		return nil, err
+	}
+
 	err = pageIterator.Iterate(func(pageItem interface{}) bool {
 		member := pageItem.(models.DirectoryObjectable)
 		memberIds = append(memberIds, member.GetId())

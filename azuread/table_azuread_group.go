@@ -120,6 +120,7 @@ func listAdGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	input := &groups.GroupsRequestBuilderGetQueryParameters{}
 
 	// Restrict the limit value to be passed in the query parameter which is not between 1 and 999, otherwise API will throw an error as follow
+	// unexpected status 400 with OData error: Request_UnsupportedQuery: Invalid page size specified: '1000'. Must be between 1 and 999 inclusive.
 	limit := d.QueryContext.Limit
 	if limit != nil {
 		if *limit > 0 && *limit <= 999 {
@@ -157,6 +158,10 @@ func listAdGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	}
 
 	pageIterator, err := msgraphcore.NewPageIterator(result, adapter, models.CreateGroupCollectionResponseFromDiscriminatorValue)
+	if err != nil {
+		plugin.Logger(ctx).Error("listAdGroups", "create_iterator_instance_error", err)
+		return nil, err
+	}
 
 	err = pageIterator.Iterate(func(pageItem interface{}) bool {
 		group := pageItem.(models.Groupable)
@@ -167,11 +172,7 @@ func listAdGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		d.StreamListItem(ctx, &ADGroupInfo{group, resourceBehaviorOptions, resourceProvisioningOptions})
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
-		if d.QueryStatus.RowsRemaining(ctx) == 0 {
-			return false
-		}
-
-		return true
+		return d.QueryStatus.RowsRemaining(ctx) != 0
 	})
 	if err != nil {
 		return nil, err
@@ -244,6 +245,11 @@ func getAdGroupMembers(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	}
 
 	pageIterator, err := msgraphcore.NewPageIterator(members, adapter, models.CreateDirectoryObjectCollectionResponseFromDiscriminatorValue)
+	if err != nil {
+		plugin.Logger(ctx).Error("getAdGroupMembers", "create_iterator_instance_error", err)
+		return nil, err
+	}
+
 	err = pageIterator.Iterate(func(pageItem interface{}) bool {
 		member := pageItem.(models.DirectoryObjectable)
 		memberIds = append(memberIds, member.GetId())
@@ -289,6 +295,11 @@ func getAdGroupOwners(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	}
 
 	pageIterator, err := msgraphcore.NewPageIterator(owners, adapter, models.CreateDirectoryObjectCollectionResponseFromDiscriminatorValue)
+	if err != nil {
+		plugin.Logger(ctx).Error("getAdGroupOwners", "create_iterator_instance_error", err)
+		return nil, err
+	}
+
 	err = pageIterator.Iterate(func(pageItem interface{}) bool {
 		member := pageItem.(models.DirectoryObjectable)
 		ownerIds = append(ownerIds, member.GetId())
@@ -311,7 +322,7 @@ func adGroupTags(ctx context.Context, d *transform.TransformData) (interface{}, 
 	}
 
 	assignedLabels := group.GroupAssignedLabels()
-	if assignedLabels == nil || len(assignedLabels) == 0 {
+	if len(assignedLabels) == 0 {
 		return nil, nil
 	}
 

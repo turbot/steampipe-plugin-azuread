@@ -28,7 +28,8 @@ type Session struct {
 	Authorizer auth.Authorizer
 }
 
-/* GetNewSession creates an session configured from (~/.steampipe/config, environment variables and CLI) in the order:
+/*
+GetNewSession creates an session configured from (~/.steampipe/config, environment variables and CLI) in the order:
 1. Client secret
 2. Client certificate
 3. Username and password
@@ -310,8 +311,8 @@ func GetGraphClient(ctx context.Context, d *plugin.QueryData) (*msgraphsdkgo.Gra
 			&azidentity.AzureCLICredentialOptions{},
 		)
 		if err != nil {
-			logger.Error("GetGraphClient", "credential_error", err)
-			return nil, nil, fmt.Errorf("error creating credentials: %w", err)
+			logger.Error("GetGraphClient", "cli_credential_error", err)
+			return nil, nil, err
 		}
 	} else if tenantID != "" && clientID != "" && clientSecret != "" { // Client secret authentication
 		cred, err = azidentity.NewClientSecretCredential(
@@ -325,8 +326,8 @@ func GetGraphClient(ctx context.Context, d *plugin.QueryData) (*msgraphsdkgo.Gra
 			},
 		)
 		if err != nil {
-			logger.Error("GetGraphClient", "credential_error", err)
-			return nil, nil, fmt.Errorf("error creating credentials: %w", err)
+			logger.Error("GetGraphClient", "client_secret_credential_error", err)
+			return nil, nil, err
 		}
 	} else if tenantID != "" && clientID != "" && certificatePath != "" { // Client certificate authentication
 		// Load certificate from given path
@@ -358,10 +359,18 @@ func GetGraphClient(ctx context.Context, d *plugin.QueryData) (*msgraphsdkgo.Gra
 				},
 			},
 		)
+		if err != nil {
+			logger.Error("GetGraphClient", "client_certificate_credential_error", err)
+			return nil, nil, err
+		}
 	} else if enableMsi { // Managed identity authentication
 		cred, err = azidentity.NewManagedIdentityCredential(
 			&azidentity.ManagedIdentityCredentialOptions{},
 		)
+		if err != nil {
+			logger.Error("GetGraphClient", "managed_identity_credential_error", err)
+			return nil, nil, err
+		}
 	}
 
 	auth, err := a.NewAzureIdentityAuthenticationProvider(cred)

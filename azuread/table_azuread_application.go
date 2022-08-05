@@ -123,6 +123,10 @@ func listAdApplications(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	}
 
 	pageIterator, err := msgraphcore.NewPageIterator(result, adapter, models.CreateApplicationCollectionResponseFromDiscriminatorValue)
+	if err != nil {
+		plugin.Logger(ctx).Error("listAdApplications", "create_iterator_instance_error", err)
+		return nil, err
+	}
 
 	err = pageIterator.Iterate(func(pageItem interface{}) bool {
 		application := pageItem.(models.Applicationable)
@@ -132,11 +136,7 @@ func listAdApplications(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 		d.StreamListItem(ctx, &ADApplicationInfo{application, isAuthorizationServiceEnabled})
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
-		if d.QueryStatus.RowsRemaining(ctx) == 0 {
-			return false
-		}
-
-		return true
+		return d.QueryStatus.RowsRemaining(ctx) != 0
 	})
 	if err != nil {
 		return nil, err
@@ -202,6 +202,11 @@ func getAdApplicationOwners(ctx context.Context, d *plugin.QueryData, h *plugin.
 	}
 
 	pageIterator, err := msgraphcore.NewPageIterator(owners, adapter, models.CreateDirectoryObjectCollectionResponseFromDiscriminatorValue)
+	if err != nil {
+		plugin.Logger(ctx).Error("getAdApplicationOwners", "create_iterator_instance_error", err)
+		return nil, err
+	}
+
 	err = pageIterator.Iterate(func(pageItem interface{}) bool {
 		owner := pageItem.(models.DirectoryObjectable)
 		ownerIds = append(ownerIds, owner.GetId())
