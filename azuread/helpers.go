@@ -17,6 +17,12 @@ type ADGroupInfo struct {
 	ResourceProvisioningOptions []string
 }
 
+type ADIdentityProviderInfo struct {
+	models.BuiltInIdentityProvider
+	ClientId     interface{}
+	ClientSecret interface{}
+}
+
 type ADServicePrincipalInfo struct {
 	models.ServicePrincipalable
 }

@@ -8,6 +8,7 @@ require (
 	github.com/iancoleman/strcase v0.2.0
 	github.com/manicminer/hamilton v0.24.0
 	github.com/microsoft/kiota-authentication-azure-go v0.3.1
+	github.com/microsoft/kiota-serialization-json-go v0.5.5
 	github.com/microsoftgraph/msgraph-sdk-go v0.30.0
 	github.com/microsoftgraph/msgraph-sdk-go-core v0.26.2
 	github.com/turbot/steampipe-plugin-sdk/v3 v3.3.2
@@ -36,10 +37,8 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.0 // indirect
-	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-hclog v1.2.0 // indirect
 	github.com/hashicorp/go-plugin v1.4.4 // indirect
-	github.com/hashicorp/go-retryablehttp v0.7.0 // indirect
 	github.com/hashicorp/go-uuid v1.0.2 // indirect
 	github.com/hashicorp/go-version v1.5.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.12.0 // indirect
@@ -50,7 +49,6 @@ require (
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/microsoft/kiota-abstractions-go v0.8.1 // indirect
 	github.com/microsoft/kiota-http-go v0.5.2 // indirect
-	github.com/microsoft/kiota-serialization-json-go v0.5.5 // indirect
 	github.com/microsoft/kiota-serialization-text-go v0.4.1 // indirect
 	github.com/mitchellh/go-testing-interface v1.0.0 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.0 // indirect

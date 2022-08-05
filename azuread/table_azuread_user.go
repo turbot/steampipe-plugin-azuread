@@ -3,7 +3,6 @@ package azuread
 import (
 	"context"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/iancoleman/strcase"
@@ -212,29 +211,6 @@ func buildUserRequestFields(ctx context.Context, queryColumns []string) ([]strin
 	}
 
 	return selectColumns, expandColumns
-}
-
-func getTenant(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	var tenantID string
-	var err error
-
-	// Read tenantID from config, or environment variables
-	azureADConfig := GetConfig(d.Connection)
-	if azureADConfig.TenantID != nil {
-		tenantID = *azureADConfig.TenantID
-	} else {
-		tenantID = os.Getenv("AZURE_TENANT_ID")
-	}
-
-	// If not set in config, get tenantID from CLI
-	if tenantID == "" {
-		tenantID, err = getTenantFromCLI()
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return tenantID, nil
 }
 
 //// TRANSFORM FUNCTIONS
