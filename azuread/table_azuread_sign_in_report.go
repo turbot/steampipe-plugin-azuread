@@ -2,7 +2,6 @@ package azuread
 
 import (
 	"context"
-	"fmt"
 
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
 	"github.com/microsoftgraph/msgraph-sdk-go/auditlogs/signins"
@@ -70,7 +69,8 @@ func listAdSignInReports(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 	// Create client
 	client, adapter, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, fmt.Errorf("error creating client: %v", err)
+		plugin.Logger(ctx).Error("azuread_sign_in_report.listAdSignInReports", "connection_error", err)
+		return nil, err
 	}
 
 	// List operations
@@ -93,6 +93,7 @@ func listAdSignInReports(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 	result, err := client.AuditLogs().SignIns().GetWithRequestConfigurationAndResponseHandler(options, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
+		plugin.Logger(ctx).Error("listAdSignInReports", "list_sign_in_report_error", errObj)
 		return nil, errObj
 	}
 
@@ -111,6 +112,7 @@ func listAdSignInReports(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 		return d.QueryStatus.RowsRemaining(ctx) != 0
 	})
 	if err != nil {
+		plugin.Logger(ctx).Error("listAdSignInReports", "paging_error", err)
 		return nil, err
 	}
 
@@ -128,12 +130,14 @@ func getAdSignInReport(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	// Create client
 	client, _, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, fmt.Errorf("error creating client: %v", err)
+		plugin.Logger(ctx).Error("azuread_sign_in_report.getAdSignInReport", "connection_error", err)
+		return nil, err
 	}
 
 	signIn, err := client.AuditLogs().SignInsById(signInID).Get()
 	if err != nil {
 		errObj := getErrorObject(err)
+		plugin.Logger(ctx).Error("getAdSignInReport", "get_sign_in_report_error", errObj)
 		return nil, errObj
 	}
 

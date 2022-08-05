@@ -2,7 +2,6 @@ package azuread
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/turbot/steampipe-plugin-sdk/v3/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v3/plugin/transform"
@@ -62,7 +61,8 @@ func listAdDomains(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 	// Create client
 	client, adapter, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, fmt.Errorf("error creating client: %v", err)
+		plugin.Logger(ctx).Error("azuread_domain.listAdDomains", "connection_error", err)
+		return nil, err
 	}
 
 	// List operations
@@ -85,6 +85,7 @@ func listAdDomains(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 	result, err := client.Domains().GetWithRequestConfigurationAndResponseHandler(options, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
+		plugin.Logger(ctx).Error("listAdDomains", "list_domain_error", errObj)
 		return nil, errObj
 	}
 
@@ -103,6 +104,7 @@ func listAdDomains(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 		return d.QueryStatus.RowsRemaining(ctx) != 0
 	})
 	if err != nil {
+		plugin.Logger(ctx).Error("listAdDomains", "paging_error", err)
 		return nil, err
 	}
 
@@ -120,12 +122,14 @@ func getAdDomain(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 	// Create client
 	client, _, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, fmt.Errorf("error creating client: %v", err)
+		plugin.Logger(ctx).Error("azuread_domain.getAdDomain", "connection_error", err)
+		return nil, err
 	}
 
 	domain, err := client.DomainsById(domainId).Get()
 	if err != nil {
 		errObj := getErrorObject(err)
+		plugin.Logger(ctx).Error("getAdDomain", "get_domain_error", errObj)
 		return nil, errObj
 	}
 

@@ -2,7 +2,6 @@ package azuread
 
 import (
 	"context"
-	"fmt"
 
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
 	"github.com/microsoftgraph/msgraph-sdk-go/directoryroles/item/members"
@@ -58,12 +57,14 @@ func listAdDirectoryRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	// Create client
 	client, _, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, fmt.Errorf("error creating client: %v", err)
+		plugin.Logger(ctx).Error("azuread_directory_role.listAdDirectoryRoles", "connection_error", err)
+		return nil, err
 	}
 
 	result, err := client.DirectoryRoles().Get()
 	if err != nil {
 		errObj := getErrorObject(err)
+		plugin.Logger(ctx).Error("listAdDirectoryRoles", "list_directory_role_error", errObj)
 		return nil, errObj
 	}
 
@@ -90,12 +91,14 @@ func getAdDirectoryRole(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	// Create client
 	client, _, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, fmt.Errorf("error creating client: %v", err)
+		plugin.Logger(ctx).Error("azuread_directory_role.getAdDirectoryRole", "connection_error", err)
+		return nil, err
 	}
 
 	directoryRole, err := client.DirectoryRolesById(directoryRoleId).Get()
 	if err != nil {
 		errObj := getErrorObject(err)
+		plugin.Logger(ctx).Error("getAdDirectoryRole", "get_directory_role_error", errObj)
 		return nil, errObj
 	}
 
@@ -106,7 +109,8 @@ func getDirectoryRoleMembers(ctx context.Context, d *plugin.QueryData, h *plugin
 	// Create client
 	client, adapter, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, fmt.Errorf("error creating client: %v", err)
+		plugin.Logger(ctx).Error("azuread_directory_role.getDirectoryRoleMembers", "connection_error", err)
+		return nil, err
 	}
 
 	directoryRole := h.Item.(*ADDirectoryRoleInfo)
@@ -130,6 +134,7 @@ func getDirectoryRoleMembers(ctx context.Context, d *plugin.QueryData, h *plugin
 	members, err := client.DirectoryRolesById(*directoryRoleID).Members().GetWithRequestConfigurationAndResponseHandler(config, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
+		plugin.Logger(ctx).Error("getDirectoryRoleMembers", "get_directory_role_members_error", errObj)
 		return nil, errObj
 	}
 
@@ -146,6 +151,7 @@ func getDirectoryRoleMembers(ctx context.Context, d *plugin.QueryData, h *plugin
 		return true
 	})
 	if err != nil {
+		plugin.Logger(ctx).Error("getDirectoryRoleMembers", "paging_error", err)
 		return nil, err
 	}
 

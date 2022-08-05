@@ -77,7 +77,8 @@ func listAdConditionalAccessPolicies(ctx context.Context, d *plugin.QueryData, _
 	// Create client
 	client, adapter, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, fmt.Errorf("error creating client: %v", err)
+		plugin.Logger(ctx).Error("azuread_conditional_access_policy.listAdConditionalAccessPolicies", "connection_error", err)
+		return nil, err
 	}
 
 	// List operations
@@ -108,6 +109,7 @@ func listAdConditionalAccessPolicies(ctx context.Context, d *plugin.QueryData, _
 	result, err := client.Identity().ConditionalAccess().Policies().GetWithRequestConfigurationAndResponseHandler(options, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
+		plugin.Logger(ctx).Error("listAdConditionalAccessPolicies", "list_conditional_access_policy_error", errObj)
 		return nil, errObj
 	}
 
@@ -126,6 +128,7 @@ func listAdConditionalAccessPolicies(ctx context.Context, d *plugin.QueryData, _
 		return d.QueryStatus.RowsRemaining(ctx) != 0
 	})
 	if err != nil {
+		plugin.Logger(ctx).Error("listAdConditionalAccessPolicies", "paging_error", err)
 		return nil, err
 	}
 
@@ -144,12 +147,14 @@ func getAdConditionalAccessPolicy(ctx context.Context, d *plugin.QueryData, h *p
 	// Create client
 	client, _, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, fmt.Errorf("error creating client: %v", err)
+		plugin.Logger(ctx).Error("azuread_conditional_access_policy.getAdConditionalAccessPolicy", "connection_error", err)
+		return nil, err
 	}
 
 	policy, err := client.Identity().ConditionalAccess().PoliciesById(conditionalAccessPolicyId).Get()
 	if err != nil {
 		errObj := getErrorObject(err)
+		plugin.Logger(ctx).Error("getAdConditionalAccessPolicy", "get_conditional_access_policy_error", errObj)
 		return nil, errObj
 	}
 	return &ADConditionalAccessPolicyInfo{policy}, nil

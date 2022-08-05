@@ -61,7 +61,6 @@ func tableAzureAdUser() *plugin.Table {
 			{Name: "mail", Type: proto.ColumnType_STRING, Description: "The SMTP address for the user, for example, jeff@contoso.onmicrosoft.com.", Transform: transform.FromMethod("GetMail")},
 			{Name: "mail_nickname", Type: proto.ColumnType_STRING, Description: "The mail alias for the user.", Transform: transform.FromMethod("GetMailNickname")},
 			{Name: "password_policies", Type: proto.ColumnType_STRING, Description: "Specifies password policies for the user. This value is an enumeration with one possible value being DisableStrongPassword, which allows weaker passwords than the default policy to be specified. DisablePasswordExpiration can also be specified. The two may be specified together; for example: DisablePasswordExpiration, DisableStrongPassword.", Transform: transform.FromMethod("GetPasswordPolicies")},
-			{Name: "refresh_tokens_valid_from_date_time", Type: proto.ColumnType_TIMESTAMP, Description: "Any refresh tokens or sessions tokens (session cookies) issued before this time are invalid, and applications will get an error when using an invalid refresh or sessions token to acquire a delegated access token (to access APIs such as Microsoft Graph)."},
 			{Name: "sign_in_sessions_valid_from_date_time", Type: proto.ColumnType_TIMESTAMP, Description: "Any refresh tokens or sessions tokens (session cookies) issued before this time are invalid, and applications will get an error when using an invalid refresh or sessions token to acquire a delegated access token (to access APIs such as Microsoft Graph).", Transform: transform.FromMethod("GetSignInSessionsValidFromDateTime")},
 			{Name: "usage_location", Type: proto.ColumnType_STRING, Description: "A two letter country code (ISO standard 3166), required for users that will be assigned licenses due to legal requirement to check for availability of services in countries.", Transform: transform.FromMethod("GetUsageLocation")},
 
@@ -84,7 +83,8 @@ func listAdUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	// Create client
 	client, adapter, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, fmt.Errorf("error creating client: %v", err)
+		plugin.Logger(ctx).Error("azuread_user.listAdUsers", "connection_error", err)
+		return nil, err
 	}
 
 	// List operations
@@ -131,6 +131,7 @@ func listAdUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	result, err := client.Users().GetWithRequestConfigurationAndResponseHandler(options, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
+		plugin.Logger(ctx).Error("listAdUsers", "list_user_error", errObj)
 		return nil, errObj
 	}
 
@@ -151,6 +152,7 @@ func listAdUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		return d.QueryStatus.RowsRemaining(ctx) != 0
 	})
 	if err != nil {
+		plugin.Logger(ctx).Error("listAdUsers", "paging_error", err)
 		return nil, err
 	}
 
@@ -164,7 +166,8 @@ func getAdUser(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) 
 	// Create client
 	client, _, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, fmt.Errorf("error creating client: %v", err)
+		plugin.Logger(ctx).Error("azuread_user.getAdUser", "connection_error", err)
+		return nil, err
 	}
 
 	userId := d.KeyColumnQuals["id"].GetStringValue()
@@ -187,6 +190,7 @@ func getAdUser(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) 
 	user, err := client.UsersById(userId).GetWithRequestConfigurationAndResponseHandler(options, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
+		plugin.Logger(ctx).Error("getAdUser", "get_user_error", errObj)
 		return nil, errObj
 	}
 	refreshTokensValidFromDateTime := user.GetAdditionalData()["refreshTokensValidFromDateTime"]

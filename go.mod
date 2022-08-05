@@ -6,7 +6,6 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.1.0
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.1.0
 	github.com/iancoleman/strcase v0.2.0
-	github.com/manicminer/hamilton v0.24.0
 	github.com/microsoft/kiota-authentication-azure-go v0.3.1
 	github.com/microsoft/kiota-serialization-json-go v0.5.5
 	github.com/microsoftgraph/msgraph-sdk-go v0.30.0
@@ -39,7 +38,6 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.0 // indirect
 	github.com/hashicorp/go-hclog v1.2.0 // indirect
 	github.com/hashicorp/go-plugin v1.4.4 // indirect
-	github.com/hashicorp/go-uuid v1.0.2 // indirect
 	github.com/hashicorp/go-version v1.5.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.12.0 // indirect
 	github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d // indirect
@@ -79,10 +77,8 @@ require (
 	go.opentelemetry.io/proto/otlp v0.16.0 // indirect
 	golang.org/x/crypto v0.0.0-20220511200225-c6db032c6c88 // indirect
 	golang.org/x/net v0.0.0-20220425223048-2871e0cb64e4 // indirect
-	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8 // indirect
 	golang.org/x/sys v0.0.0-20220412211240-33da011f77ad // indirect
 	golang.org/x/text v0.3.7 // indirect
-	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20220407144326-9054f6ed7bac // indirect
 	google.golang.org/grpc v1.46.0 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect

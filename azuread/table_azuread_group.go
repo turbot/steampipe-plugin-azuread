@@ -113,7 +113,8 @@ func listAdGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	// Create client
 	client, adapter, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, fmt.Errorf("error creating client: %v", err)
+		plugin.Logger(ctx).Error("azuread_group.listAdGroups", "connection_error", err)
+		return nil, err
 	}
 
 	// List operations
@@ -154,6 +155,7 @@ func listAdGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	result, err := client.Groups().GetWithRequestConfigurationAndResponseHandler(options, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
+		plugin.Logger(ctx).Error("listAdGroups", "list_group_error", errObj)
 		return nil, errObj
 	}
 
@@ -175,6 +177,7 @@ func listAdGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		return d.QueryStatus.RowsRemaining(ctx) != 0
 	})
 	if err != nil {
+		plugin.Logger(ctx).Error("listAdGroups", "paging_error", err)
 		return nil, err
 	}
 
@@ -193,7 +196,8 @@ func getAdGroup(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 	// Create client
 	client, _, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, fmt.Errorf("error creating client: %v", err)
+		plugin.Logger(ctx).Error("azuread_group.getAdGroup", "connection_error", err)
+		return nil, err
 	}
 
 	input := &item.GroupItemRequestBuilderGetQueryParameters{}
@@ -205,6 +209,7 @@ func getAdGroup(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 	group, err := client.GroupsById(groupId).GetWithRequestConfigurationAndResponseHandler(options, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
+		plugin.Logger(ctx).Error("getAdGroup", "get_group_error", errObj)
 		return nil, errObj
 	}
 	resourceBehaviorOptions := formatResourceBehaviorOptions(ctx, group)
@@ -217,7 +222,8 @@ func getAdGroupMembers(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	// Create client
 	client, adapter, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, fmt.Errorf("error creating client: %v", err)
+		plugin.Logger(ctx).Error("azuread_group.getAdGroupMembers", "connection_error", err)
+		return nil, err
 	}
 
 	group := h.Item.(*ADGroupInfo)
@@ -241,6 +247,7 @@ func getAdGroupMembers(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	members, err := client.GroupsById(*groupID).Members().GetWithRequestConfigurationAndResponseHandler(config, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
+		plugin.Logger(ctx).Error("getAdGroupMembers", "get_group_members_error", errObj)
 		return nil, errObj
 	}
 
@@ -257,6 +264,7 @@ func getAdGroupMembers(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 		return true
 	})
 	if err != nil {
+		plugin.Logger(ctx).Error("getAdGroupMembers", "paging_error", err)
 		return nil, err
 	}
 
@@ -267,7 +275,8 @@ func getAdGroupOwners(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	// Create client
 	client, adapter, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, fmt.Errorf("error creating client: %v", err)
+		plugin.Logger(ctx).Error("azuread_group.getAdGroupOwners", "connection_error", err)
+		return nil, err
 	}
 
 	group := h.Item.(*ADGroupInfo)
@@ -291,6 +300,7 @@ func getAdGroupOwners(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	owners, err := client.GroupsById(*groupID).Owners().GetWithRequestConfigurationAndResponseHandler(config, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
+		plugin.Logger(ctx).Error("getAdGroupOwners", "get_group_owners_error", errObj)
 		return nil, errObj
 	}
 
@@ -307,6 +317,7 @@ func getAdGroupOwners(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 		return true
 	})
 	if err != nil {
+		plugin.Logger(ctx).Error("getAdGroupMembers", "paging_error", err)
 		return nil, err
 	}
 

@@ -81,7 +81,8 @@ func listAdApplications(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	// Create client
 	client, adapter, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, fmt.Errorf("error creating client: %v", err)
+		plugin.Logger(ctx).Error("azuread_application.listAdApplications", "connection_error", err)
+		return nil, err
 	}
 
 	// List operations
@@ -119,6 +120,7 @@ func listAdApplications(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	result, err := client.Applications().GetWithRequestConfigurationAndResponseHandler(options, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
+		plugin.Logger(ctx).Error("listAdApplications", "list_application_error", errObj)
 		return nil, errObj
 	}
 
@@ -139,6 +141,7 @@ func listAdApplications(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 		return d.QueryStatus.RowsRemaining(ctx) != 0
 	})
 	if err != nil {
+		plugin.Logger(ctx).Error("listAdApplications", "paging_error", err)
 		return nil, err
 	}
 
@@ -157,12 +160,14 @@ func getAdApplication(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	// Create client
 	client, _, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, fmt.Errorf("error creating client: %v", err)
+		plugin.Logger(ctx).Error("azuread_application.getAdApplication", "connection_error", err)
+		return nil, err
 	}
 
 	application, err := client.ApplicationsById(applicationId).Get()
 	if err != nil {
 		errObj := getErrorObject(err)
+		plugin.Logger(ctx).Error("getAdApplication", "get_application_error", errObj)
 		return nil, errObj
 	}
 	isAuthorizationServiceEnabled := application.GetAdditionalData()["isAuthorizationServiceEnabled"]
@@ -174,7 +179,8 @@ func getAdApplicationOwners(ctx context.Context, d *plugin.QueryData, h *plugin.
 	// Create client
 	client, adapter, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, fmt.Errorf("error creating client: %v", err)
+		plugin.Logger(ctx).Error("azuread_application.getAdApplicationOwners", "connection_error", err)
+		return nil, err
 	}
 
 	application := h.Item.(*ADApplicationInfo)
@@ -198,6 +204,7 @@ func getAdApplicationOwners(ctx context.Context, d *plugin.QueryData, h *plugin.
 	owners, err := client.ApplicationsById(*applicationID).Owners().GetWithRequestConfigurationAndResponseHandler(config, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
+		plugin.Logger(ctx).Error("getAdApplicationOwners", "get_application_owners_error", errObj)
 		return nil, errObj
 	}
 

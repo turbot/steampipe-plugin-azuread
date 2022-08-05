@@ -58,7 +58,8 @@ func listAdIdentityProviders(ctx context.Context, d *plugin.QueryData, _ *plugin
 	// Create client
 	client, adapter, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, fmt.Errorf("error creating client: %v", err)
+		plugin.Logger(ctx).Error("azuread_identity_provider.listAdIdentityProviders", "connection_error", err)
+		return nil, err
 	}
 
 	// List operations
@@ -92,6 +93,7 @@ func listAdIdentityProviders(ctx context.Context, d *plugin.QueryData, _ *plugin
 	result, err := client.Identity().IdentityProviders().GetWithRequestConfigurationAndResponseHandler(options, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
+		plugin.Logger(ctx).Error("listAdIdentityProviders", "list_identity_provider_error", errObj)
 		return nil, errObj
 	}
 
@@ -113,6 +115,7 @@ func listAdIdentityProviders(ctx context.Context, d *plugin.QueryData, _ *plugin
 		return d.QueryStatus.RowsRemaining(ctx) != 0
 	})
 	if err != nil {
+		plugin.Logger(ctx).Error("listAdIdentityProviders", "paging_error", err)
 		return nil, err
 	}
 

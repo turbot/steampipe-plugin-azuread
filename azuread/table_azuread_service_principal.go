@@ -87,7 +87,8 @@ func listAdServicePrincipals(ctx context.Context, d *plugin.QueryData, _ *plugin
 	// Create client
 	client, adapter, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, fmt.Errorf("error creating client: %v", err)
+		plugin.Logger(ctx).Error("azuread_service_principal.listAdServicePrincipals", "connection_error", err)
+		return nil, err
 	}
 
 	// List operations
@@ -127,6 +128,7 @@ func listAdServicePrincipals(ctx context.Context, d *plugin.QueryData, _ *plugin
 	result, err := client.ServicePrincipals().GetWithRequestConfigurationAndResponseHandler(options, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
+		plugin.Logger(ctx).Error("listAdServicePrincipals", "list_service_principal_error", errObj)
 		return nil, errObj
 	}
 
@@ -145,6 +147,7 @@ func listAdServicePrincipals(ctx context.Context, d *plugin.QueryData, _ *plugin
 		return d.QueryStatus.RowsRemaining(ctx) != 0
 	})
 	if err != nil {
+		plugin.Logger(ctx).Error("listAdServicePrincipals", "paging_error", err)
 		return nil, err
 	}
 
@@ -163,12 +166,14 @@ func getAdServicePrincipal(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	// Create client
 	client, _, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, fmt.Errorf("error creating client: %v", err)
+		plugin.Logger(ctx).Error("azuread_service_principal.getAdServicePrincipal", "connection_error", err)
+		return nil, err
 	}
 
 	servicePrincipal, err := client.ServicePrincipalsById(servicePrincipalID).Get()
 	if err != nil {
 		errObj := getErrorObject(err)
+		plugin.Logger(ctx).Error("getAdServicePrincipal", "get_service_principal_error", errObj)
 		return nil, errObj
 	}
 
@@ -179,7 +184,8 @@ func getServicePrincipalOwners(ctx context.Context, d *plugin.QueryData, h *plug
 	// Create client
 	client, adapter, err := GetGraphClient(ctx, d)
 	if err != nil {
-		return nil, fmt.Errorf("error creating client: %v", err)
+		plugin.Logger(ctx).Error("azuread_service_principal.getServicePrincipalOwners", "connection_error", err)
+		return nil, err
 	}
 
 	servicePrincipal := h.Item.(*ADServicePrincipalInfo)
@@ -207,6 +213,7 @@ func getServicePrincipalOwners(ctx context.Context, d *plugin.QueryData, h *plug
 	owners, err := client.ServicePrincipalsById(*servicePrincipalID).Owners().GetWithRequestConfigurationAndResponseHandler(config, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
+		plugin.Logger(ctx).Error("getServicePrincipalOwners", "get_service_principal_owners_error", errObj)
 		return nil, errObj
 	}
 
@@ -223,6 +230,7 @@ func getServicePrincipalOwners(ctx context.Context, d *plugin.QueryData, h *plug
 		return true
 	})
 	if err != nil {
+		plugin.Logger(ctx).Error("getServicePrincipalOwners", "paging_error", err)
 		return nil, err
 	}
 
