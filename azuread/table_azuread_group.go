@@ -59,21 +59,7 @@ func tableAzureAdGroup() *plugin.Table {
 			{Name: "created_date_time", Type: proto.ColumnType_TIMESTAMP, Description: "The time at which the group was created.", Transform: transform.FromMethod("GetCreatedDateTime")},
 			{Name: "expiration_date_time", Type: proto.ColumnType_TIMESTAMP, Description: "Timestamp of when the group is set to expire.", Transform: transform.FromMethod("GetExpirationDateTime")},
 			{Name: "is_assignable_to_role", Type: proto.ColumnType_BOOL, Description: "Indicates whether this group can be assigned to an Azure Active Directory role or not.", Transform: transform.FromMethod("GetIsAssignableToRole")},
-
-			// Getting below error while requesting value for isSubscribedByMail
-			// 	{
-			// 		"error": {
-			// 				"code": "ErrorInvalidGroup",
-			// 				"message": "The requested group '[id@tenantId]' is invalid.",
-			// 				"innerError": {
-			// 						"date": "2022-07-13T11:06:23",
-			// 						"request-id": "63a83d86-a007-4c68-be75-21cea61d830e",
-			// 						"client-request-id": "d69d6667-e818-a322-c694-1fec40b438a8"
-			// 				}
-			// 		}
-			// }
-			// {Name: "is_subscribed_by_mail", Type: proto.ColumnType_BOOL, Description: "Indicates whether the signed-in user is subscribed to receive email conversations. Default value is true.", Transform: transform.FromMethod("GetIsSubscribedByMail")},
-
+			{Name: "is_subscribed_by_mail", Type: proto.ColumnType_BOOL, Description: "Indicates whether the signed-in user is subscribed to receive email conversations. Default value is true.", Hydrate: getAdGroupIsSubscribedByMail, Transform: transform.FromValue()},
 			{Name: "mail", Type: proto.ColumnType_STRING, Description: "The SMTP address for the group, for example, \"serviceadmins@contoso.onmicrosoft.com\".", Transform: transform.FromMethod("GetMail")},
 			{Name: "mail_enabled", Type: proto.ColumnType_BOOL, Description: "Specifies whether the group is mail-enabled.", Transform: transform.FromMethod("GetMailEnabled")},
 			{Name: "mail_nickname", Type: proto.ColumnType_STRING, Description: "The mail alias for the user.", Transform: transform.FromMethod("GetMailNickname")},
@@ -216,6 +202,45 @@ func getAdGroup(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 	resourceProvisioningOptions := formatResourceProvisioningOptions(ctx, group)
 
 	return &ADGroupInfo{group, resourceBehaviorOptions, resourceProvisioningOptions}, nil
+}
+
+// Returned only on $select. Supported only on the Get group API (GET /groups/{ID}).
+
+func getAdGroupIsSubscribedByMail(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+
+	var groupId string
+	if h.Item != nil {
+		groupId = *h.Item.(*ADGroupInfo).GetId()
+	} else {
+		groupId = d.KeyColumnQuals["id"].GetStringValue()
+	}
+	if groupId == "" {
+		return nil, nil
+	}
+
+	// Create client
+	client, _, err := GetGraphClient(ctx, d)
+	if err != nil {
+		plugin.Logger(ctx).Error("azuread_group.getAdGroupIsSubscribedByMail", "connection_error", err)
+		return nil, err
+	}
+
+	input := &item.GroupItemRequestBuilderGetQueryParameters{
+		Select: []string{"isSubscribedByMail"},
+	}
+
+	options := &item.GroupItemRequestBuilderGetRequestConfiguration{
+		QueryParameters: input,
+	}
+
+	group, err := client.GroupsById(groupId).GetWithRequestConfigurationAndResponseHandler(options, nil)
+	if err != nil {
+		errObj := getErrorObject(err)
+		plugin.Logger(ctx).Error("getAdGroupIsSubscribedByMail", "get_group_error", errObj)
+		return nil, nil
+	}
+
+	return group.GetIsSubscribedByMail(), nil
 }
 
 func getAdGroupMembers(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
