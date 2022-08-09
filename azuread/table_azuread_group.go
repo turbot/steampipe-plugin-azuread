@@ -82,8 +82,8 @@ func tableAzureAdGroup() *plugin.Table {
 			{Name: "member_ids", Type: proto.ColumnType_JSON, Hydrate: getAdGroupMembers, Transform: transform.FromValue(), Description: "Id of Users and groups that are members of this group."},
 			{Name: "owner_ids", Type: proto.ColumnType_JSON, Hydrate: getAdGroupOwners, Transform: transform.FromValue(), Description: "Id od the owners of the group. The owners are a set of non-admin users who are allowed to modify this object."},
 			{Name: "proxy_addresses", Type: proto.ColumnType_JSON, Description: "Email addresses for the group that direct to the same group mailbox. For example: [\"SMTP: bob@contoso.com\", \"smtp: bob@sales.contoso.com\"]. The any operator is required to filter expressions on multi-valued properties.", Transform: transform.FromMethod("GetProxyAddresses")},
-			{Name: "resource_behavior_options", Type: proto.ColumnType_JSON, Description: "Specifies the group behaviors that can be set for a Microsoft 365 group during creation. Possible values are AllowOnlyMembersToPost, HideGroupInOutlook, SubscribeNewGroupMembers, WelcomeEmailDisabled.", Transform: transform.From(adGroupResourceBehaviorOptions)},
-			{Name: "resource_provisioning_options", Type: proto.ColumnType_JSON, Description: "Specifies the group resources that are provisioned as part of Microsoft 365 group creation, that are not normally part of default group creation. Possible value is Team.", Transform: transform.From(adGroupResourceProvisioningOptions)},
+			{Name: "resource_behavior_options", Type: proto.ColumnType_JSON, Description: "Specifies the group behaviors that can be set for a Microsoft 365 group during creation. Possible values are AllowOnlyMembersToPost, HideGroupInOutlook, SubscribeNewGroupMembers, WelcomeEmailDisabled."},
+			{Name: "resource_provisioning_options", Type: proto.ColumnType_JSON, Description: "Specifies the group resources that are provisioned as part of Microsoft 365 group creation, that are not normally part of default group creation. Possible value is Team."},
 
 			// Standard columns
 			{Name: "tags", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTags, Transform: transform.From(adGroupTags)},
@@ -382,32 +382,6 @@ func adGroupTitle(_ context.Context, d *transform.TransformData) (interface{}, e
 	}
 
 	return title, nil
-}
-
-func adGroupResourceBehaviorOptions(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	data := d.HydrateItem.(*ADGroupInfo)
-	if data == nil {
-		return nil, nil
-	}
-
-	if data.ResourceBehaviorOptions == nil || len(data.ResourceBehaviorOptions) == 0 {
-		return []string{}, nil
-	}
-
-	return data.ResourceBehaviorOptions, nil
-}
-
-func adGroupResourceProvisioningOptions(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	data := d.HydrateItem.(*ADGroupInfo)
-	if data == nil {
-		return nil, nil
-	}
-
-	if data.ResourceProvisioningOptions == nil || len(data.ResourceProvisioningOptions) == 0 {
-		return []string{}, nil
-	}
-
-	return data.ResourceProvisioningOptions, nil
 }
 
 func buildGroupQueryFilter(equalQuals plugin.KeyColumnEqualsQualMap) []string {
