@@ -436,7 +436,7 @@ func buildGroupBoolNEFilter(quals plugin.KeyColumnQualMap) []string {
 }
 
 func formatResourceBehaviorOptions(ctx context.Context, group models.Groupable) []string {
-	var resourceBehaviorOptions []string
+	resourceBehaviorOptions := []string{}
 	data := group.GetAdditionalData()["resourceBehaviorOptions"]
 	if data != nil {
 		parsedData := group.GetAdditionalData()["resourceBehaviorOptions"].([]*jsonserialization.JsonParseNode)
@@ -457,7 +457,7 @@ func formatResourceBehaviorOptions(ctx context.Context, group models.Groupable) 
 }
 
 func formatResourceProvisioningOptions(ctx context.Context, group models.Groupable) []string {
-	var resourceProvisioningOptions []string
+	resourceProvisioningOptions := []string{}
 	data := group.GetAdditionalData()["resourceProvisioningOptions"]
 	if data != nil {
 		parsedData := data.([]*jsonserialization.JsonParseNode)
