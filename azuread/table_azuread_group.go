@@ -65,7 +65,7 @@ func tableAzureAdGroup() *plugin.Table {
 			{Name: "mail_nickname", Type: proto.ColumnType_STRING, Description: "The mail alias for the user.", Transform: transform.FromMethod("GetMailNickname")},
 			{Name: "membership_rule", Type: proto.ColumnType_STRING, Description: "The mail alias for the group, unique in the organization.", Transform: transform.FromMethod("GetMembershipRule")},
 			{Name: "membership_rule_processing_state", Type: proto.ColumnType_STRING, Description: "Indicates whether the dynamic membership processing is on or paused. Possible values are On or Paused.", Transform: transform.FromMethod("GetMembershipRuleProcessingState")},
-			{Name: "on_premises_domain_name", Type: proto.ColumnType_STRING, Description: "Contains the on-premises Domanin name synchronized from the on-premises directory.", Transform: transform.FromMethod("GetOnPremisesDomainName")},
+			{Name: "on_premises_domain_name", Type: proto.ColumnType_STRING, Description: "Contains the on-premises Domain name synchronized from the on-premises directory.", Transform: transform.FromMethod("GetOnPremisesDomainName")},
 			{Name: "on_premises_last_sync_date_time", Type: proto.ColumnType_TIMESTAMP, Description: "Indicates the last time at which the group was synced with the on-premises directory.", Transform: transform.FromMethod("GetOnPremisesLastSyncDateTime")},
 			{Name: "on_premises_net_bios_name", Type: proto.ColumnType_STRING, Description: "Contains the on-premises NetBiosName synchronized from the on-premises directory.", Transform: transform.FromMethod("GetOnPremisesNetBiosName")},
 			{Name: "on_premises_sam_account_name", Type: proto.ColumnType_STRING, Description: "Contains the on-premises SAM account name synchronized from the on-premises directory.", Transform: transform.FromMethod("GetOnPremisesSamAccountName")},
@@ -82,8 +82,8 @@ func tableAzureAdGroup() *plugin.Table {
 			{Name: "member_ids", Type: proto.ColumnType_JSON, Hydrate: getAdGroupMembers, Transform: transform.FromValue(), Description: "Id of Users and groups that are members of this group."},
 			{Name: "owner_ids", Type: proto.ColumnType_JSON, Hydrate: getAdGroupOwners, Transform: transform.FromValue(), Description: "Id od the owners of the group. The owners are a set of non-admin users who are allowed to modify this object."},
 			{Name: "proxy_addresses", Type: proto.ColumnType_JSON, Description: "Email addresses for the group that direct to the same group mailbox. For example: [\"SMTP: bob@contoso.com\", \"smtp: bob@sales.contoso.com\"]. The any operator is required to filter expressions on multi-valued properties.", Transform: transform.FromMethod("GetProxyAddresses")},
-			{Name: "resource_behavior_options", Type: proto.ColumnType_JSON, Description: "Specifies the group behaviors that can be set for a Microsoft 365 group during creation. Possible values are AllowOnlyMembersToPost, HideGroupInOutlook, SubscribeNewGroupMembers, WelcomeEmailDisabled."},
-			{Name: "resource_provisioning_options", Type: proto.ColumnType_JSON, Description: "Specifies the group resources that are provisioned as part of Microsoft 365 group creation, that are not normally part of default group creation. Possible value is Team."},
+			{Name: "resource_behavior_options", Type: proto.ColumnType_JSON, Description: "Specifies the group behaviors that can be set for a Microsoft 365 group during creation. Possible values are AllowOnlyMembersToPost, HideGroupInOutlook, SubscribeNewGroupMembers, WelcomeEmailDisabled.", Transform: transform.From(adGroupResourceBehaviorOptions)},
+			{Name: "resource_provisioning_options", Type: proto.ColumnType_JSON, Description: "Specifies the group resources that are provisioned as part of Microsoft 365 group creation, that are not normally part of default group creation. Possible value is Team.", Transform: transform.From(adGroupResourceProvisioningOptions)},
 
 			// Standard columns
 			{Name: "tags", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTags, Transform: transform.From(adGroupTags)},
@@ -384,6 +384,32 @@ func adGroupTitle(_ context.Context, d *transform.TransformData) (interface{}, e
 	return title, nil
 }
 
+func adGroupResourceBehaviorOptions(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	data := d.HydrateItem.(*ADGroupInfo)
+	if data == nil {
+		return nil, nil
+	}
+
+	if data.ResourceBehaviorOptions == nil || len(data.ResourceBehaviorOptions) == 0 {
+		return []string{}, nil
+	}
+
+	return data.ResourceBehaviorOptions, nil
+}
+
+func adGroupResourceProvisioningOptions(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	data := d.HydrateItem.(*ADGroupInfo)
+	if data == nil {
+		return nil, nil
+	}
+
+	if data.ResourceProvisioningOptions == nil || len(data.ResourceProvisioningOptions) == 0 {
+		return []string{}, nil
+	}
+
+	return data.ResourceProvisioningOptions, nil
+}
+
 func buildGroupQueryFilter(equalQuals plugin.KeyColumnEqualsQualMap) []string {
 	filters := []string{}
 
@@ -436,7 +462,7 @@ func buildGroupBoolNEFilter(quals plugin.KeyColumnQualMap) []string {
 }
 
 func formatResourceBehaviorOptions(ctx context.Context, group models.Groupable) []string {
-	resourceBehaviorOptions := []string{}
+	var resourceBehaviorOptions []string
 	data := group.GetAdditionalData()["resourceBehaviorOptions"]
 	if data != nil {
 		parsedData := group.GetAdditionalData()["resourceBehaviorOptions"].([]*jsonserialization.JsonParseNode)
@@ -457,7 +483,7 @@ func formatResourceBehaviorOptions(ctx context.Context, group models.Groupable) 
 }
 
 func formatResourceProvisioningOptions(ctx context.Context, group models.Groupable) []string {
-	resourceProvisioningOptions := []string{}
+	var resourceProvisioningOptions []string
 	data := group.GetAdditionalData()["resourceProvisioningOptions"]
 	if data != nil {
 		parsedData := data.([]*jsonserialization.JsonParseNode)
