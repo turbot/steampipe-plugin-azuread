@@ -13,7 +13,7 @@ select
   user_display_name,
   user_principal_name,
   ip_address,
-  location -> 'city' as city
+  location ->> 'city' as city
 from
   azuread_sign_in_report;
 ```

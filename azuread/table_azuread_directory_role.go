@@ -3,7 +3,9 @@ package azuread
 import (
 	"context"
 
-	"github.com/manicminer/hamilton/msgraph"
+	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
+	"github.com/microsoftgraph/msgraph-sdk-go/directoryroles/item/members"
+	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/turbot/steampipe-plugin-sdk/v3/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v3/plugin/transform"
 
@@ -17,52 +19,57 @@ func tableAzureAdDirectoryRole() *plugin.Table {
 		Name:        "azuread_directory_role",
 		Description: "Represents an Azure Active Directory (Azure AD) directory role",
 		Get: &plugin.GetConfig{
-			Hydrate:           getAdDirectoryRole,
-			ShouldIgnoreError: isNotFoundErrorPredicate([]string{"Invalid object identifier"}),
-			KeyColumns:        plugin.SingleColumn("id"),
+			Hydrate: getAdDirectoryRole,
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isIgnorableErrorPredicate([]string{"Request_ResourceNotFound", "Invalid object identifier"}),
+			},
+			KeyColumns: plugin.SingleColumn("id"),
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listAdDirectoryRoles,
 		},
 
 		Columns: []*plugin.Column{
-			{Name: "id", Type: proto.ColumnType_STRING, Description: "The unique identifier for the directory role.", Transform: transform.FromGo()},
-			{Name: "description", Type: proto.ColumnType_STRING, Description: "The description for the directory role."},
-			{Name: "display_name", Type: proto.ColumnType_STRING, Description: "The display name for the directory role."},
+			{Name: "id", Type: proto.ColumnType_STRING, Description: "The unique identifier for the directory role.", Transform: transform.FromMethod("GetId")},
+			{Name: "description", Type: proto.ColumnType_STRING, Description: "The description for the directory role.", Transform: transform.FromMethod("GetDescription")},
+			{Name: "display_name", Type: proto.ColumnType_STRING, Description: "The display name for the directory role.", Transform: transform.FromMethod("GetDisplayName")},
 
 			// Other fields
-			{Name: "role_template_id", Type: proto.ColumnType_STRING, Description: "The id of the directoryRoleTemplate that this role is based on. The property must be specified when activating a directory role in a tenant with a POST operation. After the directory role has been activated, the property is read only."},
+			{Name: "role_template_id", Type: proto.ColumnType_STRING, Description: "The id of the directoryRoleTemplate that this role is based on. The property must be specified when activating a directory role in a tenant with a POST operation. After the directory role has been activated, the property is read only.", Transform: transform.FromMethod("GetRoleTemplateId")},
 
-			// // Json fields
-			{Name: "member_ids", Type: proto.ColumnType_JSON, Hydrate: getAdDirectoryRoleMembers, Transform: transform.FromValue(), Description: "Id of the owners of the application. The owners are a set of non-admin users who are allowed to modify this object."},
-			// // Standard columns
-			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Transform: transform.FromField("DisplayName", "ID")},
-			{Name: "tenant_id", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTenant, Hydrate: plugin.HydrateFunc(getTenantId).WithCache(), Transform: transform.FromValue()},
+			// Json fields
+			{Name: "member_ids", Type: proto.ColumnType_JSON, Hydrate: getDirectoryRoleMembers, Transform: transform.FromValue(), Description: "Id of the owners of the application. The owners are a set of non-admin users who are allowed to modify this object."},
+
+			// Standard columns
+			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Transform: transform.From(adDirectoryRoleTitle)},
+			{Name: "tenant_id", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTenant, Hydrate: plugin.HydrateFunc(getTenant).WithCache(), Transform: transform.FromValue()},
 		},
 	}
+}
+
+type ADDirectoryRoleInfo struct {
+	models.DirectoryRoleable
 }
 
 //// LIST FUNCTION
 
 func listAdDirectoryRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	session, err := GetNewSession(ctx, d)
+	// Create client
+	client, _, err := GetGraphClient(ctx, d)
 	if err != nil {
+		plugin.Logger(ctx).Error("azuread_directory_role.listAdDirectoryRoles", "connection_error", err)
 		return nil, err
 	}
 
-	client := msgraph.NewDirectoryRolesClient(session.TenantID)
-	client.BaseClient.Authorizer = session.Authorizer
-
-	directoryRoles, _, err := client.List(ctx)
+	result, err := client.DirectoryRoles().Get()
 	if err != nil {
-		if isNotFoundError(err) {
-			return nil, nil
-		}
-		return nil, err
+		errObj := getErrorObject(err)
+		plugin.Logger(ctx).Error("listAdDirectoryRoles", "list_directory_role_error", errObj)
+		return nil, errObj
 	}
 
-	for _, directoryRoles := range *directoryRoles {
-		d.StreamListItem(ctx, directoryRoles)
+	for _, directoryRole := range result.GetValue() {
+		d.StreamListItem(ctx, &ADDirectoryRoleInfo{directoryRole})
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
 		if d.QueryStatus.RowsRemaining(ctx) == 0 {
@@ -70,61 +77,99 @@ func listAdDirectoryRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 		}
 	}
 
-	return nil, err
+	return nil, nil
 }
 
-//// Hydrate Functions
+//// HYDRATE FUNCTIONS
 
 func getAdDirectoryRole(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	var directoryRoleId string
-	if h.Item != nil {
-		directoryRoleId = *h.Item.(msgraph.DirectoryRole).ID
-	} else {
-		directoryRoleId = d.KeyColumnQuals["id"].GetStringValue()
-	}
-
+	directoryRoleId := d.KeyColumnQuals["id"].GetStringValue()
 	if directoryRoleId == "" {
 		return nil, nil
 	}
 
-	session, err := GetNewSession(ctx, d)
+	// Create client
+	client, _, err := GetGraphClient(ctx, d)
 	if err != nil {
+		plugin.Logger(ctx).Error("azuread_directory_role.getAdDirectoryRole", "connection_error", err)
 		return nil, err
 	}
 
-	client := msgraph.NewDirectoryRolesClient(session.TenantID)
-	client.BaseClient.Authorizer = session.Authorizer
-
-	directoryRole, _, err := client.Get(ctx, directoryRoleId)
+	directoryRole, err := client.DirectoryRolesById(directoryRoleId).Get()
 	if err != nil {
-		return nil, err
+		errObj := getErrorObject(err)
+		plugin.Logger(ctx).Error("getAdDirectoryRole", "get_directory_role_error", errObj)
+		return nil, errObj
 	}
-	return *directoryRole, nil
+
+	return &ADDirectoryRoleInfo{directoryRole}, nil
 }
 
-func getAdDirectoryRoleMembers(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	var directoryRoleId string
-	if h.Item != nil {
-		directoryRoleId = *h.Item.(msgraph.DirectoryRole).ID
-	} else {
-		directoryRoleId = d.KeyColumnQuals["id"].GetStringValue()
+func getDirectoryRoleMembers(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	// Create client
+	client, adapter, err := GetGraphClient(ctx, d)
+	if err != nil {
+		plugin.Logger(ctx).Error("azuread_directory_role.getDirectoryRoleMembers", "connection_error", err)
+		return nil, err
 	}
 
-	if directoryRoleId == "" {
+	directoryRole := h.Item.(*ADDirectoryRoleInfo)
+	directoryRoleID := directoryRole.GetId()
+
+	headers := map[string]string{
+		"ConsistencyLevel": "eventual",
+	}
+
+	includeCount := true
+	requestParameters := &members.MembersRequestBuilderGetQueryParameters{
+		Count: &includeCount,
+	}
+
+	config := &members.MembersRequestBuilderGetRequestConfiguration{
+		Headers:         headers,
+		QueryParameters: requestParameters,
+	}
+
+	memberIds := []*string{}
+	members, err := client.DirectoryRolesById(*directoryRoleID).Members().GetWithRequestConfigurationAndResponseHandler(config, nil)
+	if err != nil {
+		errObj := getErrorObject(err)
+		plugin.Logger(ctx).Error("getDirectoryRoleMembers", "get_directory_role_members_error", errObj)
+		return nil, errObj
+	}
+
+	pageIterator, err := msgraphcore.NewPageIterator(members, adapter, models.CreateDirectoryObjectCollectionResponseFromDiscriminatorValue)
+	if err != nil {
+		plugin.Logger(ctx).Error("getDirectoryRoleMembers", "create_iterator_instance_error", err)
+		return nil, err
+	}
+
+	err = pageIterator.Iterate(func(pageItem interface{}) bool {
+		member := pageItem.(models.DirectoryObjectable)
+		memberIds = append(memberIds, member.GetId())
+
+		return true
+	})
+	if err != nil {
+		plugin.Logger(ctx).Error("getDirectoryRoleMembers", "paging_error", err)
+		return nil, err
+	}
+
+	return memberIds, nil
+}
+
+//// TRANSFORM FUNCTIONS
+
+func adDirectoryRoleTitle(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	data := d.HydrateItem.(*ADDirectoryRoleInfo)
+	if data == nil {
 		return nil, nil
 	}
 
-	session, err := GetNewSession(ctx, d)
-	if err != nil {
-		return nil, err
+	title := data.GetDisplayName()
+	if title == nil {
+		title = data.GetId()
 	}
 
-	client := msgraph.NewDirectoryRolesClient(session.TenantID)
-	client.BaseClient.Authorizer = session.Authorizer
-
-	members, _, err := client.ListMembers(ctx, directoryRoleId)
-	if err != nil {
-		return nil, err
-	}
-	return members, nil
+	return title, nil
 }
