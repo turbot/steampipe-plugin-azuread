@@ -1,3 +1,26 @@
+## v0.6.0 [2022-08-09]
+
+_What's new?_
+
+- Updated plugin to use the [Microsoft Graph SDK for Go](https://github.com/microsoftgraph/msgraph-sdk-go). There should be no large changes in functionality, but if you notice any, please create a [new issue](https://github.com/turbot/steampipe-plugin-azuread/issues/new/choose). ([#62](https://github.com/turbot/steampipe-plugin-azuread/pull/62))
+
+_Enhancements_
+
+- Added `description` column to `azuread_application` table.
+- Added `filter` column to `azuread_identity_provider` table.
+- Added `app_id`, `app_description`, `description`, `login_url`, `logout_url`, and `oauth2_permission_scopes` columns to `azuread_service_principal` table.
+
+_Bug fixes_
+
+- Fixed column name `keyCredentials` to `key_credent4ials` in `azuread_service_principal` table.
+- Fixed column type of `ip_address` column in `azuread_sign_in_report` from string to IP address.
+
+_Breaking changes_
+
+- Removed `verified_publisher` column from `azuread_service_principal` table due to lack of API support.
+- Removed `published_permission_scopes` column from `azuread_service_principal` table (replaced by `oauth2_permission_scopes` column).
+- Removed `refresh_tokens_valid_from_date_time` column from `azuread_user` table (replaced by `sign_in_sessions_valid_from_date_time` column).
+
 ## v0.5.1 [2022-07-25]
 
 _Bug fixes_
@@ -76,7 +99,7 @@ _Bug fixes_
 - Fixed the title of the `azuread_user` table in the documentation file ([#32](https://github.com/turbot/steampipe-plugin-azuread/pull/32))
 
 ## v0.0.2 [2021-09-28]
-  
+
 _What's new?_
 
 - New tables added
@@ -86,7 +109,7 @@ _Bug fixes_
 
 - Updated `on_premises_net_bios_name` column type from `timestamp` to `string` in `azuread_group` table ([#25](https://github.com/turbot/steampipe-plugin-azuread/pull/25))
 - Added missing config options for managed identity in credential setup ([#16](https://github.com/turbot/steampipe-plugin-azuread/pull/16))
-- Fixed example queries in the documentation of `azuread_user` and `azuread_service_principal` tables ([#20](https://github.com/turbot/steampipe-plugin-azuread/pull/20)) ([#29](https://github.com/turbot/steampipe-plugin-azuread/pull/29)) 
+- Fixed example queries in the documentation of `azuread_user` and `azuread_service_principal` tables ([#20](https://github.com/turbot/steampipe-plugin-azuread/pull/20)) ([#29](https://github.com/turbot/steampipe-plugin-azuread/pull/29))
 
 ## v0.0.1 [2021-08-19]
 
