@@ -18,7 +18,7 @@ import (
 
 //// TABLE DEFINITION
 
-func tableAzureAdServicePrincipal() *plugin.Table {
+func tableAzureAdServicePrincipal(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "azuread_service_principal",
 		Description: "Represents an Azure Active Directory (Azure AD) service principal",

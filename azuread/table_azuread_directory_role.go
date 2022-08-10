@@ -14,7 +14,7 @@ import (
 
 //// TABLE DEFINITION
 
-func tableAzureAdDirectoryRole() *plugin.Table {
+func tableAzureAdDirectoryRole(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "azuread_directory_role",
 		Description: "Represents an Azure Active Directory (Azure AD) directory role",

@@ -15,7 +15,7 @@ import (
 
 //// TABLE DEFINITION
 
-func tableAzureAdDomain() *plugin.Table {
+func tableAzureAdDomain(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "azuread_domain",
 		Description: "Represents an Azure Active Directory (Azure AD) domain",
