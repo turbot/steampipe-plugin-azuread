@@ -22,7 +22,7 @@ import (
 
 //// TABLE DEFINITION
 
-func tableAzureAdGroup() *plugin.Table {
+func tableAzureAdGroup(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "azuread_group",
 		Description: "Represents an Azure AD user account.",

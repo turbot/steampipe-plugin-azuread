@@ -14,7 +14,7 @@ import (
 
 //// TABLE DEFINITION
 
-func tableAzureAdSignInReport() *plugin.Table {
+func tableAzureAdSignInReport(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "azuread_sign_in_report",
 		Description: "Represents an Azure Active Directory (Azure AD) sign in report",

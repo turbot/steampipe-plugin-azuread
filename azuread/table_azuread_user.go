@@ -18,7 +18,7 @@ import (
 
 //// TABLE DEFINITION
 
-func tableAzureAdUser() *plugin.Table {
+func tableAzureAdUser(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "azuread_user",
 		Description: "Represents an Azure AD user account.",

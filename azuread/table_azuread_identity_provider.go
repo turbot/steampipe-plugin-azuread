@@ -18,7 +18,7 @@ import (
 
 //// TABLE DEFINITION
 
-func tableAzureAdIdentityProvider() *plugin.Table {
+func tableAzureAdIdentityProvider(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "azuread_identity_provider",
 		Description: "Represents an Azure Active Directory (Azure AD) identity provider",
