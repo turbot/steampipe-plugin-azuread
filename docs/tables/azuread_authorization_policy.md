@@ -15,7 +15,7 @@ from
   azuread_authorization_policy;
 ```
 
-### Check user consent to apps accessing company data on their behalf is not allowed
+### Check if user consent to apps accessing company data on their behalf is not allowed
 
 ```sql
 select
@@ -41,7 +41,7 @@ where
   allow_invites_from = 'everyone';
 ```
 
-### Check email validation should be required to join the tenant
+### Check if email validation is not required to join the tenant
 
 ```sql
 select
@@ -51,5 +51,5 @@ select
 from
   azuread_authorization_policy
 where
-  allowed_email_verified_users_to_join_organization;
+  not allowed_email_verified_users_to_join_organization;
 ```
