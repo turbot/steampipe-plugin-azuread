@@ -15,7 +15,7 @@ func tableAzureAdAuthorizationPolicy(_ context.Context) *plugin.Table {
 		Name:        "azuread_authorization_policy",
 		Description: "Represents a policy that can control Azure Active Directory authorization settings",
 		List: &plugin.ListConfig{
-			Hydrate: listAdAuthorizationPolicy,
+			Hydrate: listAdAuthorizationPolicies,
 		},
 
 		Columns: []*plugin.Column{
@@ -43,18 +43,18 @@ func tableAzureAdAuthorizationPolicy(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listAdAuthorizationPolicy(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listAdAuthorizationPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	// Create client
 	client, _, err := GetGraphClient(ctx, d)
 	if err != nil {
-		plugin.Logger(ctx).Error("azuread_authorization_policy.listAdAuthorizationPolicy", "connection_error", err)
+		plugin.Logger(ctx).Error("azuread_authorization_policy.listAdAuthorizationPolicies", "connection_error", err)
 		return nil, err
 	}
 
 	result, err := client.Policies().AuthorizationPolicy().Get()
 	if err != nil {
 		errObj := getErrorObject(err)
-		plugin.Logger(ctx).Error("listAdAuthorizationPolicy", "list_application_error", errObj)
+		plugin.Logger(ctx).Error("listAdAuthorizationPolicies", "list_application_error", errObj)
 		return nil, errObj
 	}
 	d.StreamListItem(ctx, &ADAuthorizationPolicyInfo{result})

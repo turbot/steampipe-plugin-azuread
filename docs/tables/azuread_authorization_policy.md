@@ -1,4 +1,4 @@
-# Table: azuread_application
+# Table: azuread_authorization_policy
 
 Represents a policy that can control Azure Active Directory authorization settings.
 
@@ -26,4 +26,30 @@ from
   azuread_authorization_policy
 where
   default_user_role_permissions ->> 'permissionGrantPoliciesAssigned' = '[]';
+```
+
+### Check if all members are allowed to invite external users to the organization
+
+```sql
+select
+  display_name,
+  id,
+  default_user_role_permissions
+from
+  azuread_authorization_policy
+where
+  allow_invites_from = 'everyone';
+```
+
+### Check email validation should be required to join the tenant
+
+```sql
+select
+  display_name,
+  id,
+  default_user_role_permissions
+from
+  azuread_authorization_policy
+where
+  allowed_email_verified_users_to_join_organization;
 ```
