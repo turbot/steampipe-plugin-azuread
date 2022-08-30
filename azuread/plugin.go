@@ -25,6 +25,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 		},
 		TableMap: map[string]*plugin.Table{
 			"azuread_application":               tableAzureAdApplication(ctx),
+			"azuread_authorization_policy":      tableAzureAdAuthorizationPolicy(ctx),
 			"azuread_conditional_access_policy": tableAzureAdConditionalAccessPolicy(ctx),
 			"azuread_directory_role":            tableAzureAdDirectoryRole(ctx),
 			"azuread_domain":                    tableAzureAdDomain(ctx),
