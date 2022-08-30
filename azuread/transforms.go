@@ -7,6 +7,10 @@ type ADApplicationInfo struct {
 	IsAuthorizationServiceEnabled interface{}
 }
 
+type ADAuthorizationPolicyInfo struct {
+	models.AuthorizationPolicyable
+}
+
 type ADConditionalAccessPolicyInfo struct {
 	models.ConditionalAccessPolicyable
 }
@@ -241,6 +245,35 @@ func (application *ADApplicationInfo) ApplicationWeb() map[string]interface{} {
 	}
 
 	return webData
+}
+
+func (authorizationPolicy *ADAuthorizationPolicyInfo) AuthorizationPolicyDefaultUserRolePermissions() map[string]interface{} {
+	if authorizationPolicy.GetDefaultUserRolePermissions() == nil {
+		return nil
+	}
+	data := map[string]interface{}{}
+
+	if authorizationPolicy.GetDefaultUserRolePermissions().GetAllowedToCreateApps() != nil {
+		data["allowedToCreateApps"] = *authorizationPolicy.GetDefaultUserRolePermissions().GetAllowedToCreateApps()
+	}
+	if authorizationPolicy.GetDefaultUserRolePermissions().GetAllowedToCreateSecurityGroups() != nil {
+		data["allowedToCreateSecurityGroups"] = *authorizationPolicy.GetDefaultUserRolePermissions().GetAllowedToCreateSecurityGroups()
+	}
+	if authorizationPolicy.GetDefaultUserRolePermissions().GetAllowedToReadOtherUsers() != nil {
+		data["allowedToReadOtherUsers"] = *authorizationPolicy.GetDefaultUserRolePermissions().GetAllowedToReadOtherUsers()
+	}
+	if authorizationPolicy.GetDefaultUserRolePermissions().GetPermissionGrantPoliciesAssigned() != nil {
+		data["permissionGrantPoliciesAssigned"] = authorizationPolicy.GetDefaultUserRolePermissions().GetPermissionGrantPoliciesAssigned()
+	}
+
+	return data
+}
+
+func (authorizationPolicy *ADAuthorizationPolicyInfo) AuthorizationPolicyAllowInvitesFrom() string {
+	if authorizationPolicy.GetAllowInvitesFrom() == nil {
+		return ""
+	}
+	return authorizationPolicy.GetAllowInvitesFrom().String()
 }
 
 func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyConditionsApplications() map[string]interface{} {
