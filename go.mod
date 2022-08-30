@@ -9,7 +9,7 @@ require (
 	github.com/microsoft/kiota-authentication-azure-go v0.3.1
 	github.com/microsoft/kiota-serialization-json-go v0.5.5
 	github.com/microsoftgraph/msgraph-sdk-go v0.30.0
-	github.com/microsoftgraph/msgraph-sdk-go-core v0.26.2
+	github.com/microsoftgraph/msgraph-sdk-go-core v0.27.0
 	github.com/turbot/steampipe-plugin-sdk/v3 v3.3.2
 )
 
@@ -22,7 +22,7 @@ require (
 	github.com/btubbs/datetime v0.1.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
-	github.com/cjlapao/common-go v0.0.20 // indirect
+	github.com/cjlapao/common-go v0.0.25 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgraph-io/ristretto v0.1.0 // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
@@ -45,7 +45,7 @@ require (
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
-	github.com/microsoft/kiota-abstractions-go v0.8.1 // indirect
+	github.com/microsoft/kiota-abstractions-go v0.8.2 // indirect
 	github.com/microsoft/kiota-http-go v0.5.2 // indirect
 	github.com/microsoft/kiota-serialization-text-go v0.4.1 // indirect
 	github.com/mitchellh/go-testing-interface v1.0.0 // indirect
@@ -59,7 +59,7 @@ require (
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/sethvargo/go-retry v0.1.0 // indirect
 	github.com/stevenle/topsort v0.0.0-20130922064739-8130c1d7596b // indirect
-	github.com/stretchr/testify v1.7.2 // indirect
+	github.com/stretchr/testify v1.8.0 // indirect
 	github.com/tkrajina/go-reflector v0.5.4 // indirect
 	github.com/turbot/go-kit v0.4.0 // indirect
 	github.com/yosida95/uritemplate/v3 v3.0.2 // indirect
