@@ -6,8 +6,10 @@ import (
 	"strings"
 
 	"github.com/iancoleman/strcase"
+	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
 	"github.com/microsoftgraph/msgraph-sdk-go/devices"
 	"github.com/microsoftgraph/msgraph-sdk-go/devices/item"
+	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/turbot/steampipe-plugin-sdk/v3/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v3/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v3/plugin/transform"
@@ -61,7 +63,7 @@ func tableAzureAdDevice(_ context.Context) *plugin.Table {
 func listDevices(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 
 	// Create client
-	client, _, err := GetGraphClient(ctx, d)
+	client, adapter, err := GetGraphClient(ctx, d)
 
 	if err != nil {
 		plugin.Logger(ctx).Error("azuread_device.listDevices", "connection_error", err)
@@ -110,8 +112,30 @@ func listDevices(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 
 	if err != nil {
 		errObj := getErrorObject(err)
-		plugin.Logger(ctx).Error("listDevices", "list_device_error", errObj)
+		plugin.Logger(ctx).Error("listAdDevices", "list_device_error", errObj)
 		return nil, errObj
+	}
+
+	if result.GetNextLink() != nil {
+
+		pageIterator, err := msgraphcore.NewPageIterator(result, adapter, models.CreateDeviceCollectionResponseFromDiscriminatorValue)
+		if err != nil {
+			plugin.Logger(ctx).Error("listAdDevices", "create_iterator_instance_error", err)
+			return nil, err
+		}
+
+		err = pageIterator.Iterate(func(pageItem interface{}) bool {
+			device := pageItem.(models.Deviceable)
+
+			d.StreamListItem(ctx, &ADDeviceInfo{device})
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			return d.QueryStatus.RowsRemaining(ctx) != 0
+		})
+		if err != nil {
+			plugin.Logger(ctx).Error("listAdDevices", "paging_error", err)
+			return nil, err
+		}
 	}
 
 	for _, device := range result.GetValue() {
@@ -189,7 +213,7 @@ func getDevice(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) 
 	device, err := client.DevicesById(deviceId).GetWithRequestConfigurationAndResponseHandler(options, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
-		plugin.Logger(ctx).Error("getDevice", "get_device_error", errObj)
+		plugin.Logger(ctx).Error("getAdDevice", "get_device_error", errObj)
 		return nil, errObj
 	}
 
