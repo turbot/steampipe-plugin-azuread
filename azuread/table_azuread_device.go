@@ -44,8 +44,6 @@ func tableAzureAdDevice(_ context.Context) *plugin.Table {
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "The unique identifier for the device. Inherited from directoryObject.", Transform: transform.FromMethod("GetId")},
 			{Name: "display_name", Type: proto.ColumnType_STRING, Description: "The name displayed for the device.", Transform: transform.FromMethod("GetDisplayName")},
 
-			{Name: "filter", Type: proto.ColumnType_STRING, Transform: transform.FromQual("filter"), Description: "Odata query to search for resources."},
-
 			{Name: "account_enabled", Type: proto.ColumnType_BOOL, Description: "True if the account is enabled; otherwise, false.", Transform: transform.FromMethod("GetAccountEnabled")},
 			{Name: "approximate_last_sign_in_date_time", Type: proto.ColumnType_TIMESTAMP, Description: "The timestamp type represents date and time information using ISO 8601 format and is always in UTC time.", Transform: transform.FromMethod("GetApproximateLastSignInDateTime")},
 			{Name: "device_id", Type: proto.ColumnType_STRING, Description: "Unique identifier set by Azure Device Registration Service at the time of registration.", Transform: transform.FromMethod("GetDeviceId")},
