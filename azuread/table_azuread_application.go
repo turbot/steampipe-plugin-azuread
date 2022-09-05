@@ -117,7 +117,7 @@ func listAdApplications(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 		QueryParameters: input,
 	}
 
-	result, err := client.Applications().GetWithRequestConfigurationAndResponseHandler(options, nil)
+	result, err := client.Applications().Get(ctx, options)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("listAdApplications", "list_application_error", errObj)
@@ -130,7 +130,7 @@ func listAdApplications(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 		return nil, err
 	}
 
-	err = pageIterator.Iterate(func(pageItem interface{}) bool {
+	err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
 		application := pageItem.(models.Applicationable)
 
 		isAuthorizationServiceEnabled := application.GetAdditionalData()["isAuthorizationServiceEnabled"]
@@ -164,7 +164,7 @@ func getAdApplication(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 		return nil, err
 	}
 
-	application, err := client.ApplicationsById(applicationId).Get()
+	application, err := client.ApplicationsById(applicationId).Get(ctx, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("getAdApplication", "get_application_error", errObj)
@@ -201,7 +201,7 @@ func getAdApplicationOwners(ctx context.Context, d *plugin.QueryData, h *plugin.
 	}
 
 	ownerIds := []*string{}
-	owners, err := client.ApplicationsById(*applicationID).Owners().GetWithRequestConfigurationAndResponseHandler(config, nil)
+	owners, err := client.ApplicationsById(*applicationID).Owners().Get(ctx, config)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("getAdApplicationOwners", "get_application_owners_error", errObj)
@@ -214,7 +214,7 @@ func getAdApplicationOwners(ctx context.Context, d *plugin.QueryData, h *plugin.
 		return nil, err
 	}
 
-	err = pageIterator.Iterate(func(pageItem interface{}) bool {
+	err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
 		owner := pageItem.(models.DirectoryObjectable)
 		ownerIds = append(ownerIds, owner.GetId())
 

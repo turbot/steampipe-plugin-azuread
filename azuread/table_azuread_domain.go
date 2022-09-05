@@ -82,7 +82,7 @@ func listAdDomains(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 		QueryParameters: input,
 	}
 
-	result, err := client.Domains().GetWithRequestConfigurationAndResponseHandler(options, nil)
+	result, err := client.Domains().Get(ctx, options)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("listAdDomains", "list_domain_error", errObj)
@@ -95,7 +95,7 @@ func listAdDomains(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 		return nil, err
 	}
 
-	err = pageIterator.Iterate(func(pageItem interface{}) bool {
+	err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
 		domain := pageItem.(models.Domainable)
 
 		d.StreamListItem(ctx, &ADDomainInfo{domain})
@@ -126,7 +126,7 @@ func getAdDomain(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 		return nil, err
 	}
 
-	domain, err := client.DomainsById(domainId).Get()
+	domain, err := client.DomainsById(domainId).Get(ctx, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("getAdDomain", "get_domain_error", errObj)

@@ -403,8 +403,8 @@ func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessP
 	if conditionalAccessPolicy.GetSessionControls().GetApplicationEnforcedRestrictions().GetIsEnabled() != nil {
 		data["isEnabled"] = conditionalAccessPolicy.GetSessionControls().GetApplicationEnforcedRestrictions().GetIsEnabled()
 	}
-	if conditionalAccessPolicy.GetSessionControls().GetApplicationEnforcedRestrictions().GetType() != nil {
-		data["type"] = conditionalAccessPolicy.GetSessionControls().GetApplicationEnforcedRestrictions().GetType()
+	if conditionalAccessPolicy.GetSessionControls().GetApplicationEnforcedRestrictions().GetOdataType() != nil {
+		data["@odata.type"] = conditionalAccessPolicy.GetSessionControls().GetApplicationEnforcedRestrictions().GetOdataType()
 	}
 	return data
 }
@@ -783,7 +783,7 @@ func (user *ADUserInfo) UserMemberOf() []map[string]interface{} {
 	members := []map[string]interface{}{}
 	for _, i := range user.GetMemberOf() {
 		member := map[string]interface{}{
-			"@odata.type": i.GetType(),
+			"@odata.type": i.GetOdataType(),
 			"id":          i.GetId(),
 		}
 		members = append(members, member)

@@ -61,7 +61,7 @@ func listAdDirectoryRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 		return nil, err
 	}
 
-	result, err := client.DirectoryRoles().Get()
+	result, err := client.DirectoryRoles().Get(ctx, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("listAdDirectoryRoles", "list_directory_role_error", errObj)
@@ -95,7 +95,7 @@ func getAdDirectoryRole(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 		return nil, err
 	}
 
-	directoryRole, err := client.DirectoryRolesById(directoryRoleId).Get()
+	directoryRole, err := client.DirectoryRolesById(directoryRoleId).Get(ctx, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("getAdDirectoryRole", "get_directory_role_error", errObj)
@@ -131,7 +131,7 @@ func getDirectoryRoleMembers(ctx context.Context, d *plugin.QueryData, h *plugin
 	}
 
 	memberIds := []*string{}
-	members, err := client.DirectoryRolesById(*directoryRoleID).Members().GetWithRequestConfigurationAndResponseHandler(config, nil)
+	members, err := client.DirectoryRolesById(*directoryRoleID).Members().Get(ctx, config)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("getDirectoryRoleMembers", "get_directory_role_members_error", errObj)
@@ -144,7 +144,7 @@ func getDirectoryRoleMembers(ctx context.Context, d *plugin.QueryData, h *plugin
 		return nil, err
 	}
 
-	err = pageIterator.Iterate(func(pageItem interface{}) bool {
+	err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
 		member := pageItem.(models.DirectoryObjectable)
 		memberIds = append(memberIds, member.GetId())
 

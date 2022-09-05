@@ -90,7 +90,7 @@ func listAdIdentityProviders(ctx context.Context, d *plugin.QueryData, _ *plugin
 		QueryParameters: input,
 	}
 
-	result, err := client.Identity().IdentityProviders().GetWithRequestConfigurationAndResponseHandler(options, nil)
+	result, err := client.Identity().IdentityProviders().Get(ctx, options)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("listAdIdentityProviders", "list_identity_provider_error", errObj)
@@ -103,7 +103,7 @@ func listAdIdentityProviders(ctx context.Context, d *plugin.QueryData, _ *plugin
 		return nil, err
 	}
 
-	err = pageIterator.Iterate(func(pageItem interface{}) bool {
+	err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
 		identityProvider := pageItem.(*models.BuiltInIdentityProvider)
 
 		clientID := identityProvider.GetAdditionalData()["clientId"]

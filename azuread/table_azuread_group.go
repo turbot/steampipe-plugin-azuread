@@ -138,7 +138,7 @@ func listAdGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		QueryParameters: input,
 	}
 
-	result, err := client.Groups().GetWithRequestConfigurationAndResponseHandler(options, nil)
+	result, err := client.Groups().Get(ctx, options)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("listAdGroups", "list_group_error", errObj)
@@ -151,7 +151,7 @@ func listAdGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		return nil, err
 	}
 
-	err = pageIterator.Iterate(func(pageItem interface{}) bool {
+	err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
 		group := pageItem.(models.Groupable)
 
 		resourceBehaviorOptions := formatResourceBehaviorOptions(ctx, group)
@@ -192,7 +192,7 @@ func getAdGroup(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 		QueryParameters: input,
 	}
 
-	group, err := client.GroupsById(groupId).GetWithRequestConfigurationAndResponseHandler(options, nil)
+	group, err := client.GroupsById(groupId).Get(ctx, options)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("getAdGroup", "get_group_error", errObj)
@@ -233,7 +233,7 @@ func getAdGroupIsSubscribedByMail(ctx context.Context, d *plugin.QueryData, h *p
 		QueryParameters: input,
 	}
 
-	group, err := client.GroupsById(groupId).GetWithRequestConfigurationAndResponseHandler(options, nil)
+	group, err := client.GroupsById(groupId).Get(ctx, options)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("getAdGroupIsSubscribedByMail", "get_group_error", errObj)
@@ -269,7 +269,7 @@ func getAdGroupMembers(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	}
 
 	memberIds := []*string{}
-	members, err := client.GroupsById(*groupID).Members().GetWithRequestConfigurationAndResponseHandler(config, nil)
+	members, err := client.GroupsById(*groupID).Members().Get(ctx, config)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("getAdGroupMembers", "get_group_members_error", errObj)
@@ -282,7 +282,7 @@ func getAdGroupMembers(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 		return nil, err
 	}
 
-	err = pageIterator.Iterate(func(pageItem interface{}) bool {
+	err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
 		member := pageItem.(models.DirectoryObjectable)
 		memberIds = append(memberIds, member.GetId())
 
@@ -322,7 +322,7 @@ func getAdGroupOwners(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	}
 
 	ownerIds := []*string{}
-	owners, err := client.GroupsById(*groupID).Owners().GetWithRequestConfigurationAndResponseHandler(config, nil)
+	owners, err := client.GroupsById(*groupID).Owners().Get(ctx, config)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("getAdGroupOwners", "get_group_owners_error", errObj)
@@ -335,7 +335,7 @@ func getAdGroupOwners(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 		return nil, err
 	}
 
-	err = pageIterator.Iterate(func(pageItem interface{}) bool {
+	err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
 		member := pageItem.(models.DirectoryObjectable)
 		ownerIds = append(ownerIds, member.GetId())
 

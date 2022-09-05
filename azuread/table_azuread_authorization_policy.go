@@ -51,7 +51,7 @@ func listAdAuthorizationPolicies(ctx context.Context, d *plugin.QueryData, _ *pl
 		return nil, err
 	}
 
-	result, err := client.Policies().AuthorizationPolicy().Get()
+	result, err := client.Policies().AuthorizationPolicy().Get(ctx, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("listAdAuthorizationPolicies", "list_application_error", errObj)
