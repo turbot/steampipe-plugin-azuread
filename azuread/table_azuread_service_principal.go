@@ -125,7 +125,7 @@ func listAdServicePrincipals(ctx context.Context, d *plugin.QueryData, _ *plugin
 		QueryParameters: input,
 	}
 
-	result, err := client.ServicePrincipals().GetWithRequestConfigurationAndResponseHandler(options, nil)
+	result, err := client.ServicePrincipals().Get(ctx, options)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("listAdServicePrincipals", "list_service_principal_error", errObj)
@@ -138,7 +138,7 @@ func listAdServicePrincipals(ctx context.Context, d *plugin.QueryData, _ *plugin
 		return nil, err
 	}
 
-	err = pageIterator.Iterate(func(pageItem interface{}) bool {
+	err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
 		servicePrincipal := pageItem.(models.ServicePrincipalable)
 
 		d.StreamListItem(ctx, &ADServicePrincipalInfo{servicePrincipal})
@@ -170,7 +170,7 @@ func getAdServicePrincipal(ctx context.Context, d *plugin.QueryData, h *plugin.H
 		return nil, err
 	}
 
-	servicePrincipal, err := client.ServicePrincipalsById(servicePrincipalID).Get()
+	servicePrincipal, err := client.ServicePrincipalsById(servicePrincipalID).Get(ctx, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("getAdServicePrincipal", "get_service_principal_error", errObj)
@@ -210,7 +210,7 @@ func getServicePrincipalOwners(ctx context.Context, d *plugin.QueryData, h *plug
 	}
 
 	ownerIds := []*string{}
-	owners, err := client.ServicePrincipalsById(*servicePrincipalID).Owners().GetWithRequestConfigurationAndResponseHandler(config, nil)
+	owners, err := client.ServicePrincipalsById(*servicePrincipalID).Owners().Get(ctx, config)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("getServicePrincipalOwners", "get_service_principal_owners_error", errObj)
@@ -223,7 +223,7 @@ func getServicePrincipalOwners(ctx context.Context, d *plugin.QueryData, h *plug
 		return nil, err
 	}
 
-	err = pageIterator.Iterate(func(pageItem interface{}) bool {
+	err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
 		owner := pageItem.(models.DirectoryObjectable)
 		ownerIds = append(ownerIds, owner.GetId())
 
