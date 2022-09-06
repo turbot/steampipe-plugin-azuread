@@ -2,6 +2,8 @@
 
 _What's new?_
 
+- New tables added
+  - [azuread_authorization_policy](https://hub.steampipe.io/plugins/turbot/azuread/tables/azuread_authorization_policy) ([#67](https://github.com/turbot/steampipe-plugin-azuread/pull/67))
 - Updated plugin to use the [Microsoft Graph SDK for Go](https://github.com/microsoftgraph/msgraph-sdk-go). There should be no large changes in functionality, but if you notice any, please create a [new issue](https://github.com/turbot/steampipe-plugin-azuread/issues/new/choose). ([#62](https://github.com/turbot/steampipe-plugin-azuread/pull/62))
 
 _Enhancements_
