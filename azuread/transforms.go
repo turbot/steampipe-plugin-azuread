@@ -2,6 +2,10 @@ package azuread
 
 import "github.com/microsoftgraph/msgraph-sdk-go/models"
 
+type ADAdminConsentRequestPolicyInfo struct {
+	models.AdminConsentRequestPolicyable
+}
+
 type ADApplicationInfo struct {
 	models.Applicationable
 	IsAuthorizationServiceEnabled interface{}
@@ -38,6 +42,32 @@ type ADSignInReportInfo struct {
 type ADUserInfo struct {
 	models.Userable
 	RefreshTokensValidFromDateTime interface{}
+}
+
+func (adminConsentRequestPolicy *ADAdminConsentRequestPolicyInfo) AdminConsentRequestPolicyReviewers() []map[string]interface{} {
+	if adminConsentRequestPolicy.GetReviewers() == nil {
+		return nil
+	}
+	reviewers := []map[string]interface{}{}
+
+	for _, a := range adminConsentRequestPolicy.GetReviewers() {
+		data := map[string]interface{}{}
+		if a.GetOdataType() != nil {
+			data["@odata.type"] = *a.GetOdataType()
+		}
+		if a.GetQuery() != nil {
+			data["query"] = *a.GetQuery()
+		}
+		if a.GetQueryRoot() != nil {
+			data["queryRoot"] = *a.GetQueryRoot()
+		}
+		if a.GetQueryType() != nil {
+			data["queryType"] = *a.GetQueryType()
+		}
+		reviewers = append(reviewers, data)
+	}
+
+	return reviewers
 }
 
 func (application *ADApplicationInfo) ApplicationAPI() map[string]interface{} {
