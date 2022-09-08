@@ -7,6 +7,10 @@ type ADApplicationInfo struct {
 	IsAuthorizationServiceEnabled interface{}
 }
 
+type ADAuthorizationPolicyInfo struct {
+	models.AuthorizationPolicyable
+}
+
 type ADConditionalAccessPolicyInfo struct {
 	models.ConditionalAccessPolicyable
 }
@@ -247,6 +251,35 @@ func (application *ADApplicationInfo) ApplicationWeb() map[string]interface{} {
 	return webData
 }
 
+func (authorizationPolicy *ADAuthorizationPolicyInfo) AuthorizationPolicyDefaultUserRolePermissions() map[string]interface{} {
+	if authorizationPolicy.GetDefaultUserRolePermissions() == nil {
+		return nil
+	}
+	data := map[string]interface{}{}
+
+	if authorizationPolicy.GetDefaultUserRolePermissions().GetAllowedToCreateApps() != nil {
+		data["allowedToCreateApps"] = *authorizationPolicy.GetDefaultUserRolePermissions().GetAllowedToCreateApps()
+	}
+	if authorizationPolicy.GetDefaultUserRolePermissions().GetAllowedToCreateSecurityGroups() != nil {
+		data["allowedToCreateSecurityGroups"] = *authorizationPolicy.GetDefaultUserRolePermissions().GetAllowedToCreateSecurityGroups()
+	}
+	if authorizationPolicy.GetDefaultUserRolePermissions().GetAllowedToReadOtherUsers() != nil {
+		data["allowedToReadOtherUsers"] = *authorizationPolicy.GetDefaultUserRolePermissions().GetAllowedToReadOtherUsers()
+	}
+	if authorizationPolicy.GetDefaultUserRolePermissions().GetPermissionGrantPoliciesAssigned() != nil {
+		data["permissionGrantPoliciesAssigned"] = authorizationPolicy.GetDefaultUserRolePermissions().GetPermissionGrantPoliciesAssigned()
+	}
+
+	return data
+}
+
+func (authorizationPolicy *ADAuthorizationPolicyInfo) AuthorizationPolicyAllowInvitesFrom() string {
+	if authorizationPolicy.GetAllowInvitesFrom() == nil {
+		return ""
+	}
+	return authorizationPolicy.GetAllowInvitesFrom().String()
+}
+
 func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyConditionsApplications() map[string]interface{} {
 	if conditionalAccessPolicy.GetConditions() == nil {
 		return nil
@@ -374,8 +407,8 @@ func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessP
 	if conditionalAccessPolicy.GetSessionControls().GetApplicationEnforcedRestrictions().GetIsEnabled() != nil {
 		data["isEnabled"] = conditionalAccessPolicy.GetSessionControls().GetApplicationEnforcedRestrictions().GetIsEnabled()
 	}
-	if conditionalAccessPolicy.GetSessionControls().GetApplicationEnforcedRestrictions().GetType() != nil {
-		data["type"] = conditionalAccessPolicy.GetSessionControls().GetApplicationEnforcedRestrictions().GetType()
+	if conditionalAccessPolicy.GetSessionControls().GetApplicationEnforcedRestrictions().GetOdataType() != nil {
+		data["@odata.type"] = conditionalAccessPolicy.GetSessionControls().GetApplicationEnforcedRestrictions().GetOdataType()
 	}
 	return data
 }
@@ -754,7 +787,7 @@ func (user *ADUserInfo) UserMemberOf() []map[string]interface{} {
 	members := []map[string]interface{}{}
 	for _, i := range user.GetMemberOf() {
 		member := map[string]interface{}{
-			"@odata.type": i.GetType(),
+			"@odata.type": i.GetOdataType(),
 			"id":          i.GetId(),
 		}
 		members = append(members, member)

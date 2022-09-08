@@ -106,7 +106,7 @@ func listAdConditionalAccessPolicies(ctx context.Context, d *plugin.QueryData, _
 		QueryParameters: input,
 	}
 
-	result, err := client.Identity().ConditionalAccess().Policies().GetWithRequestConfigurationAndResponseHandler(options, nil)
+	result, err := client.Identity().ConditionalAccess().Policies().Get(ctx, options)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("listAdConditionalAccessPolicies", "list_conditional_access_policy_error", errObj)
@@ -119,7 +119,7 @@ func listAdConditionalAccessPolicies(ctx context.Context, d *plugin.QueryData, _
 		return nil, err
 	}
 
-	err = pageIterator.Iterate(func(pageItem interface{}) bool {
+	err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
 		policy := pageItem.(models.ConditionalAccessPolicyable)
 
 		d.StreamListItem(ctx, &ADConditionalAccessPolicyInfo{policy})
@@ -151,7 +151,7 @@ func getAdConditionalAccessPolicy(ctx context.Context, d *plugin.QueryData, h *p
 		return nil, err
 	}
 
-	policy, err := client.Identity().ConditionalAccess().PoliciesById(conditionalAccessPolicyId).Get()
+	policy, err := client.Identity().ConditionalAccess().PoliciesById(conditionalAccessPolicyId).Get(ctx, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("getAdConditionalAccessPolicy", "get_conditional_access_policy_error", errObj)

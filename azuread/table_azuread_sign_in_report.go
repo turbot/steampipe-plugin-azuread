@@ -90,7 +90,7 @@ func listAdSignInReports(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 		QueryParameters: input,
 	}
 
-	result, err := client.AuditLogs().SignIns().GetWithRequestConfigurationAndResponseHandler(options, nil)
+	result, err := client.AuditLogs().SignIns().Get(ctx, options)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("listAdSignInReports", "list_sign_in_report_error", errObj)
@@ -103,7 +103,7 @@ func listAdSignInReports(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 		return nil, err
 	}
 
-	err = pageIterator.Iterate(func(pageItem interface{}) bool {
+	err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
 		signIn := pageItem.(models.SignInable)
 
 		d.StreamListItem(ctx, &ADSignInReportInfo{signIn})
@@ -134,7 +134,7 @@ func getAdSignInReport(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 		return nil, err
 	}
 
-	signIn, err := client.AuditLogs().SignInsById(signInID).Get()
+	signIn, err := client.AuditLogs().SignInsById(signInID).Get(ctx, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("getAdSignInReport", "get_sign_in_report_error", errObj)

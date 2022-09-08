@@ -128,7 +128,7 @@ func listAdUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		QueryParameters: input,
 	}
 
-	result, err := client.Users().GetWithRequestConfigurationAndResponseHandler(options, nil)
+	result, err := client.Users().Get(ctx, options)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("listAdUsers", "list_user_error", errObj)
@@ -141,7 +141,7 @@ func listAdUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		return nil, err
 	}
 
-	err = pageIterator.Iterate(func(pageItem interface{}) bool {
+	err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
 		user := pageItem.(models.Userable)
 
 		refreshTokensValidFromDateTime := user.GetAdditionalData()["refreshTokensValidFromDateTime"]
@@ -187,7 +187,7 @@ func getAdUser(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) 
 		QueryParameters: input,
 	}
 
-	user, err := client.UsersById(userId).GetWithRequestConfigurationAndResponseHandler(options, nil)
+	user, err := client.UsersById(userId).Get(ctx, options)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("getAdUser", "get_user_error", errObj)
