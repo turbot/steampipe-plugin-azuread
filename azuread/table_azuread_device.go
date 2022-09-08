@@ -115,7 +115,7 @@ func listDevices(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		QueryParameters: input,
 	}
 
-	result, err := client.Devices().GetWithRequestConfigurationAndResponseHandler(options, nil)
+	result, err := client.Devices().Get(ctx, options)
 
 	if err != nil {
 		errObj := getErrorObject(err)
@@ -123,7 +123,7 @@ func listDevices(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		return nil, errObj
 	}
 
-	if result.GetNextLink() != nil {
+	if result.GetOdataNextLink() != nil {
 
 		pageIterator, err := msgraphcore.NewPageIterator(result, adapter, models.CreateDeviceCollectionResponseFromDiscriminatorValue)
 		if err != nil {
@@ -131,7 +131,7 @@ func listDevices(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 			return nil, err
 		}
 
-		err = pageIterator.Iterate(func(pageItem interface{}) bool {
+		err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
 			device := pageItem.(models.Deviceable)
 
 			d.StreamListItem(ctx, &ADDeviceInfo{device})
@@ -139,6 +139,7 @@ func listDevices(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 			// Context can be cancelled due to manual cancellation or the limit has been hit
 			return d.QueryStatus.RowsRemaining(ctx) != 0
 		})
+
 		if err != nil {
 			plugin.Logger(ctx).Error("listAdDevices", "paging_error", err)
 			return nil, err
@@ -217,7 +218,7 @@ func getDevice(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) 
 		QueryParameters: input,
 	}
 
-	device, err := client.DevicesById(deviceId).GetWithRequestConfigurationAndResponseHandler(options, nil)
+	device, err := client.DevicesById(deviceId).Get(ctx, options)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("getAdDevice", "get_device_error", errObj)

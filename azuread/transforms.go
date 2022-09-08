@@ -803,7 +803,7 @@ func (device *ADDeviceInfo) DeviceMemberOf() []map[string]interface{} {
 	members := []map[string]interface{}{}
 	for _, i := range device.GetMemberOf() {
 		member := map[string]interface{}{
-			"@odata.type": i.GetType(),
+			"@odata.type": i.GetOdataType(),
 			"id":          i.GetId(),
 		}
 		members = append(members, member)
