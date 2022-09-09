@@ -22,11 +22,11 @@ func tableAzureAdDevice(_ context.Context) *plugin.Table {
 		Name:        "azuread_device",
 		Description: "Represents an Azure AD device.",
 		Get: &plugin.GetConfig{
-			Hydrate:    getDevice,
+			Hydrate:    getAdDevice,
 			KeyColumns: plugin.SingleColumn("id"),
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listDevices,
+			Hydrate: listAdDevices,
 			KeyColumns: plugin.KeyColumnSlice{
 				// Key fields
 				{Name: "display_name", Require: plugin.Optional},
@@ -43,23 +43,26 @@ func tableAzureAdDevice(_ context.Context) *plugin.Table {
 
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "The unique identifier for the device. Inherited from directoryObject.", Transform: transform.FromMethod("GetId")},
 			{Name: "display_name", Type: proto.ColumnType_STRING, Description: "The name displayed for the device.", Transform: transform.FromMethod("GetDisplayName")},
-
 			{Name: "account_enabled", Type: proto.ColumnType_BOOL, Description: "True if the account is enabled; otherwise, false.", Transform: transform.FromMethod("GetAccountEnabled")},
-			{Name: "approximate_last_sign_in_date_time", Type: proto.ColumnType_TIMESTAMP, Description: "The timestamp type represents date and time information using ISO 8601 format and is always in UTC time.", Transform: transform.FromMethod("GetApproximateLastSignInDateTime")},
 			{Name: "device_id", Type: proto.ColumnType_STRING, Description: "Unique identifier set by Azure Device Registration Service at the time of registration.", Transform: transform.FromMethod("GetDeviceId")},
-			{Name: "extension_attributes", Type: proto.ColumnType_JSON, Description: "Contains extension attributes 1-15 for the device. The individual extension attributes are not selectable. These properties are mastered in cloud and can be set during creation or update of a device object in Azure AD.", Transform: transform.FromMethod("GetExtensions")},
+			{Name: "approximate_last_sign_in_date_time", Type: proto.ColumnType_TIMESTAMP, Description: "The timestamp type represents date and time information using ISO 8601 format and is always in UTC time.", Transform: transform.FromMethod("GetApproximateLastSignInDateTime")},
+
+			// Other fields
 			{Name: "filter", Type: proto.ColumnType_STRING, Transform: transform.FromQual("filter"), Description: "Odata query to search for resources."},
 			{Name: "is_compliant", Type: proto.ColumnType_BOOL, Description: "True if the device is compliant; otherwise, false.", Transform: transform.FromMethod("GetIsCompliant")},
 			{Name: "is_managed", Type: proto.ColumnType_BOOL, Description: "True if the device is managed; otherwise, false.", Transform: transform.FromMethod("GetIsManaged")},
 			{Name: "mdm_app_id", Type: proto.ColumnType_STRING, Description: "Application identifier used to register device into MDM.", Transform: transform.FromMethod("GetMdmAppId")},
-			{Name: "member_of", Type: proto.ColumnType_JSON, Description: "A list the groups and directory roles that the device is a direct member of.", Transform: transform.FromMethod("DeviceMemberOf")},
 			{Name: "operating_system", Type: proto.ColumnType_STRING, Description: "The type of operating system on the device.", Transform: transform.FromMethod("GetOperatingSystem")},
 			{Name: "operating_system_version", Type: proto.ColumnType_STRING, Description: "The version of the operating system on the device.", Transform: transform.FromMethod("GetOperatingSystemVersion")},
 			{Name: "profile_type", Type: proto.ColumnType_STRING, Description: "A string value that can be used to classify device types.", Transform: transform.FromMethod("GetProfileType")},
-			{Name: "trust_type", Type: proto.ColumnType_STRING, Description: "Type of trust for the joined device. Read-only. Possible values: Workplace (indicates bring your own personal devices), AzureAd (Cloud only joined devices), ServerAd (on-premises domain joined devices joined to Azure AD).", Transform: transform.FromMethod("GetTrustType")},
+			{Name: "trust_type", Type: proto.ColumnType_STRING, Description: "Type of trust for the joined device. Possible values: Workplace (indicates bring your own personal devices), AzureAd (Cloud only joined devices), ServerAd (on-premises domain joined devices joined to Azure AD).", Transform: transform.FromMethod("GetTrustType")},
+
+			// JSON fields
+			{Name: "extension_attributes", Type: proto.ColumnType_JSON, Description: "Contains extension attributes 1-15 for the device. The individual extension attributes are not selectable. These properties are mastered in cloud and can be set during creation or update of a device object in Azure AD.", Transform: transform.FromMethod("GetExtensions")},
+			{Name: "member_of", Type: proto.ColumnType_JSON, Description: "A list the groups and directory roles that the device is a direct member of.", Transform: transform.FromMethod("DeviceMemberOf")},
 
 			// Standard columns
-			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Transform: transform.From(deviceTitle)},
+			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Transform: transform.From(adDeviceTitle)},
 			{Name: "tenant_id", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTenant, Hydrate: plugin.HydrateFunc(getTenant).WithCache(), Transform: transform.FromValue()},
 		},
 	}
@@ -67,13 +70,13 @@ func tableAzureAdDevice(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listDevices(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listAdDevices(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 
 	// Create client
 	client, adapter, err := GetGraphClient(ctx, d)
 
 	if err != nil {
-		plugin.Logger(ctx).Error("azuread_device.listDevices", "connection_error", err)
+		plugin.Logger(ctx).Error("azuread_device.listAdDevices", "connection_error", err)
 		return nil, err
 	}
 
@@ -119,7 +122,7 @@ func listDevices(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 
 	if err != nil {
 		errObj := getErrorObject(err)
-		plugin.Logger(ctx).Error("listAdDevices", "list_device_error", errObj)
+		plugin.Logger(ctx).Error("azuread_device.listAdDevices", "list_device_error", errObj)
 		return nil, errObj
 	}
 
@@ -127,7 +130,7 @@ func listDevices(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 
 		pageIterator, err := msgraphcore.NewPageIterator(result, adapter, models.CreateDeviceCollectionResponseFromDiscriminatorValue)
 		if err != nil {
-			plugin.Logger(ctx).Error("listAdDevices", "create_iterator_instance_error", err)
+			plugin.Logger(ctx).Error("azuread_device.listAdDevices", "create_iterator_instance_error", err)
 			return nil, err
 		}
 
@@ -141,7 +144,7 @@ func listDevices(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		})
 
 		if err != nil {
-			plugin.Logger(ctx).Error("listAdDevices", "paging_error", err)
+			plugin.Logger(ctx).Error("azuread_device.listAdDevices", "paging_error", err)
 			return nil, err
 		}
 	}
@@ -149,6 +152,7 @@ func listDevices(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	for _, device := range result.GetValue() {
 		d.StreamListItem(ctx, &ADDeviceInfo{device})
 
+		// Context can be cancelled due to manual cancellation or the limit has been hit
 		if d.QueryStatus.RowsRemaining(ctx) == 0 {
 			return nil, nil
 		}
@@ -159,45 +163,12 @@ func listDevices(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 
 //// HYDRATE FUNCTIONS
 
-func buildDeviceRequestFields(ctx context.Context, queryColumns []string) ([]string, []string) {
-	var selectColumns, expandColumns []string
-
-	for _, columnName := range queryColumns {
-		if columnName == "title" || columnName == "filter" || columnName == "tenant_id" {
-			continue
-		}
-
-		if columnName == "member_of" {
-			expandColumns = append(expandColumns, fmt.Sprintf("%s($select=id,displayName)", strcase.ToLowerCamel(columnName)))
-			continue
-		}
-
-		selectColumns = append(selectColumns, strcase.ToLowerCamel(columnName))
-	}
-
-	return selectColumns, expandColumns
-}
-
-func deviceTitle(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	data := d.HydrateItem.(*ADDeviceInfo)
-	if data == nil {
-		return nil, nil
-	}
-
-	title := data.GetDisplayName()
-	if title == nil {
-		title = data.GetDeviceId()
-	}
-
-	return title, nil
-}
-
-func getDevice(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func getAdDevice(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 
 	// Create client
 	client, _, err := GetGraphClient(ctx, d)
 	if err != nil {
-		plugin.Logger(ctx).Error("azuread_device.getDevice", "connection_error", err)
+		plugin.Logger(ctx).Error("azuread_device.getAdDevice", "connection_error", err)
 		return nil, err
 	}
 
@@ -226,6 +197,41 @@ func getDevice(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) 
 	}
 
 	return &ADDeviceInfo{device}, nil
+}
+
+//// TRANSFORM FUNCTIONS
+
+func adDeviceTitle(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	data := d.HydrateItem.(*ADDeviceInfo)
+	if data == nil {
+		return nil, nil
+	}
+
+	title := data.GetDisplayName()
+	if title == nil {
+		title = data.GetDeviceId()
+	}
+
+	return title, nil
+}
+
+func buildDeviceRequestFields(ctx context.Context, queryColumns []string) ([]string, []string) {
+	var selectColumns, expandColumns []string
+
+	for _, columnName := range queryColumns {
+		if columnName == "title" || columnName == "filter" || columnName == "tenant_id" {
+			continue
+		}
+
+		if columnName == "member_of" {
+			expandColumns = append(expandColumns, fmt.Sprintf("%s($select=id,displayName)", strcase.ToLowerCamel(columnName)))
+			continue
+		}
+
+		selectColumns = append(selectColumns, strcase.ToLowerCamel(columnName))
+	}
+
+	return selectColumns, expandColumns
 }
 
 func buildDeviceQueryFilter(equalQuals plugin.KeyColumnEqualsQualMap) []string {
