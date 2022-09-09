@@ -19,6 +19,10 @@ type ADConditionalAccessPolicyInfo struct {
 	models.ConditionalAccessPolicyable
 }
 
+type ADDeviceInfo struct {
+	models.Deviceable
+}
+
 type ADGroupInfo struct {
 	models.Groupable
 	ResourceBehaviorOptions     []string
@@ -491,6 +495,22 @@ func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessP
 		data["value"] = conditionalAccessPolicy.GetSessionControls().GetSignInFrequency().GetValue()
 	}
 	return data
+}
+
+func (device *ADDeviceInfo) DeviceMemberOf() []map[string]interface{} {
+	if device.GetMemberOf() == nil {
+		return nil
+	}
+
+	members := []map[string]interface{}{}
+	for _, i := range device.GetMemberOf() {
+		member := map[string]interface{}{
+			"@odata.type": i.GetOdataType(),
+			"id":          i.GetId(),
+		}
+		members = append(members, member)
+	}
+	return members
 }
 
 func (group *ADGroupInfo) GroupAssignedLabels() []map[string]*string {
