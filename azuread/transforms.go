@@ -40,6 +40,10 @@ type ADUserInfo struct {
 	RefreshTokensValidFromDateTime interface{}
 }
 
+type ADDeviceInfo struct {
+	models.Deviceable
+}
+
 func (application *ADApplicationInfo) ApplicationAPI() map[string]interface{} {
 	if application.GetApi() == nil {
 		return nil
@@ -782,6 +786,22 @@ func (user *ADUserInfo) UserMemberOf() []map[string]interface{} {
 
 	members := []map[string]interface{}{}
 	for _, i := range user.GetMemberOf() {
+		member := map[string]interface{}{
+			"@odata.type": i.GetOdataType(),
+			"id":          i.GetId(),
+		}
+		members = append(members, member)
+	}
+	return members
+}
+
+func (device *ADDeviceInfo) DeviceMemberOf() []map[string]interface{} {
+	if device.GetMemberOf() == nil {
+		return nil
+	}
+
+	members := []map[string]interface{}{}
+	for _, i := range device.GetMemberOf() {
 		member := map[string]interface{}{
 			"@odata.type": i.GetOdataType(),
 			"id":          i.GetId(),
