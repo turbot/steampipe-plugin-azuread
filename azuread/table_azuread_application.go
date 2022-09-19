@@ -21,7 +21,7 @@ import (
 func tableAzureAdApplication(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "azuread_application",
-		Description: "Represents an Azure Active Directory (Azure AD) application",
+		Description: "Represents an Azure Active Directory (Azure AD) application.",
 		Get: &plugin.GetConfig{
 			Hydrate: getAdApplication,
 			IgnoreConfig: &plugin.IgnoreConfig{

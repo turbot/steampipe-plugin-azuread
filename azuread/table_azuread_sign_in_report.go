@@ -17,7 +17,7 @@ import (
 func tableAzureAdSignInReport(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "azuread_sign_in_report",
-		Description: "Represents an Azure Active Directory (Azure AD) sign in report",
+		Description: "Represents an Azure Active Directory (Azure AD) sign-in report.",
 		Get: &plugin.GetConfig{
 			Hydrate: getAdSignInReport,
 			IgnoreConfig: &plugin.IgnoreConfig{
