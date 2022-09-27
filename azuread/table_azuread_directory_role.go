@@ -17,7 +17,7 @@ import (
 func tableAzureAdDirectoryRole(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "azuread_directory_role",
-		Description: "Represents an Azure Active Directory (Azure AD) directory role",
+		Description: "Represents an Azure Active Directory (Azure AD) directory role.",
 		Get: &plugin.GetConfig{
 			Hydrate: getAdDirectoryRole,
 			IgnoreConfig: &plugin.IgnoreConfig{

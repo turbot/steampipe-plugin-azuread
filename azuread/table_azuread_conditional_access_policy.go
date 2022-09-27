@@ -21,7 +21,7 @@ import (
 func tableAzureAdConditionalAccessPolicy(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "azuread_conditional_access_policy",
-		Description: "Represents an Azure Active Directory (Azure AD) Conditional Access Policy",
+		Description: "Represents an Azure Active Directory (Azure AD) Conditional Access Policy.",
 		Get: &plugin.GetConfig{
 			Hydrate: getAdConditionalAccessPolicy,
 			IgnoreConfig: &plugin.IgnoreConfig{

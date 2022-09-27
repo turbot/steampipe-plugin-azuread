@@ -25,7 +25,7 @@ import (
 func tableAzureAdGroup(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "azuread_group",
-		Description: "Represents an Azure AD user account.",
+		Description: "Represents an Azure AD group.",
 		Get: &plugin.GetConfig{
 			Hydrate: getAdGroup,
 			IgnoreConfig: &plugin.IgnoreConfig{
