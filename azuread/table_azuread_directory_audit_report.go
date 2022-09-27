@@ -196,7 +196,7 @@ func buildDirectoryAuditQueryFilter(equalQuals plugin.KeyColumnEqualsQualMap) []
 		"result":                "string",
 	}
 
-	for qual, _ := range filterQuals {
+	for qual := range filterQuals {
 		if equalQuals[qual] != nil {
 			filters = append(filters, fmt.Sprintf("%s eq '%s'", strcase.ToCamel(qual), equalQuals[qual].GetStringValue()))
 		}
