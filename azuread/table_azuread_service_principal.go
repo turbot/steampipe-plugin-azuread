@@ -21,7 +21,7 @@ import (
 func tableAzureAdServicePrincipal(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "azuread_service_principal",
-		Description: "Represents an Azure Active Directory (Azure AD) service principal",
+		Description: "Represents an Azure Active Directory (Azure AD) service principal.",
 		Get: &plugin.GetConfig{
 			Hydrate: getAdServicePrincipal,
 			IgnoreConfig: &plugin.IgnoreConfig{

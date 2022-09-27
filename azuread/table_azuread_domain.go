@@ -18,7 +18,7 @@ import (
 func tableAzureAdDomain(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "azuread_domain",
-		Description: "Represents an Azure Active Directory (Azure AD) domain",
+		Description: "Represents an Azure Active Directory (Azure AD) domain.",
 		Get: &plugin.GetConfig{
 			Hydrate: getAdDomain,
 			IgnoreConfig: &plugin.IgnoreConfig{
