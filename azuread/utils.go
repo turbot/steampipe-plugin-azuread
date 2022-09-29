@@ -4,7 +4,7 @@ import (
 	"context"
 	"os"
 
-	"github.com/turbot/steampipe-plugin-sdk/v3/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
 )
 
 // Constants for Standard Column Descriptions
