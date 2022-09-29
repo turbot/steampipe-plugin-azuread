@@ -3,7 +3,7 @@
 _What's new?_
 
 - New tables added
-  - [azuread_device](https://hub.steampipe.io/plugins/turbot/azuread/tables/azuread_device`)
+  - [azuread_device](https://hub.steampipe.io/plugins/turbot/azuread/tables/azuread_device) ([#68](https://github.com/turbot/steampipe-plugin-azuread/pull/68)) (Thanks [@chrichts](https://github.com/chrichts) for the contribution!)
 
 _Dependencies_
 
