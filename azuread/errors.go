@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/microsoftgraph/msgraph-sdk-go/models/odataerrors"
-	"github.com/turbot/steampipe-plugin-sdk/v3/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
 )
 
 type RequestError struct {
