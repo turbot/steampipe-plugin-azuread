@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"strings"
 
+	betaerrors "github.com/microsoftgraph/msgraph-beta-sdk-go/models/odataerrors"
 	"github.com/microsoftgraph/msgraph-sdk-go/models/odataerrors"
 	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
 )
@@ -37,7 +38,7 @@ func getErrorObject(err error) *RequestError {
 
 // Return error object for beta APIs
 func getBetaErrorObject(err error) *RequestError {
-	if oDataError, ok := err.(*odataerrors.ODataError); ok {
+	if oDataError, ok := err.(*betaerrors.ODataError); ok {
 		if terr := oDataError.GetError(); terr != nil {
 			return &RequestError{
 				Code:    *terr.GetCode(),
