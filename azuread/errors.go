@@ -35,6 +35,20 @@ func getErrorObject(err error) *RequestError {
 	return nil
 }
 
+// Return error object for beta APIs
+func getBetaErrorObject(err error) *RequestError {
+	if oDataError, ok := err.(*odataerrors.ODataError); ok {
+		if terr := oDataError.GetError(); terr != nil {
+			return &RequestError{
+				Code:    *terr.GetCode(),
+				Message: *terr.GetMessage(),
+			}
+		}
+	}
+
+	return nil
+}
+
 func isIgnorableErrorPredicate(ignoreErrorCodes []string) plugin.ErrorPredicateWithContext {
 	return func(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData, err error) bool {
 		if err != nil {

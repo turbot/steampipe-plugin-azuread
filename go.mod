@@ -8,6 +8,7 @@ require (
 	github.com/iancoleman/strcase v0.2.0
 	github.com/microsoft/kiota-authentication-azure-go v0.4.1
 	github.com/microsoft/kiota-serialization-json-go v0.5.6
+	github.com/microsoftgraph/msgraph-beta-sdk-go v0.39.0
 	github.com/microsoftgraph/msgraph-sdk-go v0.37.0
 	github.com/microsoftgraph/msgraph-sdk-go-core v0.28.0
 	github.com/turbot/steampipe-plugin-sdk/v4 v4.1.7
