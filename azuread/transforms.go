@@ -29,6 +29,15 @@ type ADDirectoryAuditReportInfo struct {
 	models.DirectoryAuditable
 }
 
+type ADDirectorySettingInfo struct {
+	// models.GroupSettingable
+	DisplayName *string
+	Id          *string
+	TemplateId  *string
+	Name        *string
+	Value       *string
+}
+
 type ADGroupInfo struct {
 	models.Groupable
 	ResourceBehaviorOptions     []string
@@ -653,6 +662,28 @@ func (directoryAuditReport *ADDirectoryAuditReportInfo) DirectoryAuditTargetReso
 
 	return targetResources
 }
+
+// func (directorySetting *ADDirectorySettingInfo) DirectorySettingValues() []map[string]interface{} {
+// 	if directorySetting.GetValues() == nil {
+// 		return nil
+// 	}
+// 	values := []map[string]interface{}{}
+
+// 	for _, v := range directorySetting.GetValues() {
+// 		data := map[string]interface{}{}
+// 		if v.GetName() != nil {
+// 			data["name"] = *v.GetName()
+// 		}
+// 		if v.GetOdataType() != nil {
+// 			data["@odata.type"] = *v.GetOdataType()
+// 		}
+// 		if v.GetValue() != nil {
+// 			data["value"] = *v.GetValue()
+// 		}
+// 		values = append(values, data)
+// 	}
+// 	return values
+// }
 
 func (group *ADGroupInfo) GroupAssignedLabels() []map[string]*string {
 	if group.GetAssignedLabels() == nil {
