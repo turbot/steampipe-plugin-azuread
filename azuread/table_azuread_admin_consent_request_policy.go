@@ -19,7 +19,7 @@ func tableAzureAdAdminConsentRequestPolicy(_ context.Context) *plugin.Table {
 		},
 
 		Columns: []*plugin.Column{
-			{Name: "id", Type: proto.ColumnType_STRING, Description: "", Default: "adminConsentRequestPolicy"},
+			{Name: "id", Type: proto.ColumnType_STRING, Description: "An unique identifier of the adminConsentRequestPolicy object.", Default: "adminConsentRequestPolicy"},
 			{Name: "is_enabled", Type: proto.ColumnType_BOOL, Description: "Specifies whether the admin consent request feature is enabled or disabled.", Transform: transform.FromMethod("GetIsEnabled")},
 
 			// Other fields
