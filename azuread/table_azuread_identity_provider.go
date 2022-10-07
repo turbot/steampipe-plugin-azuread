@@ -65,11 +65,13 @@ func listAdIdentityProviders(ctx context.Context, d *plugin.QueryData, _ *plugin
 	// List operations
 	input := &identityproviders.IdentityProvidersRequestBuilderGetQueryParameters{}
 
-	limit := d.QueryContext.Limit
-	if limit != nil {
-		l := int32(*limit)
-		input.Top = &l
-	}
+	// TODO :: Check SDK to pass the Top attribute in the request.
+	// Query option 'Top' is not allowed. To allow it, set the 'AllowedQueryOptions' property on EnableQueryAttribute or QueryValidationSettings.
+	// limit := d.QueryContext.Limit
+	// if limit != nil {
+	// 	l := int32(*limit)
+	// 	input.Top = &l
+	// }
 
 	var queryFilter string
 	equalQuals := d.KeyColumnQuals
