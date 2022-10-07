@@ -7,9 +7,9 @@ import (
 	"github.com/microsoftgraph/msgraph-sdk-go/auditlogs/signins"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 
-	"github.com/turbot/steampipe-plugin-sdk/v3/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v3/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v3/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -53,7 +53,7 @@ func tableAzureAdSignInReport(_ context.Context) *plugin.Table {
 			{Name: "risk_event_types", Type: proto.ColumnType_JSON, Description: "Risk event types associated with the sign-in. The possible values are: unlikelyTravel, anonymizedIPAddress, maliciousIPAddress, unfamiliarFeatures, malwareInfectedIPAddress, suspiciousIPAddress, leakedCredentials, investigationsThreatIntelligence, generic, and unknownFutureValue.", Transform: transform.FromMethod("GetRiskEventTypes").Transform(formatSignInReportRiskEventTypes)},
 			{Name: "status", Type: proto.ColumnType_JSON, Description: "Sign-in status. Includes the error code and description of the error (in case of a sign-in failure).", Transform: transform.FromMethod("SignInStatus")},
 			{Name: "device_detail", Type: proto.ColumnType_JSON, Description: "Device information from where the sign-in occurred; includes device ID, operating system, and browser.", Transform: transform.FromMethod("SignInDeviceDetail")},
-			{Name: "location", Type: proto.ColumnType_JSON, Description: "	Provides the city, state, and country code where the sign-in originated.", Transform: transform.FromMethod("SignInLocation")},
+			{Name: "location", Type: proto.ColumnType_JSON, Description: "Provides the city, state, and country code where the sign-in originated.", Transform: transform.FromMethod("SignInLocation")},
 			{Name: "applied_conditional_access_policies", Type: proto.ColumnType_JSON, Description: "Provides a list of conditional access policies that are triggered by the corresponding sign-in activity.", Transform: transform.FromMethod("SignInAppliedConditionalAccessPolicies")},
 
 			// Standard columns
