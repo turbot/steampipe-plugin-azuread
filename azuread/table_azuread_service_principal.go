@@ -92,15 +92,17 @@ func listAdServicePrincipals(ctx context.Context, d *plugin.QueryData, _ *plugin
 	}
 
 	// List operations
-	input := &serviceprincipals.ServicePrincipalsRequestBuilderGetQueryParameters{}
+	input := &serviceprincipals.ServicePrincipalsRequestBuilderGetQueryParameters{
+		Top: Int32(999),
+	}
 
 	// Restrict the limit value to be passed in the query parameter which is not between 1 and 999, otherwise API will throw an error as follow
 	// unexpected status 400 with OData error: Request_UnsupportedQuery: Invalid page size specified: '1000'. Must be between 1 and 999 inclusive.
 	limit := d.QueryContext.Limit
 	if limit != nil {
-		if *limit > 0 && *limit <= 999 {
+		if *limit > 0 && *limit < 999 {
 			l := int32(*limit)
-			input.Top = &l
+			input.Top = Int32(l)
 		}
 	}
 
