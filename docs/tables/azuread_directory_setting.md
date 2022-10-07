@@ -23,12 +23,14 @@ from
 select
   display_name,
   id,
-  values
+  setting_name,
+  setting_value
 from
   azuread_directory_setting
 where
   display_name = 'Consent Policy Settings'
-  and values @> '[{"name": "EnableAdminConsentRequests","value": "true"}]';
+  and setting_name = 'EnableAdminConsentRequests'
+  and setting_value::bool;
 ```
 
 ### Check password protection is enabled for active directory
@@ -37,11 +39,17 @@ where
 select
   display_name,
   id,
-  values
+  setting_name,
+  setting_value
 from
   azuread_directory_setting
 where
   display_name = 'Password Rule Settings'
-  and values @> '[{"name": "EnableBannedPasswordCheckOnPremises","value": "True"}]'
-  and values @> '[{"name": "BannedPasswordCheckOnPremisesMode","value": "Enforced"}]';
+  and (
+    setting_name = 'EnableBannedPasswordCheckOnPremises'
+    and setting_value::bool
+  ) and (
+    setting_name = 'BannedPasswordCheckOnPremisesMode'
+    and setting_value = 'Enforced'
+  );
 ```

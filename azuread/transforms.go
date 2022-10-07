@@ -30,7 +30,12 @@ type ADDirectoryAuditReportInfo struct {
 }
 
 type ADDirectorySettingInfo struct {
-	models.GroupSettingable
+	// models.GroupSettingable
+	DisplayName  *string
+	Id           *string
+	TemplateId   *string
+	SettingName  *string
+	SettingValue *string
 }
 
 type ADGroupInfo struct {
@@ -658,27 +663,27 @@ func (directoryAuditReport *ADDirectoryAuditReportInfo) DirectoryAuditTargetReso
 	return targetResources
 }
 
-func (directorySetting *ADDirectorySettingInfo) DirectorySettingValues() []map[string]interface{} {
-	if directorySetting.GetValues() == nil {
-		return nil
-	}
-	values := []map[string]interface{}{}
+// func (directorySetting *ADDirectorySettingInfo) DirectorySettingValues() []map[string]interface{} {
+// 	if directorySetting.GetValues() == nil {
+// 		return nil
+// 	}
+// 	values := []map[string]interface{}{}
 
-	for _, v := range directorySetting.GetValues() {
-		data := map[string]interface{}{}
-		if v.GetName() != nil {
-			data["name"] = *v.GetName()
-		}
-		if v.GetOdataType() != nil {
-			data["@odata.type"] = *v.GetOdataType()
-		}
-		if v.GetValue() != nil {
-			data["value"] = *v.GetValue()
-		}
-		values = append(values, data)
-	}
-	return values
-}
+// 	for _, v := range directorySetting.GetValues() {
+// 		data := map[string]interface{}{}
+// 		if v.GetName() != nil {
+// 			data["name"] = *v.GetName()
+// 		}
+// 		if v.GetOdataType() != nil {
+// 			data["@odata.type"] = *v.GetOdataType()
+// 		}
+// 		if v.GetValue() != nil {
+// 			data["value"] = *v.GetValue()
+// 		}
+// 		values = append(values, data)
+// 	}
+// 	return values
+// }
 
 func (group *ADGroupInfo) GroupAssignedLabels() []map[string]*string {
 	if group.GetAssignedLabels() == nil {

@@ -18,21 +18,20 @@ func tableAzureAdDirectorySetting(_ context.Context) *plugin.Table {
 		Description: "Represents the configurations that can be used to customize the tenant-wide and object-specific restrictions and allowed behavior",
 		Get: &plugin.GetConfig{
 			Hydrate:    getAdDirectorySetting,
-			KeyColumns: plugin.SingleColumn("id"),
+			KeyColumns: plugin.AllColumns([]string{"id", "setting_name"}),
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listAdDirectorySetting,
 		},
 		Columns: []*plugin.Column{
-			{Name: "display_name", Type: proto.ColumnType_STRING, Description: "Display name of this group of settings, which comes from the associated template.", Transform: transform.FromMethod("GetDisplayName")},
-			{Name: "id", Type: proto.ColumnType_STRING, Description: "Unique identifier for these settings.", Transform: transform.FromMethod("GetId")},
-			{Name: "template_id", Type: proto.ColumnType_STRING, Description: "Unique identifier for the template used to create this group of settings.", Transform: transform.FromMethod("GetTemplateId")},
-
-			// JSON fields
-			{Name: "values", Type: proto.ColumnType_JSON, Description: "Collection of name-value pairs corresponding to the name and defaultValue properties in the referenced object.", Transform: transform.FromMethod("DirectorySettingValues")},
+			{Name: "display_name", Type: proto.ColumnType_STRING, Description: "Display name of this group of settings, which comes from the associated template."},
+			{Name: "id", Type: proto.ColumnType_STRING, Description: "Unique identifier for these settings."},
+			{Name: "template_id", Type: proto.ColumnType_STRING, Description: "Unique identifier for the template used to create this group of settings."},
+			{Name: "setting_name", Type: proto.ColumnType_STRING, Description: "Unique identifier for the template used to create this group of settings."},
+			{Name: "setting_value", Type: proto.ColumnType_STRING, Description: "Unique identifier for the template used to create this group of settings."},
 
 			// Standard columns
-			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Transform: transform.FromMethod("GetDisplayName")},
+			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Transform: transform.FromField("DisplayName")},
 			{Name: "tenant_id", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTenant, Hydrate: plugin.HydrateFunc(getTenant).WithCache(), Transform: transform.FromValue()},
 		},
 	}
@@ -64,7 +63,15 @@ func listAdDirectorySetting(ctx context.Context, d *plugin.QueryData, _ *plugin.
 	err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
 		setting := pageItem.(models.GroupSettingable)
 
-		d.StreamListItem(ctx, &ADDirectorySettingInfo{setting})
+		for _, s := range setting.GetValues() {
+			d.StreamListItem(ctx, &ADDirectorySettingInfo{
+				DisplayName:  setting.GetDisplayName(),
+				Id:           setting.GetId(),
+				TemplateId:   setting.GetTemplateId(),
+				SettingName:  s.GetName(),
+				SettingValue: s.GetValue(),
+			})
+		}
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
 		return d.QueryStatus.RowsRemaining(ctx) != 0
@@ -82,6 +89,7 @@ func listAdDirectorySetting(ctx context.Context, d *plugin.QueryData, _ *plugin.
 func getAdDirectorySetting(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 
 	directorySettingID := d.KeyColumnQuals["id"].GetStringValue()
+	settingName := d.KeyColumnQuals["setting_name"].GetStringValue()
 	if directorySettingID == "" {
 		return nil, nil
 	}
@@ -99,5 +107,16 @@ func getAdDirectorySetting(ctx context.Context, d *plugin.QueryData, h *plugin.H
 		plugin.Logger(ctx).Error("azuread_directory_setting.getAdDirectorySetting", "get_directory_setting_error", errObj)
 		return nil, errObj
 	}
-	return &ADDirectorySettingInfo{setting}, nil
+
+	result := ADDirectorySettingInfo{}
+	for _, s := range setting.GetValues() {
+		if settingName == *s.GetName() {
+			result.DisplayName = setting.GetDisplayName()
+			result.Id = setting.GetId()
+			result.TemplateId = setting.GetTemplateId()
+			result.SettingName = s.GetName()
+			result.SettingValue = s.GetValue()
+		}
+	}
+	return &result, nil
 }
