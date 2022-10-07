@@ -14,16 +14,3 @@ select
 from
   azuread_security_defaults_policy;
 ```
-
-### Check security defaults is disabled on Azure AD
-
-```sql
-select
-  display_name,
-  id,
-  is_enabled
-from
-  azuread_security_defaults_policy
-where
-  not is_enabled;
-```
