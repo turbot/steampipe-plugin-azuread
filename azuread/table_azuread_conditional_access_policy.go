@@ -6,10 +6,10 @@ import (
 	"strings"
 
 	"github.com/iancoleman/strcase"
-	"github.com/turbot/steampipe-plugin-sdk/v3/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v3/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
 
-	"github.com/turbot/steampipe-plugin-sdk/v3/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
 
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
 	"github.com/microsoftgraph/msgraph-sdk-go/identity/conditionalaccess/policies"
@@ -21,7 +21,7 @@ import (
 func tableAzureAdConditionalAccessPolicy(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "azuread_conditional_access_policy",
-		Description: "Represents an Azure Active Directory (Azure AD) Conditional Access Policy",
+		Description: "Represents an Azure Active Directory (Azure AD) Conditional Access Policy.",
 		Get: &plugin.GetConfig{
 			Hydrate: getAdConditionalAccessPolicy,
 			IgnoreConfig: &plugin.IgnoreConfig{

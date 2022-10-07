@@ -11,9 +11,9 @@ import (
 	"github.com/microsoftgraph/msgraph-sdk-go/applications/item/owners"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 
-	"github.com/turbot/steampipe-plugin-sdk/v3/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v3/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v3/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -21,7 +21,7 @@ import (
 func tableAzureAdApplication(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "azuread_application",
-		Description: "Represents an Azure Active Directory (Azure AD) application",
+		Description: "Represents an Azure Active Directory (Azure AD) application.",
 		Get: &plugin.GetConfig{
 			Hydrate: getAdApplication,
 			IgnoreConfig: &plugin.IgnoreConfig{

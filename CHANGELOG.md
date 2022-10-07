@@ -1,3 +1,15 @@
+## v0.7.0 [2022-09-29]
+
+_What's new?_
+
+- New tables added
+  - [azuread_device](https://hub.steampipe.io/plugins/turbot/azuread/tables/azuread_device) ([#68](https://github.com/turbot/steampipe-plugin-azuread/pull/68)) (Thanks [@chrichts](https://github.com/chrichts) for the contribution!)
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v4.1.7](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v417-2022-09-08) which includes several caching and memory management improvements. ([#79](https://github.com/turbot/steampipe-plugin-azuread/pull/79))
+- Recompiled plugin with Go version `1.19`. ([#79](https://github.com/turbot/steampipe-plugin-azuread/pull/79))
+
 ## v0.6.0 [2022-08-09]
 
 _What's new?_

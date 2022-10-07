@@ -15,6 +15,10 @@ type ADConditionalAccessPolicyInfo struct {
 	models.ConditionalAccessPolicyable
 }
 
+type ADDirectoryAuditReportInfo struct {
+	models.DirectoryAuditable
+}
+
 type ADDirectorySettingInfo struct {
 	models.GroupSettingable
 }
@@ -42,6 +46,10 @@ type ADSignInReportInfo struct {
 type ADUserInfo struct {
 	models.Userable
 	RefreshTokensValidFromDateTime interface{}
+}
+
+type ADDeviceInfo struct {
+	models.Deviceable
 }
 
 func (application *ADApplicationInfo) ApplicationAPI() map[string]interface{} {
@@ -467,6 +475,137 @@ func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessP
 	return data
 }
 
+func (directoryAuditReport *ADDirectoryAuditReportInfo) DirectoryAuditAdditionalDetails() []map[string]interface{} {
+	if directoryAuditReport.GetAdditionalDetails() == nil {
+		return nil
+	}
+	additionalDetails := []map[string]interface{}{}
+
+	for _, i := range directoryAuditReport.GetAdditionalDetails() {
+		data := map[string]interface{}{}
+		if i.GetKey() != nil {
+			data["key"] = *i.GetKey()
+		}
+		if i.GetValue() != nil {
+			data["value"] = *i.GetValue()
+		}
+		if i.GetOdataType() != nil {
+			data["@odata.type"] = *i.GetOdataType()
+		}
+		additionalDetails = append(additionalDetails, data)
+	}
+
+	return additionalDetails
+}
+
+func (directoryAuditReport *ADDirectoryAuditReportInfo) DirectoryAuditInitiatedBy() map[string]interface{} {
+	if directoryAuditReport.GetInitiatedBy() == nil {
+		return nil
+	}
+	data := map[string]interface{}{}
+
+	if directoryAuditReport.GetInitiatedBy().GetOdataType() != nil {
+		data["@odata.type"] = *directoryAuditReport.GetInitiatedBy().GetOdataType()
+	}
+
+	if directoryAuditReport.GetInitiatedBy().GetUser() != nil {
+		userData := map[string]interface{}{}
+
+		if directoryAuditReport.GetInitiatedBy().GetUser().GetDisplayName() != nil {
+			userData["displayName"] = *directoryAuditReport.GetInitiatedBy().GetUser().GetDisplayName()
+		}
+		if directoryAuditReport.GetInitiatedBy().GetUser().GetId() != nil {
+			userData["id"] = *directoryAuditReport.GetInitiatedBy().GetUser().GetId()
+		}
+		if directoryAuditReport.GetInitiatedBy().GetUser().GetUserPrincipalName() != nil {
+			userData["userPrincipalName"] = *directoryAuditReport.GetInitiatedBy().GetUser().GetUserPrincipalName()
+		}
+		if directoryAuditReport.GetInitiatedBy().GetUser().GetIpAddress() != nil {
+			userData["ipAddress"] = *directoryAuditReport.GetInitiatedBy().GetUser().GetIpAddress()
+		}
+		data["user"] = userData
+	}
+
+	if directoryAuditReport.GetInitiatedBy().GetApp() != nil {
+		appData := map[string]interface{}{}
+
+		if directoryAuditReport.GetInitiatedBy().GetApp().GetDisplayName() != nil {
+			appData["displayName"] = *directoryAuditReport.GetInitiatedBy().GetApp().GetDisplayName()
+		}
+		if directoryAuditReport.GetInitiatedBy().GetApp().GetAppId() != nil {
+			appData["appId"] = *directoryAuditReport.GetInitiatedBy().GetApp().GetAppId()
+		}
+		if directoryAuditReport.GetInitiatedBy().GetApp().GetServicePrincipalId() != nil {
+			appData["servicePrincipalId"] = *directoryAuditReport.GetInitiatedBy().GetApp().GetServicePrincipalId()
+		}
+		if directoryAuditReport.GetInitiatedBy().GetApp().GetServicePrincipalName() != nil {
+			appData["servicePrincipalName"] = *directoryAuditReport.GetInitiatedBy().GetApp().GetServicePrincipalName()
+		}
+		data["app"] = appData
+	}
+
+	return data
+}
+
+func (directoryAuditReport *ADDirectoryAuditReportInfo) DirectoryAuditResult() string {
+	if directoryAuditReport.GetResult() == nil {
+		return ""
+	}
+	return directoryAuditReport.GetResult().String()
+}
+
+func (directoryAuditReport *ADDirectoryAuditReportInfo) DirectoryAuditTargetResources() []map[string]interface{} {
+	if directoryAuditReport.GetTargetResources() == nil {
+		return nil
+	}
+	targetResources := []map[string]interface{}{}
+
+	for _, i := range directoryAuditReport.GetTargetResources() {
+		data := map[string]interface{}{}
+		if i.GetDisplayName() != nil {
+			data["displayName"] = *i.GetDisplayName()
+		}
+		if i.GetId() != nil {
+			data["id"] = *i.GetId()
+		}
+		if i.GetOdataType() != nil {
+			data["@odata.type"] = *i.GetOdataType()
+		}
+		if i.GetGroupType() != nil {
+			data["groupType"] = i.GetGroupType().String()
+		}
+		if i.GetType() != nil {
+			data["type"] = *i.GetType()
+		}
+		if i.GetUserPrincipalName() != nil {
+			data["userPrincipalName"] = *i.GetUserPrincipalName()
+		}
+
+		modifiedProperties := []map[string]interface{}{}
+		for _, m := range i.GetModifiedProperties() {
+			prop := map[string]interface{}{}
+			if m.GetDisplayName() != nil {
+				prop["displayName"] = *m.GetDisplayName()
+			}
+			if m.GetNewValue() != nil {
+				prop["newValue"] = *m.GetNewValue()
+			}
+			if m.GetOldValue() != nil {
+				prop["oldValue"] = *m.GetOldValue()
+			}
+			if m.GetOdataType() != nil {
+				prop["@odata.type"] = *m.GetOdataType()
+			}
+			modifiedProperties = append(modifiedProperties, prop)
+		}
+		data["modifiedProperties"] = modifiedProperties
+
+		targetResources = append(targetResources, data)
+	}
+
+	return targetResources
+}
+
 func (directorySetting *ADDirectorySettingInfo) DirectorySettingValues() []map[string]interface{} {
 	if directorySetting.GetValues() == nil {
 		return nil
@@ -808,6 +947,22 @@ func (user *ADUserInfo) UserMemberOf() []map[string]interface{} {
 
 	members := []map[string]interface{}{}
 	for _, i := range user.GetMemberOf() {
+		member := map[string]interface{}{
+			"@odata.type": i.GetOdataType(),
+			"id":          i.GetId(),
+		}
+		members = append(members, member)
+	}
+	return members
+}
+
+func (device *ADDeviceInfo) DeviceMemberOf() []map[string]interface{} {
+	if device.GetMemberOf() == nil {
+		return nil
+	}
+
+	members := []map[string]interface{}{}
+	for _, i := range device.GetMemberOf() {
 		member := map[string]interface{}{
 			"@odata.type": i.GetOdataType(),
 			"id":          i.GetId(),

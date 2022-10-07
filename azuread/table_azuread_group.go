@@ -15,9 +15,9 @@ import (
 	"github.com/microsoftgraph/msgraph-sdk-go/groups/item/owners"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 
-	"github.com/turbot/steampipe-plugin-sdk/v3/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v3/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v3/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -25,7 +25,7 @@ import (
 func tableAzureAdGroup(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "azuread_group",
-		Description: "Represents an Azure AD user account.",
+		Description: "Represents an Azure AD group.",
 		Get: &plugin.GetConfig{
 			Hydrate: getAdGroup,
 			IgnoreConfig: &plugin.IgnoreConfig{

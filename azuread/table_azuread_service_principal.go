@@ -6,9 +6,9 @@ import (
 	"strings"
 
 	"github.com/iancoleman/strcase"
-	"github.com/turbot/steampipe-plugin-sdk/v3/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v3/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v3/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
 
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
@@ -21,7 +21,7 @@ import (
 func tableAzureAdServicePrincipal(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "azuread_service_principal",
-		Description: "Represents an Azure Active Directory (Azure AD) service principal",
+		Description: "Represents an Azure Active Directory (Azure AD) service principal.",
 		Get: &plugin.GetConfig{
 			Hydrate: getAdServicePrincipal,
 			IgnoreConfig: &plugin.IgnoreConfig{

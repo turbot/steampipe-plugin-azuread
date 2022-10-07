@@ -3,14 +3,14 @@ package azuread
 import (
 	"context"
 
-	"github.com/turbot/steampipe-plugin-sdk/v3/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v3/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
 
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
 	"github.com/microsoftgraph/msgraph-sdk-go/domains"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 
-	"github.com/turbot/steampipe-plugin-sdk/v3/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
 )
 
 //// TABLE DEFINITION
@@ -18,7 +18,7 @@ import (
 func tableAzureAdDomain(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "azuread_domain",
-		Description: "Represents an Azure Active Directory (Azure AD) domain",
+		Description: "Represents an Azure Active Directory (Azure AD) domain.",
 		Get: &plugin.GetConfig{
 			Hydrate: getAdDomain,
 			IgnoreConfig: &plugin.IgnoreConfig{

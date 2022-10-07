@@ -3,9 +3,9 @@ package azuread
 import (
 	"context"
 
-	"github.com/turbot/steampipe-plugin-sdk/v3/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v3/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v3/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -13,7 +13,7 @@ import (
 func tableAzureAdAuthorizationPolicy(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "azuread_authorization_policy",
-		Description: "Represents a policy that can control Azure Active Directory authorization settings",
+		Description: "Represents a policy that can control Azure Active Directory authorization settings.",
 		List: &plugin.ListConfig{
 			Hydrate: listAdAuthorizationPolicies,
 		},

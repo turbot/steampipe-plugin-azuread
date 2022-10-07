@@ -6,10 +6,10 @@ import (
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
 	"github.com/microsoftgraph/msgraph-sdk-go/directoryroles/item/members"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
-	"github.com/turbot/steampipe-plugin-sdk/v3/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v3/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
 
-	"github.com/turbot/steampipe-plugin-sdk/v3/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
 )
 
 //// TABLE DEFINITION
@@ -17,7 +17,7 @@ import (
 func tableAzureAdDirectoryRole(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "azuread_directory_role",
-		Description: "Represents an Azure Active Directory (Azure AD) directory role",
+		Description: "Represents an Azure Active Directory (Azure AD) directory role.",
 		Get: &plugin.GetConfig{
 			Hydrate: getAdDirectoryRole,
 			IgnoreConfig: &plugin.IgnoreConfig{
