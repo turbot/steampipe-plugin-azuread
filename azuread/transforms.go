@@ -1,6 +1,8 @@
 package azuread
 
-import "github.com/microsoftgraph/msgraph-sdk-go/models"
+import (
+	"github.com/microsoftgraph/msgraph-sdk-go/models"
+)
 
 type ADAdminConsentRequestPolicyInfo struct {
 	models.AdminConsentRequestPolicyable
@@ -37,6 +39,10 @@ type ADIdentityProviderInfo struct {
 	models.BuiltInIdentityProvider
 	ClientId     interface{}
 	ClientSecret interface{}
+}
+
+type ADSecurityDefaultsPolicyInfo struct {
+	models.IdentitySecurityDefaultsEnforcementPolicyable
 }
 
 type ADServicePrincipalInfo struct {
