@@ -18,7 +18,7 @@ func tableAzureAdDirectorySetting(_ context.Context) *plugin.Table {
 		Description: "Represents the configurations that can be used to customize the tenant-wide and object-specific restrictions and allowed behavior",
 		Get: &plugin.GetConfig{
 			Hydrate:    getAdDirectorySetting,
-			KeyColumns: plugin.AllColumns([]string{"id", "setting_name"}),
+			KeyColumns: plugin.AllColumns([]string{"id", "name"}),
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listAdDirectorySetting,
@@ -27,11 +27,11 @@ func tableAzureAdDirectorySetting(_ context.Context) *plugin.Table {
 			{Name: "display_name", Type: proto.ColumnType_STRING, Description: "Display name of this group of settings, which comes from the associated template."},
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "Unique identifier for these settings."},
 			{Name: "template_id", Type: proto.ColumnType_STRING, Description: "Unique identifier for the template used to create this group of settings."},
-			{Name: "setting_name", Type: proto.ColumnType_STRING, Description: "Unique identifier for the template used to create this group of settings."},
-			{Name: "setting_value", Type: proto.ColumnType_STRING, Description: "Unique identifier for the template used to create this group of settings."},
+			{Name: "name", Type: proto.ColumnType_STRING, Description: "Name of the setting."},
+			{Name: "value", Type: proto.ColumnType_STRING, Description: "Value of the setting."},
 
 			// Standard columns
-			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Transform: transform.FromField("DisplayName")},
+			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Transform: transform.FromField("Name")},
 			{Name: "tenant_id", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTenant, Hydrate: plugin.HydrateFunc(getTenant).WithCache(), Transform: transform.FromValue()},
 		},
 	}
@@ -65,11 +65,11 @@ func listAdDirectorySetting(ctx context.Context, d *plugin.QueryData, _ *plugin.
 
 		for _, s := range setting.GetValues() {
 			d.StreamListItem(ctx, &ADDirectorySettingInfo{
-				DisplayName:  setting.GetDisplayName(),
-				Id:           setting.GetId(),
-				TemplateId:   setting.GetTemplateId(),
-				SettingName:  s.GetName(),
-				SettingValue: s.GetValue(),
+				DisplayName: setting.GetDisplayName(),
+				Id:          setting.GetId(),
+				TemplateId:  setting.GetTemplateId(),
+				Name:        s.GetName(),
+				Value:       s.GetValue(),
 			})
 		}
 
@@ -89,7 +89,7 @@ func listAdDirectorySetting(ctx context.Context, d *plugin.QueryData, _ *plugin.
 func getAdDirectorySetting(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 
 	directorySettingID := d.KeyColumnQuals["id"].GetStringValue()
-	settingName := d.KeyColumnQuals["setting_name"].GetStringValue()
+	settingName := d.KeyColumnQuals["name"].GetStringValue()
 	if directorySettingID == "" {
 		return nil, nil
 	}
@@ -114,8 +114,9 @@ func getAdDirectorySetting(ctx context.Context, d *plugin.QueryData, h *plugin.H
 			result.DisplayName = setting.GetDisplayName()
 			result.Id = setting.GetId()
 			result.TemplateId = setting.GetTemplateId()
-			result.SettingName = s.GetName()
-			result.SettingValue = s.GetValue()
+			result.Name = s.GetName()
+			result.Value = s.GetValue()
+			break
 		}
 	}
 	return &result, nil

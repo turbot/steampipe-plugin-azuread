@@ -17,39 +17,39 @@ from
   azuread_directory_setting;
 ```
 
-### Check user admin consent workflow is enabled
+### Check if user admin consent workflow is enabled
 
 ```sql
 select
   display_name,
   id,
-  setting_name,
-  setting_value
+  name,
+  value
 from
   azuread_directory_setting
 where
   display_name = 'Consent Policy Settings'
-  and setting_name = 'EnableAdminConsentRequests'
-  and setting_value::bool;
+  and name = 'EnableAdminConsentRequests'
+  and value::bool;
 ```
 
-### Check password protection is enabled for active directory
+### Check if banned password protection is enabled
 
 ```sql
 select
   display_name,
   id,
-  setting_name,
-  setting_value
+  name,
+  value
 from
   azuread_directory_setting
 where
   display_name = 'Password Rule Settings'
   and (
-    setting_name = 'EnableBannedPasswordCheckOnPremises'
-    and setting_value::bool
+    name = 'EnableBannedPasswordCheckOnPremises'
+    and value::bool
   ) and (
-    setting_name = 'BannedPasswordCheckOnPremisesMode'
-    and setting_value = 'Enforced'
+    name = 'BannedPasswordCheckOnPremisesMode'
+    and value = 'Enforced'
   );
 ```

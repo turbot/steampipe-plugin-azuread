@@ -31,11 +31,11 @@ type ADDirectoryAuditReportInfo struct {
 
 type ADDirectorySettingInfo struct {
 	// models.GroupSettingable
-	DisplayName  *string
-	Id           *string
-	TemplateId   *string
-	SettingName  *string
-	SettingValue *string
+	DisplayName *string
+	Id          *string
+	TemplateId  *string
+	Name        *string
+	Value       *string
 }
 
 type ADGroupInfo struct {
