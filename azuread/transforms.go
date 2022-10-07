@@ -4,6 +4,10 @@ import (
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 )
 
+type ADAdminConsentRequestPolicyInfo struct {
+	models.AdminConsentRequestPolicyable
+}
+
 type ADApplicationInfo struct {
 	models.Applicationable
 	IsAuthorizationServiceEnabled interface{}
@@ -15,6 +19,10 @@ type ADAuthorizationPolicyInfo struct {
 
 type ADConditionalAccessPolicyInfo struct {
 	models.ConditionalAccessPolicyable
+}
+
+type ADDeviceInfo struct {
+	models.Deviceable
 }
 
 type ADDirectoryAuditReportInfo struct {
@@ -50,8 +58,30 @@ type ADUserInfo struct {
 	RefreshTokensValidFromDateTime interface{}
 }
 
-type ADDeviceInfo struct {
-	models.Deviceable
+func (adminConsentRequestPolicy *ADAdminConsentRequestPolicyInfo) AdminConsentRequestPolicyReviewers() []map[string]interface{} {
+	if adminConsentRequestPolicy.GetReviewers() == nil {
+		return nil
+	}
+	reviewers := []map[string]interface{}{}
+
+	for _, a := range adminConsentRequestPolicy.GetReviewers() {
+		data := map[string]interface{}{}
+		if a.GetOdataType() != nil {
+			data["@odata.type"] = *a.GetOdataType()
+		}
+		if a.GetQuery() != nil {
+			data["query"] = *a.GetQuery()
+		}
+		if a.GetQueryRoot() != nil {
+			data["queryRoot"] = *a.GetQueryRoot()
+		}
+		if a.GetQueryType() != nil {
+			data["queryType"] = *a.GetQueryType()
+		}
+		reviewers = append(reviewers, data)
+	}
+
+	return reviewers
 }
 
 func (application *ADApplicationInfo) ApplicationAPI() map[string]interface{} {
@@ -475,6 +505,22 @@ func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessP
 		data["value"] = conditionalAccessPolicy.GetSessionControls().GetSignInFrequency().GetValue()
 	}
 	return data
+}
+
+func (device *ADDeviceInfo) DeviceMemberOf() []map[string]interface{} {
+	if device.GetMemberOf() == nil {
+		return nil
+	}
+
+	members := []map[string]interface{}{}
+	for _, i := range device.GetMemberOf() {
+		member := map[string]interface{}{
+			"@odata.type": i.GetOdataType(),
+			"id":          i.GetId(),
+		}
+		members = append(members, member)
+	}
+	return members
 }
 
 func (directoryAuditReport *ADDirectoryAuditReportInfo) DirectoryAuditAdditionalDetails() []map[string]interface{} {
@@ -927,22 +973,6 @@ func (user *ADUserInfo) UserMemberOf() []map[string]interface{} {
 
 	members := []map[string]interface{}{}
 	for _, i := range user.GetMemberOf() {
-		member := map[string]interface{}{
-			"@odata.type": i.GetOdataType(),
-			"id":          i.GetId(),
-		}
-		members = append(members, member)
-	}
-	return members
-}
-
-func (device *ADDeviceInfo) DeviceMemberOf() []map[string]interface{} {
-	if device.GetMemberOf() == nil {
-		return nil
-	}
-
-	members := []map[string]interface{}{}
-	for _, i := range device.GetMemberOf() {
 		member := map[string]interface{}{
 			"@odata.type": i.GetOdataType(),
 			"id":          i.GetId(),
