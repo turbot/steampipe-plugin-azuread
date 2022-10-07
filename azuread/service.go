@@ -16,7 +16,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	a "github.com/microsoft/kiota-authentication-azure-go"
-	msgraphbetasdkgo "github.com/microsoftgraph/msgraph-beta-sdk-go"
 	msgraphsdkgo "github.com/microsoftgraph/msgraph-sdk-go"
 	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
 )
@@ -29,57 +28,13 @@ GetGraphClient creates a graph service client configured from (~/.steampipe/conf
 4. CLI
 */
 func GetGraphClient(ctx context.Context, d *plugin.QueryData) (*msgraphsdkgo.GraphServiceClient, *msgraphsdkgo.GraphRequestAdapter, error) {
+	logger := plugin.Logger(ctx)
 
 	// Have we already created and cached the session?
 	sessionCacheKey := "GetGraphClient"
 	if cachedData, ok := d.ConnectionManager.Cache.Get(sessionCacheKey); ok {
 		return cachedData.(*msgraphsdkgo.GraphServiceClient), nil, nil
 	}
-
-	auth, err := getAzureIdentityAuthenticationProvider(ctx, d)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	adapter, err := msgraphsdkgo.NewGraphRequestAdapter(auth)
-	if err != nil {
-		return nil, nil, fmt.Errorf("error creating graph adapter: %v", err)
-	}
-	client := msgraphsdkgo.NewGraphServiceClient(adapter)
-
-	// Save session into cache
-	d.ConnectionManager.Cache.Set(sessionCacheKey, client)
-
-	return client, adapter, nil
-}
-
-func GetGraphBetaClient(ctx context.Context, d *plugin.QueryData) (*msgraphbetasdkgo.GraphServiceClient, *msgraphbetasdkgo.GraphRequestAdapter, error) {
-
-	// Have we already created and cached the session?
-	sessionCacheKey := "GetGraphBetaClient"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(sessionCacheKey); ok {
-		return cachedData.(*msgraphbetasdkgo.GraphServiceClient), nil, nil
-	}
-
-	auth, err := getAzureIdentityAuthenticationProvider(ctx, d)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	adapter, err := msgraphbetasdkgo.NewGraphRequestAdapter(auth)
-	if err != nil {
-		return nil, nil, fmt.Errorf("error creating graph adapter: %v", err)
-	}
-	client := msgraphbetasdkgo.NewGraphServiceClient(adapter)
-
-	// Save session into cache
-	d.ConnectionManager.Cache.Set(sessionCacheKey, client)
-
-	return client, adapter, nil
-}
-
-func getAzureIdentityAuthenticationProvider(ctx context.Context, d *plugin.QueryData) (*a.AzureIdentityAuthenticationProvider, error) {
-	logger := plugin.Logger(ctx)
 
 	var tenantID, environment, clientID, clientSecret, certificatePath, certificatePassword string
 
@@ -144,8 +99,8 @@ func getAzureIdentityAuthenticationProvider(ctx context.Context, d *plugin.Query
 			&azidentity.AzureCLICredentialOptions{},
 		)
 		if err != nil {
-			logger.Error("getAzureIdentityAuthenticationProvider", "cli_credential_error", err)
-			return nil, err
+			logger.Error("GetGraphClient", "cli_credential_error", err)
+			return nil, nil, err
 		}
 	} else if tenantID != "" && clientID != "" && clientSecret != "" { // Client secret authentication
 		cred, err = azidentity.NewClientSecretCredential(
@@ -159,14 +114,14 @@ func getAzureIdentityAuthenticationProvider(ctx context.Context, d *plugin.Query
 			},
 		)
 		if err != nil {
-			logger.Error("getAzureIdentityAuthenticationProvider", "client_secret_credential_error", err)
-			return nil, err
+			logger.Error("GetGraphClient", "client_secret_credential_error", err)
+			return nil, nil, err
 		}
 	} else if tenantID != "" && clientID != "" && certificatePath != "" { // Client certificate authentication
 		// Load certificate from given path
 		loadFile, err := os.ReadFile(certificatePath)
 		if err != nil {
-			return nil, fmt.Errorf("error reading certificate from %s: %v", certificatePath, err)
+			return nil, nil, fmt.Errorf("error reading certificate from %s: %v", certificatePath, err)
 		}
 
 		var certs []*x509.Certificate
@@ -178,7 +133,7 @@ func getAzureIdentityAuthenticationProvider(ctx context.Context, d *plugin.Query
 		}
 
 		if err != nil {
-			return nil, fmt.Errorf("error parsing certificate from %s: %v", certificatePath, err)
+			return nil, nil, fmt.Errorf("error parsing certificate from %s: %v", certificatePath, err)
 		}
 
 		cred, err = azidentity.NewClientCertificateCredential(
@@ -193,25 +148,34 @@ func getAzureIdentityAuthenticationProvider(ctx context.Context, d *plugin.Query
 			},
 		)
 		if err != nil {
-			logger.Error("getAzureIdentityAuthenticationProvider", "client_certificate_credential_error", err)
-			return nil, err
+			logger.Error("GetGraphClient", "client_certificate_credential_error", err)
+			return nil, nil, err
 		}
 	} else if enableMsi { // Managed identity authentication
 		cred, err = azidentity.NewManagedIdentityCredential(
 			&azidentity.ManagedIdentityCredentialOptions{},
 		)
 		if err != nil {
-			logger.Error("getAzureIdentityAuthenticationProvider", "managed_identity_credential_error", err)
-			return nil, err
+			logger.Error("GetGraphClient", "managed_identity_credential_error", err)
+			return nil, nil, err
 		}
 	}
 
 	auth, err := a.NewAzureIdentityAuthenticationProvider(cred)
 	if err != nil {
-		return nil, fmt.Errorf("error creating authentication provider: %v", err)
+		return nil, nil, fmt.Errorf("error creating authentication provider: %v", err)
 	}
 
-	return auth, nil
+	adapter, err := msgraphsdkgo.NewGraphRequestAdapter(auth)
+	if err != nil {
+		return nil, nil, fmt.Errorf("error creating graph adapter: %v", err)
+	}
+	client := msgraphsdkgo.NewGraphServiceClient(adapter)
+
+	// Save session into cache
+	d.ConnectionManager.Cache.Set(sessionCacheKey, client)
+
+	return client, adapter, nil
 }
 
 // https://github.com/Azure/go-autorest/blob/3fb5326fea196cd5af02cf105ca246a0fba59021/autorest/azure/cli/token.go#L126

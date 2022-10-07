@@ -1,7 +1,6 @@
 package azuread
 
 import (
-	betaModels "github.com/microsoftgraph/msgraph-beta-sdk-go/models"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 )
 
@@ -35,7 +34,7 @@ type ADIdentityProviderInfo struct {
 }
 
 type ADSecurityDefaultsPolicyInfo struct {
-	betaModels.IdentitySecurityDefaultsEnforcementPolicyable
+	models.IdentitySecurityDefaultsEnforcementPolicyable
 }
 
 type ADServicePrincipalInfo struct {

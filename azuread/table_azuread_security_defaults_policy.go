@@ -35,7 +35,7 @@ func tableAzureAdSecurityDefaultsPolicy(_ context.Context) *plugin.Table {
 
 func listAdSecurityDefaultPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	// Create client
-	client, _, err := GetGraphBetaClient(ctx, d)
+	client, _, err := GetGraphClient(ctx, d)
 	if err != nil {
 		plugin.Logger(ctx).Error("azuread_security_defaults_policy.listAdSecurityDefaultPolicies", "connection_error", err)
 		return nil, err
@@ -43,7 +43,7 @@ func listAdSecurityDefaultPolicies(ctx context.Context, d *plugin.QueryData, _ *
 
 	result, err := client.Policies().IdentitySecurityDefaultsEnforcementPolicy().Get(ctx, nil)
 	if err != nil {
-		errObj := getBetaErrorObject(err)
+		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("listAdSecurityDefaultPolicies", "list_security_defaults_policy_error", errObj)
 		return nil, errObj
 	}
