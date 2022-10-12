@@ -35,7 +35,7 @@ func tableAzureAdAuthorizationPolicy(_ context.Context) *plugin.Table {
 			{Name: "default_user_role_permissions", Type: proto.ColumnType_JSON, Description: "Specifies certain customizable permissions for default user role.", Transform: transform.FromMethod("AuthorizationPolicyDefaultUserRolePermissions")},
 
 			// Standard columns
-			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Transform: transform.FromMethod("GetId")},
+			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Transform: transform.FromMethod("GetDisplayName")},
 			{Name: "tenant_id", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTenant, Hydrate: plugin.HydrateFunc(getTenant).WithCache(), Transform: transform.FromValue()},
 		},
 	}
