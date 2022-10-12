@@ -8,7 +8,7 @@ Represents the policy for enabling or disabling the Azure AD admin consent workf
 
 ```sql
 select
-  id,
+  title,
   is_enabled,
   version
 from
@@ -19,7 +19,7 @@ from
 
 ```sql
 select
-  id,
+  title,
   is_enabled,
   version
 from
@@ -32,7 +32,7 @@ where
 
 ```sql
 select
-  p.id,
+  p.title,
   p.is_enabled,
   u.display_name as user_display_name,
   u.user_principal_name
