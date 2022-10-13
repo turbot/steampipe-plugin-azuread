@@ -1,3 +1,17 @@
+## v0.8.0 [2022-10-13]
+
+_What's new?_
+
+- New tables added
+  - [azuread_admin_consent_request_policy](https://hub.steampipe.io/plugins/turbot/azuread/tables/azuread_admin_consent_request_policy) ([#73](https://github.com/turbot/steampipe-plugin-azuread/pull/73))
+  - [azuread_directory_audit_report](https://hub.steampipe.io/plugins/turbot/azuread/tables/azuread_directory_audit_report) ([#72](https://github.com/turbot/steampipe-plugin-azuread/pull/72))
+  - [azuread_directory_setting](https://hub.steampipe.io/plugins/turbot/azuread/tables/azuread_directory_setting) ([#75](https://github.com/turbot/steampipe-plugin-azuread/pull/75))
+  - [azuread_security_defaults_policy](https://hub.steampipe.io/plugins/turbot/azuread/tables/azuread_security_defaults_policy) ([#77](https://github.com/turbot/steampipe-plugin-azuread/pull/77))
+
+_Bug fixes_
+
+- Fixed default page size in all tables. ([#85](https://github.com/turbot/steampipe-plugin-azuread/pull/85))
+
 ## v0.7.0 [2022-09-29]
 
 _What's new?_
