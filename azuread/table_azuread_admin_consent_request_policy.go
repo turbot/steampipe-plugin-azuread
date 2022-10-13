@@ -31,7 +31,7 @@ func tableAzureAdAdminConsentRequestPolicy(_ context.Context) *plugin.Table {
 			{Name: "reviewers", Type: proto.ColumnType_JSON, Description: "The list of reviewers for the admin consent.", Transform: transform.FromMethod("AdminConsentRequestPolicyReviewers")},
 
 			// Standard columns
-			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Default: "adminConsentRequestPolicy"},
+			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Default: "Admin Consent Request Policy"},
 			{Name: "tenant_id", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTenant, Hydrate: plugin.HydrateFunc(getTenant).WithCache(), Transform: transform.FromValue()},
 		},
 	}
