@@ -1,3 +1,9 @@
+## v0.8.1 [2022-10-21]
+
+_Bug fixes_
+
+- Disabled caching of Graph client to avoid errors when running consecutive queries for some tables. ([#90](https://github.com/turbot/steampipe-plugin-azuread/pull/90))
+
 ## v0.8.0 [2022-10-13]
 
 _What's new?_
