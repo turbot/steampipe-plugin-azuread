@@ -1,10 +1,9 @@
 ---
 name: Feature request - New table
 about: Suggest a new table for this project
-title: Add table azuread_<service>_<resource>
+title: Add table azuread_<resource>
 labels: enhancement, new table
 assignees: ''
-
 ---
 
 **References**
