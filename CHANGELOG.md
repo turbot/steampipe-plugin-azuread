@@ -1,3 +1,9 @@
+## v0.8.2 [2022-10-28]
+
+_Bug fixes_
+
+- Updated the `docs/index.md` file to add the missing permission `Policy.Read.All` which is required to query `azuread_authorization_policy` table. ([#92](https://github.com/turbot/steampipe-plugin-azuread/pull/92))
+
 ## v0.8.1 [2022-10-21]
 
 _Bug fixes_
