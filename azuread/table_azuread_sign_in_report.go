@@ -37,7 +37,7 @@ func tableAzureAdSignInReport(_ context.Context) *plugin.Table {
 			{Name: "user_id", Type: proto.ColumnType_STRING, Description: "ID of the user that initiated the sign-in.", Transform: transform.FromMethod("GetUserId")},
 			{Name: "app_id", Type: proto.ColumnType_STRING, Description: "Unique GUID representing the app ID in the Azure Active Directory.", Transform: transform.FromMethod("GetAppId")},
 			{Name: "app_display_name", Type: proto.ColumnType_STRING, Description: "App name displayed in the Azure Portal.", Transform: transform.FromMethod("GetAppDisplayName")},
-			{Name: "ip_address", Type: proto.ColumnType_IPADDR, Description: "IP address of the client used to sign in.", Transform: transform.FromMethod("GetIpAddress")},
+			{Name: "ip_address", Type: proto.ColumnType_STRING, Description: "IP address of the client used to sign in.", Transform: transform.FromMethod("GetIpAddress")},
 			{Name: "client_app_used", Type: proto.ColumnType_STRING, Description: "Identifies the legacy client used for sign-in activity.", Transform: transform.FromMethod("GetClientAppUsed")},
 			{Name: "correlation_id", Type: proto.ColumnType_STRING, Description: "The request ID sent from the client when the sign-in is initiated; used to troubleshoot sign-in activity.", Transform: transform.FromMethod("GetCorrelationId")},
 			{Name: "conditional_access_status", Type: proto.ColumnType_STRING, Description: "Reports status of an activated conditional access policy. Possible values are: success, failure, notApplied, and unknownFutureValue.", Transform: transform.FromMethod("GetConditionalAccessStatus")},
