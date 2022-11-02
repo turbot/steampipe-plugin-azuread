@@ -1,3 +1,9 @@
+## v0.8.3 [2022-11-02]
+
+_Bug fixes_
+
+- Updated `ip_address` column type to string in `azuread_sign_in_report` table to handle partial IP addresses. ([#95](https://github.com/turbot/steampipe-plugin-azuread/pull/95))
+
 ## v0.8.2 [2022-10-28]
 
 _Bug fixes_
