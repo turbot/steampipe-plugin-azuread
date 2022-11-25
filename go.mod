@@ -10,7 +10,7 @@ require (
 	github.com/microsoft/kiota-serialization-json-go v0.5.6
 	github.com/microsoftgraph/msgraph-sdk-go v0.37.0
 	github.com/microsoftgraph/msgraph-sdk-go-core v0.28.0
-	github.com/turbot/steampipe-plugin-sdk/v4 v4.1.7
+	github.com/turbot/steampipe-plugin-sdk/v4 v4.1.8
 )
 
 require (
