@@ -62,6 +62,9 @@ type ADSignInReportInfo struct {
 	models.SignInable
 }
 
+type ADLicenseInfo struct {
+	models.LicenseDetailsable
+}
 type ADUserInfo struct {
 	models.Userable
 	RefreshTokensValidFromDateTime interface{}
@@ -661,6 +664,30 @@ func (directoryAuditReport *ADDirectoryAuditReportInfo) DirectoryAuditTargetReso
 	}
 
 	return targetResources
+}
+
+func (application *ADLicenseInfo) ServicePlans() []map[string]interface{} {
+	if application.GetServicePlans() == nil {
+		return nil
+	}
+
+	servicePlans := []map[string]interface{}{}
+	for _, p := range application.GetServicePlans() {
+		serviceplan := map[string]interface{}{}
+		if p.GetProvisioningStatus() != nil {
+			serviceplan["provisioningStatus"] = *p.GetProvisioningStatus()
+		}
+		if p.GetServicePlanId() != nil {
+			serviceplan["servicePlanId"] = *p.GetServicePlanId()
+		}
+		if p.GetServicePlanName() != nil {
+			serviceplan["servicePlanName"] = *p.GetServicePlanName()
+		}
+
+		servicePlans = append(servicePlans, serviceplan)
+	}
+
+	return servicePlans
 }
 
 // func (directorySetting *ADDirectorySettingInfo) DirectorySettingValues() []map[string]interface{} {
