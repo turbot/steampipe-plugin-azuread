@@ -21,10 +21,10 @@ func tableAzureAdLicense(_ context.Context) *plugin.Table {
 		},
 
 		Columns: []*plugin.Column{
-			{Name: "id", Type: proto.ColumnType_STRING, Description: "Display name for this policy.", Transform: transform.FromMethod("GetId")},
-			{Name: "sku_id", Type: proto.ColumnType_STRING, Description: "Display name for this policy.", Transform: transform.FromMethod("GetSkuId")},
-			{Name: "sku_part_number", Type: proto.ColumnType_STRING, Description: "Display name for this policy.", Transform: transform.FromMethod("GetSkuPartNumber")},
-			{Name: "service_plans", Type: proto.ColumnType_JSON, Description: "Display name for this policy.", Transform: transform.FromMethod("ServicePlans")},
+			{Name: "id", Type: proto.ColumnType_STRING, Description: "Unique ID representing the license.", Transform: transform.FromMethod("GetId")},
+			{Name: "sku_id", Type: proto.ColumnType_STRING, Description: "The SKU id of the license.", Transform: transform.FromMethod("GetSkuId")},
+			{Name: "sku_part_number", Type: proto.ColumnType_STRING, Description: "The SKU name of the license..", Transform: transform.FromMethod("GetSkuPartNumber")},
+			{Name: "service_plans", Type: proto.ColumnType_JSON, Description: "Service plan details of the license.", Transform: transform.FromMethod("ServicePlans")},
 		},
 	}
 }
