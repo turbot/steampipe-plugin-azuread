@@ -39,7 +39,7 @@ func listAdLicenses(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 		return nil, err
 	}
 
-	result, err := client.UsersById("steampipe@turbotoffice.onmicrosoft.com").LicenseDetails().Get(ctx, nil)
+	result, err := client.Me().LicenseDetails().Get(ctx, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("azuread_license.listAdLicenses", "api_error", errObj)
