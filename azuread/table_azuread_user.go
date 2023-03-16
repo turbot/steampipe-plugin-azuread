@@ -249,6 +249,9 @@ func getUserAuthenticationMethods(ctx context.Context, d *plugin.QueryData, h *p
 	auth, err := client.UsersById(*data.GetId()).Authentication().Methods().Get(ctx, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
+		if errObj.Code == "accessDenied" {
+			return nil, nil
+		}
 		plugin.Logger(ctx).Error("azuread_user.getUserAuthentication", "api_error", errObj)
 		return nil, errObj
 	}
