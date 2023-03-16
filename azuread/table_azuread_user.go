@@ -249,6 +249,8 @@ func getUserAuthenticationMethods(ctx context.Context, d *plugin.QueryData, h *p
 	auth, err := client.UsersById(*data.GetId()).Authentication().Methods().Get(ctx, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
+
+		// for testing
 		if errObj.Code == "accessDenied" {
 			return nil, nil
 		}
