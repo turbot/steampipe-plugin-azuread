@@ -8,7 +8,6 @@ import (
 	"github.com/iancoleman/strcase"
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
-
 	"github.com/microsoftgraph/msgraph-sdk-go/users"
 	"github.com/microsoftgraph/msgraph-sdk-go/users/item"
 
@@ -50,10 +49,6 @@ func tableAzureAdUser(_ context.Context) *plugin.Table {
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "The unique identifier for the user. Should be treated as an opaque identifier.", Transform: transform.FromMethod("GetId")},
 			{Name: "user_principal_name", Type: proto.ColumnType_STRING, Description: "Principal email of the active directory user.", Transform: transform.FromMethod("GetUserPrincipalName")},
 			{Name: "account_enabled", Type: proto.ColumnType_BOOL, Description: "True if the account is enabled; otherwise, false.", Transform: transform.FromMethod("GetAccountEnabled")},
-
-			// {Name: "authentication", Type: proto.ColumnType_JSON, Description: "True if the account is enabled; otherwise, false.", Transform: transform.From(userAuthentication)},
-			{Name: "authentication", Type: proto.ColumnType_JSON, Description: "True if the account is enabled; otherwise, false.", Transform: transform.FromMethod("GetAuthentication")},
-
 			{Name: "user_type", Type: proto.ColumnType_STRING, Description: "A string value that can be used to classify user types in your directory.", Transform: transform.FromMethod("GetUserType")},
 			{Name: "given_name", Type: proto.ColumnType_STRING, Description: "The given name (first name) of the user.", Transform: transform.FromMethod("GetGivenName")},
 			{Name: "surname", Type: proto.ColumnType_STRING, Description: "Family name or last name of the active directory user.", Transform: transform.FromMethod("GetSurname")},
@@ -70,6 +65,7 @@ func tableAzureAdUser(_ context.Context) *plugin.Table {
 			{Name: "usage_location", Type: proto.ColumnType_STRING, Description: "A two letter country code (ISO standard 3166), required for users that will be assigned licenses due to legal requirement to check for availability of services in countries.", Transform: transform.FromMethod("GetUsageLocation")},
 
 			// Json fields
+			{Name: "authentication_methods", Type: proto.ColumnType_JSON, Description: "List of authentication methods registered to a user.", Transform: transform.FromValue(), Hydrate: getUserAuthenticationMethods},
 			{Name: "member_of", Type: proto.ColumnType_JSON, Description: "A list the groups and directory roles that the user is a direct member of.", Transform: transform.FromMethod("UserMemberOf")},
 			{Name: "im_addresses", Type: proto.ColumnType_JSON, Description: "The instant message voice over IP (VOIP) session initiation protocol (SIP) addresses for the user.", Transform: transform.FromMethod("GetImAddresses")},
 			{Name: "other_mails", Type: proto.ColumnType_JSON, Description: "A list of additional email addresses for the user.", Transform: transform.FromMethod("GetOtherMails")},
@@ -241,48 +237,24 @@ func adUserTitle(_ context.Context, d *transform.TransformData) (interface{}, er
 	return title, nil
 }
 
-func userAuthentication(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	data := d.HydrateItem.(*ADUserInfo)
-	if data == nil {
-		return nil, nil
+func getUserAuthenticationMethods(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	client, _, err := GetGraphClient(ctx, d)
+	if err != nil {
+		plugin.Logger(ctx).Error("azuread_user.getUserAuthentication", "connection_error", err)
+		return nil, err
 	}
 
-	auth := data.GetAuthentication()
+	data := h.Item.(*ADUserInfo)
+
+	auth, err := client.UsersById(*data.GetId()).Authentication().Methods().Get(ctx, nil)
+	if err != nil {
+		errObj := getErrorObject(err)
+		plugin.Logger(ctx).Error("azuread_user.getUserAuthentication", "api_error", errObj)
+		return nil, errObj
+	}
 
 	return auth, nil
 }
-
-// func getUserAuthentication(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-// 	client, _, err := GetGraphClient(ctx, d)
-// 	if err != nil {
-// 		plugin.Logger(ctx).Error("azuread_user.getAdUser", "connection_error", err)
-// 		return nil, err
-// 	}
-
-// 	data := h.Item.(*ADUserInfo)
-
-// 	// Check for query context and requests only for queried columns
-// 	givenColumns := d.QueryContext.Columns
-// 	selectColumns, expandColumns := buildUserRequestFields(ctx, givenColumns)
-
-// 	input := &item.UserItemRequestBuilderGetQueryParameters{}
-// 	input.Select = selectColumns
-// 	input.Expand = expandColumns
-
-// 	options := &authItem.AuthenticationMethodConfigurationItemRequestBuilderGetRequestConfiguration{}
-
-// 	auth, err := client.AuthenticationMethodConfigurationsById(*data.GetId()).Get(ctx, options)
-// 	if err != nil {
-// 		errObj := getErrorObject(err)
-// 		plugin.Logger(ctx).Error("getAdUser", "get_user_error", errObj)
-// 		if strings.Contains(errObj.Message, "No HTTP resource was found that matches the request URI") {
-// 			return nil, nil
-// 		}
-// 		return nil, errObj
-// 	}
-
-// 	return auth, nil
-// }
 
 func buildQueryFilter(equalQuals plugin.KeyColumnEqualsQualMap) []string {
 	filters := []string{}
