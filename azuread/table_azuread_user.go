@@ -10,6 +10,7 @@ import (
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/microsoftgraph/msgraph-sdk-go/users"
 	"github.com/microsoftgraph/msgraph-sdk-go/users/item"
+	"github.com/microsoftgraph/msgraph-sdk-go/users/item/settings"
 
 	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
@@ -65,6 +66,7 @@ func tableAzureAdUser(_ context.Context) *plugin.Table {
 			{Name: "usage_location", Type: proto.ColumnType_STRING, Description: "A two letter country code (ISO standard 3166), required for users that will be assigned licenses due to legal requirement to check for availability of services in countries.", Transform: transform.FromMethod("GetUsageLocation")},
 
 			// Json fields
+			{Name: "settings", Type: proto.ColumnType_JSON, Description: "The current user settings for content discovery.", Transform: transform.FromValue(), Hydrate: getUserSettings},
 			{Name: "member_of", Type: proto.ColumnType_JSON, Description: "A list the groups and directory roles that the user is a direct member of.", Transform: transform.FromMethod("UserMemberOf")},
 			{Name: "im_addresses", Type: proto.ColumnType_JSON, Description: "The instant message voice over IP (VOIP) session initiation protocol (SIP) addresses for the user.", Transform: transform.FromMethod("GetImAddresses")},
 			{Name: "other_mails", Type: proto.ColumnType_JSON, Description: "A list of additional email addresses for the user.", Transform: transform.FromMethod("GetOtherMails")},
@@ -234,6 +236,32 @@ func adUserTitle(_ context.Context, d *transform.TransformData) (interface{}, er
 	}
 
 	return title, nil
+}
+
+func getUserSettings(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	client, _, err := GetGraphClient(ctx, d)
+	if err != nil {
+		plugin.Logger(ctx).Error("azuread_user.getUserSettings", "connection_error", err)
+		return nil, err
+	}
+
+	data := h.Item.(*ADUserInfo)
+
+	params := settings.SettingsRequestBuilderGetRequestConfiguration{}
+
+	settings, err := client.UsersById(*data.GetId()).Settings().Get(ctx, &params)
+	if err != nil {
+		errObj := getErrorObject(err)
+
+		// for testing
+		if errObj.Code == "ErrorInvalidUser" {
+			return nil, nil
+		}
+		plugin.Logger(ctx).Error("azuread_user.getUserSettings", "api_error", errObj)
+		return nil, errObj
+	}
+
+	return settings, nil
 }
 
 func buildQueryFilter(equalQuals plugin.KeyColumnEqualsQualMap) []string {
