@@ -6,10 +6,10 @@ import (
 	"strings"
 
 	"github.com/iancoleman/strcase"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
 	"github.com/microsoftgraph/msgraph-sdk-go/identity/conditionalaccess/policies"
@@ -94,7 +94,7 @@ func listAdConditionalAccessPolicies(ctx context.Context, d *plugin.QueryData, _
 		}
 	}
 
-	equalQuals := d.KeyColumnQuals
+	equalQuals := d.EqualsQuals
 	filter := buildConditionalAccessPolicyQueryFilter(equalQuals)
 
 	if len(filter) > 0 {
@@ -125,7 +125,7 @@ func listAdConditionalAccessPolicies(ctx context.Context, d *plugin.QueryData, _
 		d.StreamListItem(ctx, &ADConditionalAccessPolicyInfo{policy})
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
-		return d.QueryStatus.RowsRemaining(ctx) != 0
+		return d.RowsRemaining(ctx) != 0
 	})
 	if err != nil {
 		plugin.Logger(ctx).Error("listAdConditionalAccessPolicies", "paging_error", err)
@@ -139,7 +139,7 @@ func listAdConditionalAccessPolicies(ctx context.Context, d *plugin.QueryData, _
 
 func getAdConditionalAccessPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 
-	conditionalAccessPolicyId := d.KeyColumnQuals["id"].GetStringValue()
+	conditionalAccessPolicyId := d.EqualsQuals["id"].GetStringValue()
 	if conditionalAccessPolicyId == "" {
 		return nil, nil
 	}

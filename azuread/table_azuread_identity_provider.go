@@ -6,14 +6,14 @@ import (
 	"strings"
 
 	"github.com/iancoleman/strcase"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
 	"github.com/microsoftgraph/msgraph-sdk-go/identity/identityproviders"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 )
 
 //// TABLE DEFINITION
@@ -74,7 +74,7 @@ func listAdIdentityProviders(ctx context.Context, d *plugin.QueryData, _ *plugin
 	// }
 
 	var queryFilter string
-	equalQuals := d.KeyColumnQuals
+	equalQuals := d.EqualsQuals
 	filter := buildIdentityProviderQueryFilter(equalQuals)
 
 	if equalQuals["filter"] != nil {
@@ -114,7 +114,7 @@ func listAdIdentityProviders(ctx context.Context, d *plugin.QueryData, _ *plugin
 		d.StreamListItem(ctx, &ADIdentityProviderInfo{*identityProvider, clientID, clientSecret})
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
-		return d.QueryStatus.RowsRemaining(ctx) != 0
+		return d.RowsRemaining(ctx) != 0
 	})
 	if err != nil {
 		plugin.Logger(ctx).Error("listAdIdentityProviders", "paging_error", err)

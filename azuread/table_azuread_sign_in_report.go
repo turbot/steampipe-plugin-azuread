@@ -7,9 +7,9 @@ import (
 	"github.com/microsoftgraph/msgraph-sdk-go/auditlogs/signins"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -111,7 +111,7 @@ func listAdSignInReports(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 		d.StreamListItem(ctx, &ADSignInReportInfo{signIn})
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
-		return d.QueryStatus.RowsRemaining(ctx) != 0
+		return d.RowsRemaining(ctx) != 0
 	})
 	if err != nil {
 		plugin.Logger(ctx).Error("listAdSignInReports", "paging_error", err)
@@ -124,7 +124,7 @@ func listAdSignInReports(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 //// HYDRATE FUNCTIONS
 
 func getAdSignInReport(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	signInID := d.KeyColumnQuals["id"].GetStringValue()
+	signInID := d.EqualsQuals["id"].GetStringValue()
 	if signInID == "" {
 		return nil, nil
 	}

@@ -11,9 +11,9 @@ import (
 	"github.com/microsoftgraph/msgraph-sdk-go/auditlogs/directoryaudits"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -91,7 +91,7 @@ func listAdDirectoryAuditReports(ctx context.Context, d *plugin.QueryData, _ *pl
 		}
 	}
 
-	equalQuals := d.KeyColumnQuals
+	equalQuals := d.EqualsQuals
 
 	var queryFilter string
 	filter := buildDirectoryAuditQueryFilter(equalQuals)
@@ -153,7 +153,7 @@ func listAdDirectoryAuditReports(ctx context.Context, d *plugin.QueryData, _ *pl
 		d.StreamListItem(ctx, &ADDirectoryAuditReportInfo{directoryAudit})
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
-		return d.QueryStatus.RowsRemaining(ctx) != 0
+		return d.RowsRemaining(ctx) != 0
 	})
 	if err != nil {
 		plugin.Logger(ctx).Error("listAdDirectoryAuditReports", "paging_error", err)
@@ -166,7 +166,7 @@ func listAdDirectoryAuditReports(ctx context.Context, d *plugin.QueryData, _ *pl
 //// HYDRATE FUNCTIONS
 
 func getAdDirectoryAuditReport(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	directoryAuditID := d.KeyColumnQuals["id"].GetStringValue()
+	directoryAuditID := d.EqualsQuals["id"].GetStringValue()
 	if directoryAuditID == "" {
 		return nil, nil
 	}

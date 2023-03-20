@@ -11,9 +11,9 @@ import (
 	"github.com/microsoftgraph/msgraph-sdk-go/users"
 	"github.com/microsoftgraph/msgraph-sdk-go/users/item"
 
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -102,7 +102,7 @@ func listAdUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		}
 	}
 
-	equalQuals := d.KeyColumnQuals
+	equalQuals := d.EqualsQuals
 	quals := d.Quals
 
 	// Check for query context and requests only for queried columns
@@ -152,7 +152,7 @@ func listAdUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		d.StreamListItem(ctx, &ADUserInfo{user, refreshTokensValidFromDateTime})
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
-		return d.QueryStatus.RowsRemaining(ctx) != 0
+		return d.RowsRemaining(ctx) != 0
 	})
 	if err != nil {
 		plugin.Logger(ctx).Error("listAdUsers", "paging_error", err)
@@ -173,7 +173,7 @@ func getAdUser(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) 
 		return nil, err
 	}
 
-	userId := d.KeyColumnQuals["id"].GetStringValue()
+	userId := d.EqualsQuals["id"].GetStringValue()
 	if userId == "" {
 		return nil, nil
 	}
