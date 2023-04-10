@@ -12,7 +12,7 @@ By default, all entities inherit the preset defaults.
 select
   display_name,
   id,
-  values
+  value
 from
   azuread_directory_setting;
 ```

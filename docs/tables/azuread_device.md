@@ -43,5 +43,5 @@ select
 from
   azuread_device
 where
-  not is_complaint;
+  not is_compliant;
 ```
