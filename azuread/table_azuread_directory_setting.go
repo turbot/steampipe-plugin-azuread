@@ -5,9 +5,9 @@ import (
 
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -74,7 +74,7 @@ func listAdDirectorySetting(ctx context.Context, d *plugin.QueryData, _ *plugin.
 		}
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
-		return d.QueryStatus.RowsRemaining(ctx) != 0
+		return d.RowsRemaining(ctx) != 0
 	})
 	if err != nil {
 		plugin.Logger(ctx).Error("listAdDirectorySetting", "paging_error", err)
@@ -88,8 +88,8 @@ func listAdDirectorySetting(ctx context.Context, d *plugin.QueryData, _ *plugin.
 
 func getAdDirectorySetting(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 
-	directorySettingID := d.KeyColumnQuals["id"].GetStringValue()
-	settingName := d.KeyColumnQuals["name"].GetStringValue()
+	directorySettingID := d.EqualsQuals["id"].GetStringValue()
+	settingName := d.EqualsQuals["name"].GetStringValue()
 	if directorySettingID == "" {
 		return nil, nil
 	}

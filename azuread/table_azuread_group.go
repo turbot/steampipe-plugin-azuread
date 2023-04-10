@@ -15,9 +15,9 @@ import (
 	"github.com/microsoftgraph/msgraph-sdk-go/groups/item/owners"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -118,7 +118,7 @@ func listAdGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		}
 	}
 
-	equalQuals := d.KeyColumnQuals
+	equalQuals := d.EqualsQuals
 	quals := d.Quals
 
 	var queryFilter string
@@ -162,7 +162,7 @@ func listAdGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		d.StreamListItem(ctx, &ADGroupInfo{group, resourceBehaviorOptions, resourceProvisioningOptions})
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
-		return d.QueryStatus.RowsRemaining(ctx) != 0
+		return d.RowsRemaining(ctx) != 0
 	})
 	if err != nil {
 		plugin.Logger(ctx).Error("listAdGroups", "paging_error", err)
@@ -176,7 +176,7 @@ func listAdGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 
 func getAdGroup(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 
-	groupId := d.KeyColumnQuals["id"].GetStringValue()
+	groupId := d.EqualsQuals["id"].GetStringValue()
 	if groupId == "" {
 		return nil, nil
 	}
@@ -214,7 +214,7 @@ func getAdGroupIsSubscribedByMail(ctx context.Context, d *plugin.QueryData, h *p
 	if h.Item != nil {
 		groupId = *h.Item.(*ADGroupInfo).GetId()
 	} else {
-		groupId = d.KeyColumnQuals["id"].GetStringValue()
+		groupId = d.EqualsQuals["id"].GetStringValue()
 	}
 	if groupId == "" {
 		return nil, nil

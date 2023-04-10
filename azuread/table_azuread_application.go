@@ -11,9 +11,9 @@ import (
 	"github.com/microsoftgraph/msgraph-sdk-go/applications/item/owners"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -98,7 +98,7 @@ func listAdApplications(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	}
 
 	var queryFilter string
-	equalQuals := d.KeyColumnQuals
+	equalQuals := d.EqualsQuals
 	filter := buildApplicationQueryFilter(equalQuals)
 
 	if equalQuals["filter"] != nil {
@@ -137,7 +137,7 @@ func listAdApplications(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 		d.StreamListItem(ctx, &ADApplicationInfo{application, isAuthorizationServiceEnabled})
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
-		return d.QueryStatus.RowsRemaining(ctx) != 0
+		return d.RowsRemaining(ctx) != 0
 	})
 	if err != nil {
 		plugin.Logger(ctx).Error("listAdApplications", "paging_error", err)
@@ -151,7 +151,7 @@ func listAdApplications(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 
 func getAdApplication(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 
-	applicationId := d.KeyColumnQuals["id"].GetStringValue()
+	applicationId := d.EqualsQuals["id"].GetStringValue()
 	if applicationId == "" {
 		return nil, nil
 	}
