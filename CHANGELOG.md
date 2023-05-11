@@ -1,3 +1,13 @@
+## v0.10.0 [2023-05-11]
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v5.4.1](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v541-2023-05-05) which fixes increased plugin initialization time due to multiple connections causing the schema to be loaded repeatedly. ([#112](https://github.com/turbot/steampipe-plugin-azuread/pull/112))
+
+_Bug fixes_
+
+- Fixed the `tags` column in `azuread_group` table to be of JSON type instead of string. ([#111](https://github.com/turbot/steampipe-plugin-azuread/pull/111))
+
 ## v0.9.0 [2023-04-10]
 
 _Dependencies_
