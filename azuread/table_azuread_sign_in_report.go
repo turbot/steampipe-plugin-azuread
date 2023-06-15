@@ -106,9 +106,10 @@ func listAdSignInReports(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 	}
 
 	err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
-		signIn := pageItem.(models.SignInable)
-
-		d.StreamListItem(ctx, &ADSignInReportInfo{signIn})
+		// To prevent errors during type conversion caused by inconsistent API responses (especially with larger data sets), we may get the different type of response (models.DirectoryAuditable), we need to include the following check.
+		if signIn, ok := pageItem.(models.SignInable); ok {
+			d.StreamListItem(ctx, &ADSignInReportInfo{signIn})
+		}
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
 		return d.RowsRemaining(ctx) != 0
