@@ -148,12 +148,13 @@ func listAdDirectoryAuditReports(ctx context.Context, d *plugin.QueryData, _ *pl
 	}
 
 	err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
+		// To prevent errors during type conversion caused by inconsistent API responses (especially with larger data sets), we may get the different type of response (models.SignInable), we need to include the following check.
 		if directoryAudit, ok := pageItem.(models.DirectoryAuditable); ok {
 			d.StreamListItem(ctx, &ADDirectoryAuditReportInfo{directoryAudit})
 		}
-		
-			// Context can be cancelled due to manual cancellation or the limit has been hit
-			return d.RowsRemaining(ctx) != 0
+
+		// Context can be cancelled due to manual cancellation or the limit has been hit
+		return d.RowsRemaining(ctx) != 0
 	})
 	if err != nil {
 		plugin.Logger(ctx).Error("listAdDirectoryAuditReports", "paging_error", err)
