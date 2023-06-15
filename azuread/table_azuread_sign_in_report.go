@@ -106,9 +106,9 @@ func listAdSignInReports(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 	}
 
 	err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
-		signIn := pageItem.(models.SignInable)
-
-		d.StreamListItem(ctx, &ADSignInReportInfo{signIn})
+		if signIn, ok := pageItem.(models.SignInable); ok {
+			d.StreamListItem(ctx, &ADSignInReportInfo{signIn})
+		}
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
 		return d.RowsRemaining(ctx) != 0

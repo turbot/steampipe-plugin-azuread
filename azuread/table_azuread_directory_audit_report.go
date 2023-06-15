@@ -148,11 +148,10 @@ func listAdDirectoryAuditReports(ctx context.Context, d *plugin.QueryData, _ *pl
 	}
 
 	err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
-
 		if directoryAudit, ok := pageItem.(models.DirectoryAuditable); ok {
 			d.StreamListItem(ctx, &ADDirectoryAuditReportInfo{directoryAudit})
-
 		}
+		
 			// Context can be cancelled due to manual cancellation or the limit has been hit
 			return d.RowsRemaining(ctx) != 0
 	})
