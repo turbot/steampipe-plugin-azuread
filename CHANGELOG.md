@@ -2,7 +2,7 @@
 
 _Bug fixes_
 
-- Fixed the ListConfig of`azuread_directory_audit_report` and `azuread_sign_in_report` tables to prevent errors during type conversion caused by inconsistent API responses. ([#116](https://github.com/turbot/steampipe-plugin-azuread/pull/116))
+- Fixed the `ListConfig` of `azuread_directory_audit_report` and `azuread_sign_in_report` tables to prevent errors during type conversion caused by inconsistent API responses. ([#116](https://github.com/turbot/steampipe-plugin-azuread/pull/116))
 
 ## v0.10.0 [2023-05-11]
 
