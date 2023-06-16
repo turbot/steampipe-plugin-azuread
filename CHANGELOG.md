@@ -1,3 +1,9 @@
+## v0.11.0 [2023-06-16]
+
+_Bug fixes_
+
+- Fixed the list call in tables `azuread_directory_audit_report.go` and `azuread_sign_in_report.go` to prevent errors during type conversion caused by inconsistent API responses. ([#116](https://github.com/turbot/steampipe-plugin-azuread/pull/116))
+
 ## v0.10.0 [2023-05-11]
 
 _Dependencies_
