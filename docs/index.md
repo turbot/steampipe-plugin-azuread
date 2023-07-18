@@ -147,7 +147,7 @@ Alternatively, you can use an unqualified name and it will be resolved according
 select * from azuread_user
 ```
 
-You can create multi-subscription connections by using an [**aggregator** connection](https://steampipe.io/docs/using-steampipe/managing-connections#using-aggregators). Aggregators allow you to query data from multiple connections for a plugin as if they are a single connection:
+You can create multi-tenant connections by using an [**aggregator** connection](https://steampipe.io/docs/using-steampipe/managing-connections#using-aggregators). Aggregators allow you to query data from multiple connections for a plugin as if they are a single connection:
 
 ```hcl
 connection "azuread_all" {
