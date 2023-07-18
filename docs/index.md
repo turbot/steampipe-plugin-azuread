@@ -173,11 +173,6 @@ connection "azuread_all" {
 }
 ```
 
-## Get involved
-
-- Open source: https://github.com/turbot/steampipe-plugin-azuread
-- Community: [Slack Channel](https://steampipe.io/community/join)
-
 ## Configuring Azure Active Directory Credentials
 
 The Azure AD plugin support multiple formats and authentication mechanisms, and they are tried in the below order:
@@ -270,3 +265,8 @@ connection "azuread" {
   plugin = "azuread"
 }
 ```
+
+## Get involved
+
+- Open source: https://github.com/turbot/steampipe-plugin-azuread
+- Community: [Slack Channel](https://steampipe.io/community/join)
