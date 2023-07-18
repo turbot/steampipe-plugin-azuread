@@ -102,10 +102,76 @@ connection "azuread" {
 
 By default, all options are commented out in the default connection, thus Steampipe will resolve your credentials using the same order as mentioned in [Credentials](#credentials). This provides a quick way to get started with Steampipe, but you will probably want to customize your experience using configuration options for querying multiple tenants, [configuring credentials](#configuring-active-directory-credentials) from your Azure CLI, Client Certificate, etc.
 
-## Get involved
+## Multi-Tenant Connections
 
-- Open source: https://github.com/turbot/steampipe-plugin-azuread
-- Community: [Slack Channel](https://steampipe.io/community/join)
+You may create multiple azuread connections:
+
+```hcl
+connection "azuread_all" {
+  type        = "aggregator"
+  plugin      = "azuread"
+  connections = ["azuread_*"]
+}
+
+connection "azuread_ten_1" {
+  plugin        = "azuread"
+  tenant_id     = "crfsd708-7da0-4cea-abeb-0a4c334d0f90"
+  client_id     = "ea4v6490-c9b5-41db-a942-40a3eaba7053"
+  client_secret = "oIb8Q~2hrXFNvWkvtKRtSriRg-kAM3CWEn0g0aGn"
+}
+
+connection "azuread_ten_2" {
+  plugin        = "azuread"
+  tenant_id     = "crfsd708-7da0-4cea-abeb-0a4c334d0f80"
+  client_id     = "ea4v6490-c9b5-41db-a942-40a3eaba7088"
+  client_secret = "oIb8Q~2hrXFNvWkvtKRtSriRg-kAM3NEEn0g0aGn"
+}
+
+connection "azuread_ten_3" {
+  plugin        = "azuread"
+  tenant_id     = "crfsd708-7da0-4cea-abeb-0a4c334d0f70"
+  client_id     = "ea4v6490-c9b5-41db-a942-40a3eaba7000"
+  client_secret = "oIb8Q~2hrXFNvWkvtKRtSriRg-kAM3VREn0g0aGn"
+}
+```
+
+Each connection is implemented as a distinct [Postgres schema](https://www.postgresql.org/docs/current/ddl-schemas.html). As such, you can use qualified table names to query a specific connection:
+
+```sql
+select * from azuread_ten_1.azuread_user
+```
+
+Alternatively, you can use an unqualified name and it will be resolved according to the [Search Path](https://steampipe.io/docs/using-steampipe/managing-connections#setting-the-search-path):
+
+```sql
+select * from azuread_user
+```
+
+You can create multi-tenant connections by using an [**aggregator** connection](https://steampipe.io/docs/using-steampipe/managing-connections#using-aggregators). Aggregators allow you to query data from multiple connections for a plugin as if they are a single connection:
+
+```hcl
+connection "azuread_all" {
+  plugin      = "azuread"
+  type        = "aggregator"
+  connections = ["azuread_ten_1", "azuread_ten_2", "azuread_ten_3"]
+}
+```
+
+Querying tables from this connection will return results from the `azuread_ten_1`, `azuread_ten_2`, and `azuread_ten_3` connections:
+
+```sql
+select * from azuread_all.azuread_user
+```
+
+Steampipe supports the `*` wildcard in the connection names. For example, to aggregate all the Azuread plugin connections whose names begin with `azuread_`:
+
+```hcl
+connection "azuread_all" {
+  type        = "aggregator"
+  plugin      = "azuread"
+  connections = ["azuread_*"]
+}
+```
 
 ## Configuring Azure Active Directory Credentials
 
@@ -199,3 +265,8 @@ connection "azuread" {
   plugin = "azuread"
 }
 ```
+
+## Get involved
+
+- Open source: https://github.com/turbot/steampipe-plugin-azuread
+- Community: [Slack Channel](https://steampipe.io/community/join)
