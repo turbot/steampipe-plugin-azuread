@@ -2,7 +2,7 @@
 
 _Enhancements_
 
-- Updated the `docs/index.md` file to include multi-account configuration examples. ([#122](https://github.com/turbot/steampipe-plugin-azuread/pull/122))
+- Updated the `docs/index.md` file to include multi-tenant configuration examples. ([#122](https://github.com/turbot/steampipe-plugin-azuread/pull/122))
 
 ## v0.11.0 [2023-06-20]
 
