@@ -7,7 +7,7 @@ Use SQL to query infrastructure including users, groups, applications and more f
 - **[Get started →](https://hub.steampipe.io/plugins/turbot/azuread)**
 - Documentation: [Table definitions & examples](https://hub.steampipe.io/plugins/turbot/azuread/tables)
 
-- Community: [Slack Channel](https://steampipe.io/community/join)
+- Community: [Join #steampipe on Slack →](https://turbot.com/community/join)
 - Get involved: [Issues](https://github.com/turbot/steampipe-plugin-azuread/issues)
 
 ## Quick start
