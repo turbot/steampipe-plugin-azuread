@@ -52,6 +52,7 @@ func tableAzureAdUser(_ context.Context) *plugin.Table {
 			{Name: "user_type", Type: proto.ColumnType_STRING, Description: "A string value that can be used to classify user types in your directory.", Transform: transform.FromMethod("GetUserType")},
 			{Name: "given_name", Type: proto.ColumnType_STRING, Description: "The given name (first name) of the user.", Transform: transform.FromMethod("GetGivenName")},
 			{Name: "surname", Type: proto.ColumnType_STRING, Description: "Family name or last name of the active directory user.", Transform: transform.FromMethod("GetSurname")},
+			{Name: "department", Type: proto.ColumnType_STRING, Description: "The name of the department in which the user works.", Transform: transform.FromMethod("GetDepartment")},
 
 			{Name: "filter", Type: proto.ColumnType_STRING, Transform: transform.FromQual("filter"), Description: "Odata query to search for resources."},
 
