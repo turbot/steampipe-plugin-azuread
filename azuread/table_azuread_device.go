@@ -238,7 +238,7 @@ func buildDeviceRequestFields(ctx context.Context, queryColumns []string) ([]str
 				selectColumns = append(selectColumns, []string{"displayName"}...)
 			}
 			if !helpers.StringSliceContains(queryColumns, "device_id") {
-				selectColumns = append(selectColumns, []string{"DeviceId"}...)
+				selectColumns = append(selectColumns, []string{"deviceId"}...)
 			}
 			continue
 		}
