@@ -11,6 +11,7 @@ import (
 	"github.com/microsoftgraph/msgraph-sdk-go/users"
 	"github.com/microsoftgraph/msgraph-sdk-go/users/item"
 
+	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
@@ -206,12 +207,22 @@ func buildUserRequestFields(ctx context.Context, queryColumns []string) ([]strin
 	var selectColumns, expandColumns []string
 
 	for _, columnName := range queryColumns {
-		if columnName == "title" || columnName == "filter" || columnName == "tenant_id" {
+		if columnName == "filter" || columnName == "tenant_id" {
 			continue
 		}
 
 		if columnName == "member_of" {
 			expandColumns = append(expandColumns, fmt.Sprintf("%s($select=id,displayName)", strcase.ToLowerCamel(columnName)))
+			continue
+		}
+
+		if columnName == "title" {
+			if !helpers.StringSliceContains(queryColumns, "display_name") {
+				selectColumns = append(selectColumns, []string{"displayName"}...)
+			}
+			if !helpers.StringSliceContains(queryColumns, "user_principal_name") {
+				selectColumns = append(selectColumns, []string{"userPrincipalName"}...)
+			}
 			continue
 		}
 
