@@ -6,7 +6,7 @@ _Enhancements_
 
 _Bug fixes_
 
-- Fix the `title` column in `azuread_device` and `azuread_user` tables to correctly return data instead of null. ([#134](https://github.com/turbot/steampipe-plugin-azuread/pull/134))
+- Fixed the `title` column in `azuread_device` and `azuread_user` tables to correctly return data instead of null. ([#134](https://github.com/turbot/steampipe-plugin-azuread/pull/134))
 
 _Dependencies_
 
