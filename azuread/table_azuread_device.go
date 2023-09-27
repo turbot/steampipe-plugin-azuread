@@ -7,6 +7,7 @@ import (
 
 	"github.com/iancoleman/strcase"
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
+	"github.com/turbot/go-kit/helpers"
 	"github.com/microsoftgraph/msgraph-sdk-go/devices"
 	"github.com/microsoftgraph/msgraph-sdk-go/devices/item"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
@@ -223,12 +224,22 @@ func buildDeviceRequestFields(ctx context.Context, queryColumns []string) ([]str
 	var selectColumns, expandColumns []string
 
 	for _, columnName := range queryColumns {
-		if columnName == "title" || columnName == "filter" || columnName == "tenant_id" {
+		if columnName == "filter" || columnName == "tenant_id" {
 			continue
 		}
 
 		if columnName == "member_of" {
 			expandColumns = append(expandColumns, fmt.Sprintf("%s($select=id,displayName)", strcase.ToLowerCamel(columnName)))
+			continue
+		}
+
+		if columnName == "title" {
+			if !helpers.StringSliceContains(queryColumns, "display_name") {
+				selectColumns = append(selectColumns, []string{"displayName"}...)
+			}
+			if !helpers.StringSliceContains(queryColumns, "device_id") {
+				selectColumns = append(selectColumns, []string{"deviceId"}...)
+			}
 			continue
 		}
 
