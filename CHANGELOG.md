@@ -1,3 +1,17 @@
+## v0.13.0 [2023-09-27]
+
+_Enhancements_
+
+- Added the `department` column to `azuread_user` table. ([#132](https://github.com/turbot/steampipe-plugin-azuread/pull/132))
+
+_Bug fixes_
+
+- Fix the `title` column in `azuread_device` and `azuread_user` tables to correctly return data instead of null. ([#134](https://github.com/turbot/steampipe-plugin-azuread/pull/134))
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v5.5.1](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v551-2023-07-26). ([#127](https://github.com/turbot/steampipe-plugin-azuread/pull/127))
+
 ## v0.12.0 [2023-07-18]
 
 _Enhancements_
