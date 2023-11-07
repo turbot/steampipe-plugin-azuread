@@ -24,7 +24,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			Schema:      ConfigSchema,
 		},
 		TableMap: map[string]*plugin.Table{
-			// "azuread_admin_consent_request_policy": tableAzureAdAdminConsentRequestPolicy(ctx),
+			"azuread_admin_consent_request_policy": tableAzureAdAdminConsentRequestPolicy(ctx),
 			"azuread_application":                  tableAzureAdApplication(ctx),
 			"azuread_authorization_policy":         tableAzureAdAuthorizationPolicy(ctx),
 			"azuread_conditional_access_policy":    tableAzureAdConditionalAccessPolicy(ctx),

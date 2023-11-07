@@ -4,9 +4,9 @@ import (
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 )
 
-// type ADAdminConsentRequestPolicyInfo struct {
-// 	models.AdminConsentRequestPolicyable
-// }
+type ADAdminConsentRequestPolicyInfo struct {
+	models.AdminConsentRequestPolicyable
+}
 
 type ADApplicationInfo struct {
 	models.Applicationable
