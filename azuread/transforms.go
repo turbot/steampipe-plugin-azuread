@@ -29,14 +29,14 @@ import (
 // 	models.DirectoryAuditable
 // }
 
-// type ADDirectorySettingInfo struct {
-// 	// models.GroupSettingable
-// 	DisplayName *string
-// 	Id          *string
-// 	TemplateId  *string
-// 	Name        *string
-// 	Value       *string
-// }
+type ADDirectorySettingInfo struct {
+	// models.GroupSettingable
+	DisplayName *string
+	Id          *string
+	TemplateId  *string
+	Name        *string
+	Value       *string
+}
 
 type ADDomainInfo struct {
 	models.Domainable
