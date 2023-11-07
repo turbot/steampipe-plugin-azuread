@@ -11,6 +11,10 @@ import (
 	"github.com/microsoftgraph/msgraph-sdk-go/users"
 	"github.com/microsoftgraph/msgraph-sdk-go/users/item"
 
+	// "github.com/microsoftgraph/msgraph-sdk-go/users/item"
+
+	// userModels "github.com/microsoftgraph/msgraph-sdk-go/users/models"
+
 	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
@@ -129,11 +133,11 @@ func listAdUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		input.Filter = &joinStr
 	}
 
-	options := &users.UsersRequestBuilderGetRequestConfiguration{
+	options := &users.UsersRequestBuilderGetOptions{
 		QueryParameters: input,
 	}
 
-	result, err := client.Users().Get(ctx, options)
+	result, err := client.Users().Get(options)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("listAdUsers", "list_user_error", errObj)
@@ -188,11 +192,7 @@ func getAdUser(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) 
 	input.Select = selectColumns
 	input.Expand = expandColumns
 
-	options := &item.UserItemRequestBuilderGetRequestConfiguration{
-		QueryParameters: input,
-	}
-
-	user, err := client.UsersById(userId).Get(ctx, options)
+	user, err := client.UsersById(userId).Get(nil)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("getAdUser", "get_user_error", errObj)
