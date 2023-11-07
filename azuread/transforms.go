@@ -29,6 +29,10 @@ import (
 // 	models.DirectoryAuditable
 // }
 
+type ADDirectoryRoleInfo struct {
+	models.DirectoryRoleable
+}
+
 type ADDirectorySettingInfo struct {
 	// models.GroupSettingable
 	DisplayName *string
