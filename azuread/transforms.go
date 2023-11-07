@@ -54,9 +54,9 @@ import (
 // 	models.IdentitySecurityDefaultsEnforcementPolicyable
 // }
 
-// type ADServicePrincipalInfo struct {
-// 	models.ServicePrincipalable
-// }
+type ADServicePrincipalInfo struct {
+	models.ServicePrincipalable
+}
 
 type ADSignInReportInfo struct {
 	models.SignInable
