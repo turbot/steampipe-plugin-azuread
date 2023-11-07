@@ -38,11 +38,11 @@ import (
 // 	Value       *string
 // }
 
-// type ADGroupInfo struct {
-// 	models.Groupable
-// 	ResourceBehaviorOptions     []string
-// 	ResourceProvisioningOptions []string
-// }
+type ADGroupInfo struct {
+	models.Groupable
+	ResourceBehaviorOptions     interface{}
+	ResourceProvisioningOptions interface{}
+}
 
 type ADIdentityProviderInfo struct {
 	models.BuiltInIdentityProvider
@@ -1006,7 +1006,7 @@ func (user *ADUserInfo) UserMemberOf() []map[string]interface{} {
 	for _, i := range user.GetMemberOf() {
 		member := map[string]interface{}{
 			// "@odata.type": i.GetOdataType(),
-			"id":          i.GetId(),
+			"id": i.GetId(),
 		}
 		members = append(members, member)
 	}
