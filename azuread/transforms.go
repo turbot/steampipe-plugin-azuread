@@ -8,10 +8,10 @@ import (
 // 	models.AdminConsentRequestPolicyable
 // }
 
-// type ADApplicationInfo struct {
-// 	models.Applicationable
-// 	IsAuthorizationServiceEnabled interface{}
-// }
+type ADApplicationInfo struct {
+	models.Applicationable
+	IsAuthorizationServiceEnabled interface{}
+}
 
 type ADAuthorizationPolicyInfo struct {
 	models.AuthorizationPolicyable
