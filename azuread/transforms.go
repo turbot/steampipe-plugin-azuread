@@ -21,9 +21,9 @@ import (
 // 	models.ConditionalAccessPolicyable
 // }
 
-// type ADDeviceInfo struct {
-// 	models.Deviceable
-// }
+type ADDeviceInfo struct {
+	models.Deviceable
+}
 
 type ADDirectoryAuditReportInfo struct {
 	models.DirectoryAuditable
