@@ -38,6 +38,10 @@ import (
 // 	Value       *string
 // }
 
+type ADDomainInfo struct {
+	models.Domainable
+}
+
 type ADGroupInfo struct {
 	models.Groupable
 	ResourceBehaviorOptions     interface{}
