@@ -27,7 +27,7 @@ func (m *RequestError) Error() string {
 func getErrorObject(err error) *RequestError {
 	switch err := err.(type) {
 	case *odataerrors.ODataError:
-		terr := err.GetError()
+		terr := err.GetErrorEscaped()
 		return &RequestError{
 			Code:    *terr.GetCode(),
 			Message: *terr.GetMessage(),

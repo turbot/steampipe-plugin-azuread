@@ -9,11 +9,6 @@ import (
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/microsoftgraph/msgraph-sdk-go/users"
-	"github.com/microsoftgraph/msgraph-sdk-go/users/item"
-
-	// "github.com/microsoftgraph/msgraph-sdk-go/users/item"
-
-	// userModels "github.com/microsoftgraph/msgraph-sdk-go/users/models"
 
 	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
@@ -133,32 +128,30 @@ func listAdUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		input.Filter = &joinStr
 	}
 
-	options := &users.UsersRequestBuilderGetOptions{
+	options := &users.UsersRequestBuilderGetRequestConfiguration{
 		QueryParameters: input,
 	}
 
-	result, err := client.Users().Get(options)
+	result, err := client.Users().Get(ctx, options)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("listAdUsers", "list_user_error", errObj)
 		return nil, errObj
 	}
 
-	pageIterator, err := msgraphcore.NewPageIterator(result, adapter, models.CreateUserCollectionResponseFromDiscriminatorValue)
+	pageIterator, err := msgraphcore.NewPageIterator[models.Userable](result, adapter, models.CreateUserCollectionResponseFromDiscriminatorValue)
 	if err != nil {
 		plugin.Logger(ctx).Error("listAdUsers", "create_iterator_instance_error", err)
 		return nil, err
 	}
 
-	err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
-		user := pageItem.(models.Userable)
-
+	err = pageIterator.Iterate(context.Background(), func(user models.Userable) bool {
 		refreshTokensValidFromDateTime := user.GetAdditionalData()["refreshTokensValidFromDateTime"]
-
 		d.StreamListItem(ctx, &ADUserInfo{user, refreshTokensValidFromDateTime})
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
 		return d.RowsRemaining(ctx) != 0
+		return true
 	})
 	if err != nil {
 		plugin.Logger(ctx).Error("listAdUsers", "paging_error", err)
@@ -184,15 +177,9 @@ func getAdUser(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) 
 		return nil, nil
 	}
 
-	// Check for query context and requests only for queried columns
-	givenColumns := d.QueryContext.Columns
-	selectColumns, expandColumns := buildUserRequestFields(ctx, givenColumns)
+	input := &users.UserItemRequestBuilderGetRequestConfiguration{}
 
-	input := &item.UserItemRequestBuilderGetQueryParameters{}
-	input.Select = selectColumns
-	input.Expand = expandColumns
-
-	user, err := client.UsersById(userId).Get(nil)
+	user, err := client.Users().ByUserId(userId).Get(ctx, input)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("getAdUser", "get_user_error", errObj)
