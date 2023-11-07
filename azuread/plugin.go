@@ -37,7 +37,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			// "azuread_identity_provider":            tableAzureAdIdentityProvider(ctx),
 			// "azuread_security_defaults_policy":     tableAzureAdSecurityDefaultsPolicy(ctx),
 			// "azuread_service_principal":            tableAzureAdServicePrincipal(ctx),
-			// "azuread_sign_in_report":               tableAzureAdSignInReport(ctx),
+			"azuread_sign_in_report":               tableAzureAdSignInReport(ctx),
 			"azuread_user":                         tableAzureAdUser(ctx),
 		},
 	}

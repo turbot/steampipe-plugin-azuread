@@ -58,9 +58,9 @@ import (
 // 	models.ServicePrincipalable
 // }
 
-// type ADSignInReportInfo struct {
-// 	models.SignInable
-// }
+type ADSignInReportInfo struct {
+	models.SignInable
+}
 
 type ADUserInfo struct {
 	models.Userable

@@ -151,7 +151,6 @@ func listAdUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
 		return d.RowsRemaining(ctx) != 0
-		return true
 	})
 	if err != nil {
 		plugin.Logger(ctx).Error("listAdUsers", "paging_error", err)
