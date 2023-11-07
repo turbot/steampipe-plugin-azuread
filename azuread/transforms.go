@@ -17,9 +17,9 @@ import (
 // 	models.AuthorizationPolicyable
 // }
 
-// type ADConditionalAccessPolicyInfo struct {
-// 	models.ConditionalAccessPolicyable
-// }
+type ADConditionalAccessPolicyInfo struct {
+	models.ConditionalAccessPolicyable
+}
 
 type ADDeviceInfo struct {
 	models.Deviceable
