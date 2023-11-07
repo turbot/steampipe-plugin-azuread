@@ -25,9 +25,9 @@ import (
 // 	models.Deviceable
 // }
 
-// type ADDirectoryAuditReportInfo struct {
-// 	models.DirectoryAuditable
-// }
+type ADDirectoryAuditReportInfo struct {
+	models.DirectoryAuditable
+}
 
 type ADDirectoryRoleInfo struct {
 	models.DirectoryRoleable
