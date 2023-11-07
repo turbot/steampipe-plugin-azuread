@@ -44,11 +44,11 @@ import (
 // 	ResourceProvisioningOptions []string
 // }
 
-// // type ADIdentityProviderInfo struct {
-// // 	models.BuiltInIdentityProvider
-// // 	ClientId     interface{}
-// // 	ClientSecret interface{}
-// // }
+type ADIdentityProviderInfo struct {
+	models.BuiltInIdentityProvider
+	ClientId     interface{}
+	ClientSecret interface{}
+}
 
 type ADSecurityDefaultsPolicyInfo struct {
 	models.IdentitySecurityDefaultsEnforcementPolicyable

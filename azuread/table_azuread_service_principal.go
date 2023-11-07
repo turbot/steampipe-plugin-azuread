@@ -141,7 +141,6 @@ func listAdServicePrincipals(ctx context.Context, d *plugin.QueryData, _ *plugin
 	}
 
 	err = pageIterator.Iterate(ctx, func(pageItem models.ServicePrincipalable) bool {
-
 		d.StreamListItem(ctx, &ADServicePrincipalInfo{pageItem})
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
@@ -224,8 +223,7 @@ func getServicePrincipalOwners(ctx context.Context, d *plugin.QueryData, h *plug
 	}
 
 	err = pageIterator.Iterate(ctx, func(pageItem models.DirectoryObjectable) bool {
-		owner := pageItem.(models.DirectoryObjectable)
-		ownerIds = append(ownerIds, owner.GetId())
+		ownerIds = append(ownerIds, pageItem.GetId())
 
 		return true
 	})
