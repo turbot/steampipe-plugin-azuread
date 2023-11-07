@@ -13,9 +13,9 @@ import (
 // 	IsAuthorizationServiceEnabled interface{}
 // }
 
-// type ADAuthorizationPolicyInfo struct {
-// 	models.AuthorizationPolicyable
-// }
+type ADAuthorizationPolicyInfo struct {
+	models.AuthorizationPolicyable
+}
 
 type ADConditionalAccessPolicyInfo struct {
 	models.ConditionalAccessPolicyable
