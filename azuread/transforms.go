@@ -50,9 +50,9 @@ import (
 // // 	ClientSecret interface{}
 // // }
 
-// type ADSecurityDefaultsPolicyInfo struct {
-// 	models.IdentitySecurityDefaultsEnforcementPolicyable
-// }
+type ADSecurityDefaultsPolicyInfo struct {
+	models.IdentitySecurityDefaultsEnforcementPolicyable
+}
 
 type ADServicePrincipalInfo struct {
 	models.ServicePrincipalable
