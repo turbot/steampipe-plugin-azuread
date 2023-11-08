@@ -176,7 +176,16 @@ func getAdUser(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) 
 		return nil, nil
 	}
 
-	input := &users.UserItemRequestBuilderGetRequestConfiguration{}
+	givenColumns := d.QueryContext.Columns
+	selectColumns, expandColumns := buildUserRequestFields(ctx, givenColumns)
+
+	input := &users.UserItemRequestBuilderGetRequestConfiguration{
+		QueryParameters: &users.UserItemRequestBuilderGetQueryParameters{
+			Expand: expandColumns,
+			Select: selectColumns,
+		},
+	}
+
 
 	user, err := client.Users().ByUserId(userId).Get(ctx, input)
 	if err != nil {
@@ -185,6 +194,7 @@ func getAdUser(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) 
 		return nil, errObj
 	}
 	refreshTokensValidFromDateTime := user.GetAdditionalData()["refreshTokensValidFromDateTime"]
+	plugin.Logger(ctx).Error("Sur Name =>>> ", user.GetSurname())
 
 	return &ADUserInfo{user, refreshTokensValidFromDateTime}, nil
 }
