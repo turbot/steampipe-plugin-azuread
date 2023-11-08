@@ -308,27 +308,27 @@ func (application *ADApplicationInfo) ApplicationWeb() map[string]interface{} {
 	return webData
 }
 
-// func (authorizationPolicy *ADAuthorizationPolicyInfo) AuthorizationPolicyDefaultUserRolePermissions() map[string]interface{} {
-// 	if authorizationPolicy.GetDefaultUserRolePermissions() == nil {
-// 		return nil
-// 	}
-// 	data := map[string]interface{}{}
+func (authorizationPolicy *ADAuthorizationPolicyInfo) AuthorizationPolicyDefaultUserRolePermissions() map[string]interface{} {
+	if authorizationPolicy.GetDefaultUserRolePermissions() == nil {
+		return nil
+	}
+	data := map[string]interface{}{}
 
-// 	if authorizationPolicy.GetDefaultUserRolePermissions().GetAllowedToCreateApps() != nil {
-// 		data["allowedToCreateApps"] = *authorizationPolicy.GetDefaultUserRolePermissions().GetAllowedToCreateApps()
-// 	}
-// 	if authorizationPolicy.GetDefaultUserRolePermissions().GetAllowedToCreateSecurityGroups() != nil {
-// 		data["allowedToCreateSecurityGroups"] = *authorizationPolicy.GetDefaultUserRolePermissions().GetAllowedToCreateSecurityGroups()
-// 	}
-// 	if authorizationPolicy.GetDefaultUserRolePermissions().GetAllowedToReadOtherUsers() != nil {
-// 		data["allowedToReadOtherUsers"] = *authorizationPolicy.GetDefaultUserRolePermissions().GetAllowedToReadOtherUsers()
-// 	}
-// 	if authorizationPolicy.GetDefaultUserRolePermissions().GetPermissionGrantPoliciesAssigned() != nil {
-// 		data["permissionGrantPoliciesAssigned"] = authorizationPolicy.GetDefaultUserRolePermissions().GetPermissionGrantPoliciesAssigned()
-// 	}
+	if authorizationPolicy.GetDefaultUserRolePermissions().GetAllowedToCreateApps() != nil {
+		data["allowedToCreateApps"] = *authorizationPolicy.GetDefaultUserRolePermissions().GetAllowedToCreateApps()
+	}
+	if authorizationPolicy.GetDefaultUserRolePermissions().GetAllowedToCreateSecurityGroups() != nil {
+		data["allowedToCreateSecurityGroups"] = *authorizationPolicy.GetDefaultUserRolePermissions().GetAllowedToCreateSecurityGroups()
+	}
+	if authorizationPolicy.GetDefaultUserRolePermissions().GetAllowedToReadOtherUsers() != nil {
+		data["allowedToReadOtherUsers"] = *authorizationPolicy.GetDefaultUserRolePermissions().GetAllowedToReadOtherUsers()
+	}
+	if authorizationPolicy.GetDefaultUserRolePermissions().GetPermissionGrantPoliciesAssigned() != nil {
+		data["permissionGrantPoliciesAssigned"] = authorizationPolicy.GetDefaultUserRolePermissions().GetPermissionGrantPoliciesAssigned()
+	}
 
-// 	return data
-// }
+	return data
+}
 
 func (authorizationPolicy *ADAuthorizationPolicyInfo) AuthorizationPolicyAllowInvitesFrom() string {
 	if authorizationPolicy.GetAllowInvitesFrom() == nil {
@@ -1013,8 +1013,8 @@ func (user *ADUserInfo) UserMemberOf() []map[string]interface{} {
 	members := []map[string]interface{}{}
 	for _, i := range user.GetMemberOf() {
 		member := map[string]interface{}{
-			// "@odata.type": i.GetOdataType(),
-			"id": i.GetId(),
+			"@odata.type": i.GetOdataType(),
+			"id":          i.GetId(),
 		}
 		members = append(members, member)
 	}

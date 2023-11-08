@@ -32,7 +32,7 @@ func tableAzureAdAuthorizationPolicy(_ context.Context) *plugin.Table {
 			{Name: "guest_user_role_id", Type: proto.ColumnType_STRING, Description: "Represents role templateId for the role that should be granted to guest user.", Transform: transform.FromMethod("GetGuestUserRoleId")},
 
 			// JSON fields
-			{Name: "default_user_role_permissions", Type: proto.ColumnType_JSON, Description: "Specifies certain customizable permissions for default user role.", Transform: transform.FromMethod("GetDefaultUserRolePermissions")},
+			{Name: "default_user_role_permissions", Type: proto.ColumnType_JSON, Description: "Specifies certain customizable permissions for default user role.", Transform: transform.FromMethod("AuthorizationPolicyDefaultUserRolePermissions")},
 
 			// Standard columns
 			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Transform: transform.FromMethod("GetDisplayName")},
