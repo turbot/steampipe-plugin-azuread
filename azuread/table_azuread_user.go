@@ -194,7 +194,6 @@ func getAdUser(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) 
 		return nil, errObj
 	}
 	refreshTokensValidFromDateTime := user.GetAdditionalData()["refreshTokensValidFromDateTime"]
-	plugin.Logger(ctx).Error("Sur Name =>>> ", user.GetSurname())
 
 	return &ADUserInfo{user, refreshTokensValidFromDateTime}, nil
 }
