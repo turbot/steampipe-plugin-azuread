@@ -50,13 +50,13 @@ func tableAzureAdDirectoryAuditReport(_ context.Context) *plugin.Table {
 			{Name: "correlation_id", Type: proto.ColumnType_STRING, Description: "Indicates a unique ID that helps correlate activities that span across various services. Can be used to trace logs across services.", Transform: transform.FromMethod("GetCorrelationId")},
 			{Name: "logged_by_service", Type: proto.ColumnType_STRING, Description: "Indicates information on which service initiated the activity (For example: Self-service Password Management, Core Directory, B2C, Invited Users, Microsoft Identity Manager, Privileged Identity Management.", Transform: transform.FromMethod("GetLoggedByService")},
 			{Name: "operation_type", Type: proto.ColumnType_STRING, Description: "Indicates the type of operation that was performed. The possible values include but are not limited to the following: Add, Assign, Update, Unassign, and Delete.", Transform: transform.FromMethod("GetOperationType")},
-			{Name: "result", Type: proto.ColumnType_STRING, Description: "Indicates the result of the activity. Possible values are: success, failure, timeout, unknownFutureValue.", Transform: transform.FromMethod("GetResult")},
+			{Name: "result", Type: proto.ColumnType_STRING, Description: "Indicates the result of the activity. Possible values are: success, failure, timeout, unknownFutureValue.", Transform: transform.FromMethod("DirectoryAuditResult")},
 			{Name: "result_reason", Type: proto.ColumnType_STRING, Description: "Indicates the reason for failure if the result is failure or timeout.", Transform: transform.FromMethod("GetResultReason")},
 
 			// JSON fields
-			{Name: "additional_details", Type: proto.ColumnType_JSON, Description: "Indicates additional details on the activity.", Transform: transform.FromMethod("GetAdditionalDetails")},
-			{Name: "initiated_by", Type: proto.ColumnType_JSON, Description: "Indicates information about the user or app initiated the activity.", Transform: transform.FromMethod("GetInitiatedBy")},
-			{Name: "target_resources", Type: proto.ColumnType_JSON, Description: "Indicates information on which resource was changed due to the activity. Target Resource Type can be User, Device, Directory, App, Role, Group, Policy or Other.", Transform: transform.FromMethod("GetTargetResources")},
+			{Name: "additional_details", Type: proto.ColumnType_JSON, Description: "Indicates additional details on the activity.", Transform: transform.FromMethod("DirectoryAuditAdditionalDetails")},
+			{Name: "initiated_by", Type: proto.ColumnType_JSON, Description: "Indicates information about the user or app initiated the activity.", Transform: transform.FromMethod("DirectoryAuditInitiatedBy")},
+			{Name: "target_resources", Type: proto.ColumnType_JSON, Description: "Indicates information on which resource was changed due to the activity. Target Resource Type can be User, Device, Directory, App, Role, Group, Policy or Other.", Transform: transform.FromMethod("DirectoryAuditTargetResources")},
 
 			// Standard columns
 			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Transform: transform.FromMethod("GetId")},

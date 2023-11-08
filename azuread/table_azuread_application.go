@@ -53,16 +53,16 @@ func tableAzureAdApplication(_ context.Context) *plugin.Table {
 			{Name: "sign_in_audience", Type: proto.ColumnType_STRING, Description: "Specifies the Microsoft accounts that are supported for the current application.", Transform: transform.FromMethod("GetSignInAudience")},
 
 			// JSON fields
-			{Name: "api", Type: proto.ColumnType_JSON, Description: "Specifies settings for an application that implements a web API.", Transform: transform.FromMethod("GetApi")},
+			{Name: "api", Type: proto.ColumnType_JSON, Description: "Specifies settings for an application that implements a web API.", Transform: transform.FromMethod("ApplicationAPI")},
 			{Name: "identifier_uris", Type: proto.ColumnType_JSON, Description: "The URIs that identify the application within its Azure AD tenant, or within a verified custom domain if the application is multi-tenant.", Transform: transform.FromMethod("GetIdentifierUris")},
-			{Name: "info", Type: proto.ColumnType_JSON, Description: "Basic profile information of the application such as app's marketing, support, terms of service and privacy statement URLs. The terms of service and privacy statement are surfaced to users through the user consent experience.", Transform: transform.FromMethod("GetInfo")},
-			{Name: "key_credentials", Type: proto.ColumnType_JSON, Description: "The collection of key credentials associated with the application.", Transform: transform.FromMethod("GetKeyCredentials")},
+			{Name: "info", Type: proto.ColumnType_JSON, Description: "Basic profile information of the application such as app's marketing, support, terms of service and privacy statement URLs. The terms of service and privacy statement are surfaced to users through the user consent experience.", Transform: transform.FromMethod("ApplicationInfo")},
+			{Name: "key_credentials", Type: proto.ColumnType_JSON, Description: "The collection of key credentials associated with the application.", Transform: transform.FromMethod("ApplicationKeyCredentials")},
 			{Name: "owner_ids", Type: proto.ColumnType_JSON, Hydrate: getAdApplicationOwners, Transform: transform.FromValue(), Description: "Id of the owners of the application. The owners are a set of non-admin users who are allowed to modify this object."},
-			{Name: "parental_control_settings", Type: proto.ColumnType_JSON, Description: "Specifies parental control settings for an application.", Transform: transform.FromMethod("GetParentalControlSettings")},
-			{Name: "password_credentials", Type: proto.ColumnType_JSON, Description: "The collection of password credentials associated with the application.", Transform: transform.FromMethod("GetPasswordCredentials")},
-			{Name: "spa", Type: proto.ColumnType_JSON, Description: "Specifies settings for a single-page application, including sign out URLs and redirect URIs for authorization codes and access tokens.", Transform: transform.FromMethod("GetSpa")},
+			{Name: "parental_control_settings", Type: proto.ColumnType_JSON, Description: "Specifies parental control settings for an application.", Transform: transform.FromMethod("ApplicationParentalControlSettings")},
+			{Name: "password_credentials", Type: proto.ColumnType_JSON, Description: "The collection of password credentials associated with the application.", Transform: transform.FromMethod("ApplicationPasswordCredentials")},
+			{Name: "spa", Type: proto.ColumnType_JSON, Description: "Specifies settings for a single-page application, including sign out URLs and redirect URIs for authorization codes and access tokens.", Transform: transform.FromMethod("ApplicationSpa")},
 			{Name: "tags_src", Type: proto.ColumnType_JSON, Description: "Custom strings that can be used to categorize and identify the application.", Transform: transform.FromMethod("GetTags")},
-			{Name: "web", Type: proto.ColumnType_JSON, Description: "Specifies settings for a web application.", Transform: transform.FromMethod("GetWeb")},
+			{Name: "web", Type: proto.ColumnType_JSON, Description: "Specifies settings for a web application.", Transform: transform.FromMethod("ApplicationWeb")},
 
 			// Standard columns
 			{Name: "tags", Type: proto.ColumnType_JSON, Description: ColumnDescriptionTags, Transform: transform.From(adApplicationTags)},
@@ -182,10 +182,6 @@ func getAdApplicationOwners(ctx context.Context, d *plugin.QueryData, h *plugin.
 
 	application := h.Item.(*ADApplicationInfo)
 	applicationID := application.GetId()
-
-	// headers := map[string]string{
-	// 	"ConsistencyLevel": "eventual",
-	// }
 
 	headers := &abstractions.RequestHeaders{}
 	headers.Add("ConsistencyLevel", "eventual")

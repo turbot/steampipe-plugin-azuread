@@ -59,7 +59,7 @@ func tableAzureAdDevice(_ context.Context) *plugin.Table {
 
 			// JSON fields
 			{Name: "extension_attributes", Type: proto.ColumnType_JSON, Description: "Contains extension attributes 1-15 for the device. The individual extension attributes are not selectable. These properties are mastered in cloud and can be set during creation or update of a device object in Azure AD.", Transform: transform.FromMethod("GetExtensions")},
-			{Name: "member_of", Type: proto.ColumnType_JSON, Description: "A list the groups and directory roles that the device is a direct member of.", Transform: transform.FromMethod("GetMemberOf")},
+			{Name: "member_of", Type: proto.ColumnType_JSON, Description: "A list the groups and directory roles that the device is a direct member of.", Transform: transform.FromMethod("DeviceMemberOf")},
 
 			// Standard columns
 			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Transform: transform.From(adDeviceTitle)},

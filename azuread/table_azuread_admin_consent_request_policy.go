@@ -28,7 +28,7 @@ func tableAzureAdAdminConsentRequestPolicy(_ context.Context) *plugin.Table {
 			{Name: "version", Type: proto.ColumnType_INT, Description: "Specifies the version of this policy. When the policy is updated, this version is updated.", Transform: transform.FromMethod("GetVersion")},
 
 			// JSON fields
-			{Name: "reviewers", Type: proto.ColumnType_JSON, Description: "The list of reviewers for the admin consent.", Transform: transform.FromMethod("GetReviewers")},
+			{Name: "reviewers", Type: proto.ColumnType_JSON, Description: "The list of reviewers for the admin consent.", Transform: transform.FromMethod("AdminConsentRequestPolicyReviewers")},
 
 			// Standard columns
 			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Default: "Admin Consent Request Policy"},
