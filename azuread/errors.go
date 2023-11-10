@@ -32,7 +32,7 @@ func getErrorObject(err error) *RequestError {
 		}
 	}
 
-	return nil
+	return &RequestError{Message: err.Error()}
 }
 
 func isIgnorableErrorPredicate(ignoreErrorCodes []string) plugin.ErrorPredicateWithContext {
