@@ -153,7 +153,7 @@ func listAdGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	err = pageIterator.Iterate(ctx, func(group models.Groupable) bool {
 
 		resourceBehaviorOptions := formatResourceAdditionalData(group, "resourceBehaviorOptions")
-	resourceProvisioningOptions := formatResourceAdditionalData(group, "resourceProvisioningOptions")
+		resourceProvisioningOptions := formatResourceAdditionalData(group, "resourceProvisioningOptions")
 
 		d.StreamListItem(ctx, &ADGroupInfo{group, resourceBehaviorOptions, resourceProvisioningOptions})
 

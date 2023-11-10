@@ -48,7 +48,6 @@ func tableAzureAdDirectoryRole(_ context.Context) *plugin.Table {
 	}
 }
 
-
 //// LIST FUNCTION
 
 func listAdDirectoryRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {

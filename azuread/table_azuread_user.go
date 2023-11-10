@@ -186,7 +186,6 @@ func getAdUser(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) 
 		},
 	}
 
-
 	user, err := client.Users().ByUserId(userId).Get(ctx, input)
 	if err != nil {
 		errObj := getErrorObject(err)
