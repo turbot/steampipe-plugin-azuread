@@ -44,6 +44,8 @@ func getErrorObject(err error) *RequestError {
 			Message: err.Error(),
 		}
 	}
+
+	return &RequestError{Message: err.Error()}
 }
 
 func isIgnorableErrorPredicate(ignoreErrorCodes []string) plugin.ErrorPredicateWithContext {
