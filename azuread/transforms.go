@@ -354,11 +354,11 @@ func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessP
 	}
 }
 
-func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyConditionsClientAppTypes() []models.ConditionalAccessClientApp {
+func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyConditionsClientAppTypes() []string {
 	if conditionalAccessPolicy.GetConditions() == nil {
 		return nil
 	}
-	return conditionalAccessPolicy.GetConditions().GetClientAppTypes()
+	return models.SerializeConditionalAccessClientApp(conditionalAccessPolicy.GetConditions().GetClientAppTypes())
 }
 
 func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyConditionsLocations() map[string]interface{} {
@@ -391,11 +391,11 @@ func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessP
 	}
 }
 
-func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyConditionsSignInRiskLevels() []models.RiskLevel {
+func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyConditionsSignInRiskLevels() []string {
 	if conditionalAccessPolicy.GetConditions() == nil {
 		return nil
 	}
-	return conditionalAccessPolicy.GetConditions().GetSignInRiskLevels()
+	return models.SerializeRiskLevel(conditionalAccessPolicy.GetConditions().GetSignInRiskLevels())
 }
 
 func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyConditionsUsers() map[string]interface{} {
@@ -424,11 +424,11 @@ func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessP
 	return conditionalAccessPolicy.GetConditions().GetUserRiskLevels()
 }
 
-func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyGrantControlsBuiltInControls() []models.ConditionalAccessGrantControl {
+func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyGrantControlsBuiltInControls() []string {
 	if conditionalAccessPolicy.GetGrantControls() == nil {
 		return nil
 	}
-	return conditionalAccessPolicy.GetGrantControls().GetBuiltInControls()
+	return models.SerializeConditionalAccessGrantControl(conditionalAccessPolicy.GetGrantControls().GetBuiltInControls())
 }
 
 func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyGrantControlsCustomAuthenticationFactors() []string {
