@@ -1,10 +1,20 @@
-# Table: azuread_user
+---
+title: "Steampipe Table: azuread_user - Query Azure AD Users using SQL"
+description: "Allows users to query Azure AD Users, specifically user profiles, providing insights into user information and behavior."
+---
 
-An Azure AD user account, which helps employees sign in and access resources.
+# Table: azuread_user - Query Azure AD Users using SQL
+
+Azure Active Directory (Azure AD) is Microsoft's multi-tenant, cloud-based directory, and identity management service. It combines core directory services, application access management, and identity protection into a single solution. Azure AD is the backbone of the Office 365 system, and it can sync with on-premise Active Directory.
+
+## Table Usage Guide
+
+The `azuread_user` table provides insights into user profiles within Azure Active Directory. As a system administrator, explore user-specific details through this table, including user identities, user principal names, and associated metadata. Utilize it to uncover information about users, such as their display names, job titles, and the verification of user identities.
 
 ## Examples
 
 ### Basic info
+Explore the basic information of users in your Azure Active Directory. This can be useful for understanding the user composition of your organization, including their display names, principal names, IDs, given names, and emails.
 
 ```sql
 select
@@ -18,6 +28,7 @@ from
 ```
 
 ### List guest users
+Discover the segments that consist of guest users within your Azure Active Directory, allowing you to better manage and monitor these specific user accounts. This is particularly useful in maintaining security protocols and ensuring guest users have appropriate access permissions.
 
 ```sql
 select
@@ -32,6 +43,7 @@ where
 ```
 
 ### List disabled users
+Discover the segments that consist of disabled user accounts within the Azure Active Directory. This can be useful in monitoring and managing user accessibility for security and compliance purposes.
 
 ```sql
 select
@@ -46,6 +58,7 @@ where
 ```
 
 ### List users with access to directory roles
+Discover the segments that have access to directory roles to better manage permissions and security protocols. This is particularly useful for administrators seeking to optimize access control and understand user-role relationships.
 
 ```sql
 select
@@ -60,6 +73,7 @@ where
 ```
 
 ### List users with information of groups they are attached
+Discover the segments that outline the association between users and groups in your Azure Active Directory. This query is useful for assessing user-group relationships, aiding in the management of access and permissions.
 
 ```sql
 select
