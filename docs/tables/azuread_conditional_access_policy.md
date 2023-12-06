@@ -16,7 +16,18 @@ The `azuread_conditional_access_policy` table provides insights into Conditional
 ### Basic info
 Analyze the settings to understand the status and creation date of the built-in controls in your Azure Active Directory conditional access policy. This can help you assess the elements within your policy and make necessary adjustments.
 
-```sql
+```sql+postgres
+select
+  id,
+  display_name,
+  state,
+  created_date_time,
+  built_in_controls
+from
+  azuread_conditional_access_policy;
+```
+
+```sql+sqlite
 select
   id,
   display_name,
@@ -30,7 +41,7 @@ from
 ### List conditional access policies with mfa enabled
 Uncover the details of conditional access policies that have multi-factor authentication enabled. This is useful for enhancing security by identifying policies that require an additional layer of verification.
 
-```sql
+```sql+postgres
 select
   id,
   display_name,
@@ -39,4 +50,8 @@ from
   azuread_conditional_access_policy
 where
   built_in_controls ?& array['mfa'];
+```
+
+```sql+sqlite
+Error: SQLite does not support array operations and '?&' operator.
 ```

@@ -16,7 +16,17 @@ The `azuread_directory_role` table provides insights into Directory Roles within
 ### Basic info
 Explore the roles within your Azure Active Directory to understand their functions and who has been assigned to them. This can be useful for auditing purposes or to ensure the correct permissions have been granted.
 
-```sql
+```sql+postgres
+select
+  id,
+  display_name,
+  description,
+  member_ids
+from
+  azuread_directory_role;
+```
+
+```sql+sqlite
 select
   id,
   display_name,
@@ -29,7 +39,7 @@ from
 ### List users with access to directory roles
 Explore which users have access to specific directory roles. This is useful for managing and reviewing user permissions in a system.
 
-```sql
+```sql+postgres
 select
   u.display_name as username,
   role.display_name as directory_role
@@ -39,4 +49,16 @@ from
   azuread_user as u
 where
   u.id = m_id;
+```
+
+```sql+sqlite
+select
+  u.display_name as username,
+  role.display_name as directory_role
+from
+  azuread_directory_role as role,
+  json_each(role.member_ids) as m_id,
+  azuread_user as u
+where
+  u.id = m_id.value;
 ```

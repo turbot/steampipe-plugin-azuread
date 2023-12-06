@@ -16,7 +16,16 @@ The `azuread_directory_setting` table provides insights into Directory Settings 
 ### Basic info
 Explore the basic information in your Azure Active Directory settings to determine the areas where changes or updates may be needed. This can be especially useful in managing user access and permissions within your organization.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  value
+from
+  azuread_directory_setting;
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -28,7 +37,7 @@ from
 ### Check if user admin consent workflow is enabled
 Determine if the workflow for user admin consent is activated. This is useful for managing and enforcing user permissions and access controls within your Azure Active Directory.
 
-```sql
+```sql+postgres
 select
   display_name,
   id,
@@ -42,10 +51,24 @@ where
   and value::bool;
 ```
 
+```sql+sqlite
+select
+  display_name,
+  id,
+  name,
+  value
+from
+  azuread_directory_setting
+where
+  display_name = 'Consent Policy Settings'
+  and name = 'EnableAdminConsentRequests'
+  and value = '1';
+```
+
 ### Check if banned password protection is enabled
 Determine if your organization's password policy is effectively safeguarding against the use of commonly banned passwords. This query is beneficial in identifying potential vulnerabilities in your password protection settings, ensuring a robust security protocol.
 
-```sql
+```sql+postgres
 select
   display_name,
   id,
@@ -58,6 +81,25 @@ where
   and (
     name = 'EnableBannedPasswordCheckOnPremises'
     and value::bool
+  ) and (
+    name = 'BannedPasswordCheckOnPremisesMode'
+    and value = 'Enforced'
+  );
+```
+
+```sql+sqlite
+select
+  display_name,
+  id,
+  name,
+  value
+from
+  azuread_directory_setting
+where
+  display_name = 'Password Rule Settings'
+  and (
+    name = 'EnableBannedPasswordCheckOnPremises'
+    and value = 'true'
   ) and (
     name = 'BannedPasswordCheckOnPremisesMode'
     and value = 'Enforced'

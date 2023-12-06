@@ -16,7 +16,16 @@ The `azuread_authorization_policy` table provides insights into authorization po
 ### Basic info
 Analyze the settings to understand the display name, ID, and invite permissions for a given Azure AD authorization policy. This can be useful for auditing and managing access controls within your Azure environment.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  allow_invites_from
+from
+  azuread_authorization_policy;
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -28,7 +37,7 @@ from
 ### Check if user consent to apps accessing company data on their behalf is not allowed
 Determine the areas in which users have not granted permission for apps to access company data on their behalf. This can be useful to maintain data privacy and prevent unauthorized access.
 
-```sql
+```sql+postgres
 select
   display_name,
   id,
@@ -39,10 +48,32 @@ where
   default_user_role_permissions ->> 'permissionGrantPoliciesAssigned' = '[]';
 ```
 
+```sql+sqlite
+select
+  display_name,
+  id,
+  default_user_role_permissions
+from
+  azuread_authorization_policy
+where
+  json_extract(default_user_role_permissions, '$.permissionGrantPoliciesAssigned') = '[]';
+```
+
 ### Check if all members are allowed to invite external users to the organization
 Determine if your organization's settings permit all members to invite external users. This is useful for assessing the openness of your organization's communication and collaboration policies.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  default_user_role_permissions
+from
+  azuread_authorization_policy
+where
+  allow_invites_from = 'everyone';
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -56,7 +87,18 @@ where
 ### Check if email validation is not required to join the tenant
 Determine if your organization's settings allow users to join without verifying their email first. This could be a potential security risk, as it may enable unauthorized individuals to gain access to your system.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  default_user_role_permissions
+from
+  azuread_authorization_policy
+where
+  not allowed_email_verified_users_to_join_organization;
+```
+
+```sql+sqlite
 select
   display_name,
   id,

@@ -16,7 +16,17 @@ The `azuread_device` table provides insights into registered devices within Azur
 ### Basic info
 Explore which devices in your Azure Active Directory are managed and compliant, as well as their group memberships. This is useful for maintaining security standards and managing device access within your organization.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  is_managed,
+  is_compliant,
+  member_of
+from
+  azuread_device;
+```
+
+```sql+sqlite
 select
   display_name,
   is_managed,
@@ -29,7 +39,7 @@ from
 ### List managed devices
 Explore which devices are managed within your Azure Active Directory. This allows you to gain insights into the device profiles, including their operating system versions, for better management and security compliance.
 
-```sql
+```sql+postgres
 select
   display_name,
   profile_type,
@@ -42,10 +52,23 @@ where
   is_managed;
 ```
 
+```sql+sqlite
+select
+  display_name,
+  profile_type,
+  id,
+  operating_system,
+  operating_system_version
+from
+  azuread_device
+where
+  is_managed = 1;
+```
+
 ### List non-compliant devices
 Explore which devices in your Azure Active Directory are not compliant with your organization's standards. This can help you identify potential security risks and take necessary corrective actions.
 
-```sql
+```sql+postgres
 select
   display_name,
   profile_type,
@@ -56,4 +79,17 @@ from
   azuread_device
 where
   not is_compliant;
+```
+
+```sql+sqlite
+select
+  display_name,
+  profile_type,
+  id,
+  operating_system,
+  operating_system_version
+from
+  azuread_device
+where
+  is_compliant = 0;
 ```

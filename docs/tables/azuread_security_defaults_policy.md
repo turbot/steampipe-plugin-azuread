@@ -16,7 +16,16 @@ The `azuread_security_defaults_policy` table provides insights into the Security
 ### Basic info
 Explore which security policies are active within your Azure Active Directory. This can help in assessing your current security settings and identifying areas that might need reinforcement.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  is_enabled
+from
+  azuread_security_defaults_policy;
+```
+
+```sql+sqlite
 select
   display_name,
   id,

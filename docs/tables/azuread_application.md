@@ -16,7 +16,16 @@ The `azuread_application` table provides insights into applications registered w
 ### Basic info
 Explore which applications are registered in your Azure Active Directory by identifying their display names and associated IDs. This can help you manage and monitor your applications effectively.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  app_id
+from
+  azuread_application;
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -28,7 +37,7 @@ from
 ### List owners of an application
 This query helps to identify the owners of a specific application within a system, which is useful for understanding who has control over and responsibility for that application. It's particularly beneficial in scenarios where there is a need to audit access rights or investigate potential security issues.
 
-```sql
+```sql+postgres
 select
   app.display_name as application_name,
   app.id as application_id,
@@ -38,6 +47,20 @@ from
   azuread_application as app,
   jsonb_array_elements_text(owner_ids) as o
   left join azuread_user as u on u.id = o
+where
+  app.id = 'a6656898-3879-4d35-8a58-b34237095a70';
+```
+
+```sql+sqlite
+select
+  app.display_name as application_name,
+  app.id as application_id,
+  o.value as owner_id,
+  u.display_name as owner_display_name
+from
+  azuread_application as app,
+  json_each(app.owner_ids) as o
+  left join azuread_user as u on u.id = o.value
 where
   app.id = 'a6656898-3879-4d35-8a58-b34237095a70';
 ```

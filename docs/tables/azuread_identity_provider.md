@@ -16,7 +16,15 @@ The `azuread_identity_provider` table provides insights into Identity Providers 
 ### Basic info
 Discover the identities that are registered within your Azure Active Directory. This can assist in managing access and authentication within your organization.
 
-```sql
+```sql+postgres
+select
+  name,
+  id
+from
+  azuread_identity_provider;
+```
+
+```sql+sqlite
 select
   name,
   id

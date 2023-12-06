@@ -16,7 +16,7 @@ The `azuread_sign_in_report` table provides insights into sign-in activities wit
 ### Basic info
 Discover the segments that highlight user sign-in activities in AzureAD by analyzing the date, user details, and location. This practical application can be used to monitor user activities and track sign-in locations for security purposes.
 
-```sql
+```sql+postgres
 select
   id,
   created_date_time,
@@ -28,10 +28,34 @@ from
   azuread_sign_in_report;
 ```
 
+```sql+sqlite
+select
+  id,
+  created_date_time,
+  user_display_name,
+  user_principal_name,
+  ip_address,
+  json_extract(location, '$.city') as city
+from
+  azuread_sign_in_report;
+```
+
 ### List an user sign in details
 Explore which applications a specific user has accessed within your Azure Active Directory. This can help you monitor user activity, ensuring they're only accessing appropriate resources.
 
-```sql
+```sql+postgres
+select
+  user_display_name,
+  id,
+  app_display_name,
+  user_principal_name
+from
+  azuread_sign_in_report
+where
+  user_principal_name = 'abc@myacc.onmicrosoft.com';
+```
+
+```sql+sqlite
 select
   user_display_name,
   id,

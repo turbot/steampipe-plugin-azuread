@@ -16,7 +16,17 @@ The `azuread_domain` table provides insights into the domains within Azure Activ
 ### Basic info
 Determine the administrative status and verification state of your Azure Active Directory domains, and gain insights into the supported services. This is beneficial for managing access controls and understanding the capabilities of your domains.
 
-```sql
+```sql+postgres
+select
+  id,
+  is_admin_managed,
+  is_verified,
+  supported_services
+from
+  azuread_domain;
+```
+
+```sql+sqlite
 select
   id,
   is_admin_managed,
@@ -29,7 +39,16 @@ from
 ### List verified domains
 Discover the segments that are verified within your Azure Active Directory (AD) domain. This can help ensure the integrity and security of your domain by identifying those that have been validated.
 
-```sql
+```sql+postgres
+select
+  id
+from
+  azuread_domain
+where
+  is_verified;
+```
+
+```sql+sqlite
 select
   id
 from

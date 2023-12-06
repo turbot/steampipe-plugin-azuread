@@ -16,7 +16,16 @@ The `azuread_service_principal` table provides insights into Service Principals 
 ### Basic info
 Explore the relationship between display names and application names in your Azure Active Directory. This can be useful in understanding how your applications are connected and organized within the directory.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  app_display_name
+from
+  azuread_service_principal;
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -28,7 +37,7 @@ from
 ### List disabled service principals
 Uncover the details of disabled service principals within your Azure Active Directory. This is useful in ensuring that disabled accounts are not posing a security risk or cluttering your system.
 
-```sql
+```sql+postgres
 select
   display_name,
   id
@@ -38,10 +47,32 @@ where
   not account_enabled;
 ```
 
+```sql+sqlite
+select
+  display_name,
+  id
+from
+  azuread_service_principal
+where
+  account_enabled = 0;
+```
+
 ### List service principals related to applications
 Explore which service principals are directly related to applications in Azure Active Directory. This can be useful to determine which applications have active accounts, aiding in both security and account management.
 
-```sql
+```sql+postgres
+select
+  id,
+  app_display_name,
+  account_enabled
+from
+  azuread_service_principal
+where
+  service_principal_type = 'Application'
+  and tenant_id = app_owner_organization_id;
+```
+
+```sql+sqlite
 select
   id,
   app_display_name,

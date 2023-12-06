@@ -16,7 +16,16 @@ The `azuread_admin_consent_request_policy` table provides insights into admin co
 ### Basic info
 Explore which Azure Active Directory admin consent request policies are enabled and their respective versions. This is useful for assessing the current status and versioning of your policies.
 
-```sql
+```sql+postgres
+select
+  title,
+  is_enabled,
+  version
+from
+  azuread_admin_consent_request_policy;
+```
+
+```sql+sqlite
 select
   title,
   is_enabled,
@@ -28,7 +37,18 @@ from
 ### Check admin consent workflow is enabled
 Determine if the admin consent workflow is active in Azure Active Directory, which is essential for enhancing security by ensuring that admins explicitly approve access requests to specific resources.
 
-```sql
+```sql+postgres
+select
+  title,
+  is_enabled,
+  version
+from
+  azuread_admin_consent_request_policy
+where
+  is_enabled;
+```
+
+```sql+sqlite
 select
   title,
   is_enabled,
@@ -42,7 +62,7 @@ where
 ### List users who can review new admin consent requests
 Determine the users who have the authority to review new administrative consent requests. This is useful for managing permissions and ensuring only appropriate personnel are able to handle these requests.
 
-```sql
+```sql+postgres
 select
   p.title,
   p.is_enabled,
@@ -54,4 +74,8 @@ from
   left join azuread_user as u on split_part(r ->> 'query', '/', 4) = u.id
 where
   is_enabled;
+```
+
+```sql+sqlite
+Error: SQLite does not support split or string_to_array functions.
 ```
