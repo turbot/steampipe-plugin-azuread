@@ -267,7 +267,4 @@ connection "azuread" {
 }
 ```
 
-## Get involved
 
-- Open source: https://github.com/turbot/steampipe-plugin-azuread
-- Community: [Join #steampipe on Slack →](https://turbot.com/community/join)
