@@ -21,7 +21,6 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 		},
 		ConnectionConfigSchema: &plugin.ConnectionConfigSchema{
 			NewInstance: ConfigInstance,
-			Schema:      ConfigSchema,
 		},
 		TableMap: map[string]*plugin.Table{
 			"azuread_admin_consent_request_policy": tableAzureAdAdminConsentRequestPolicy(ctx),
