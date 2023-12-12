@@ -13,12 +13,12 @@ engines: ["steampipe", "sqlite", "postgres", "export"]
 
 # Azure Active Directory + Steampipe
 
+[Steampipe](https://steampipe.io) is an open-source zero-ETL engine to instantly query cloud APIs using SQL.
+
 [Azure Active Directory](https://docs.microsoft.com/en-in/azure/active-directory/fundamentals/active-directory-whatis) is Microsoft’s cloud-based identity and access management service, which helps your employees sign in and access resources in:
 
 - External resources, such as Microsoft 365, the Azure portal, and thousands of other SaaS applications.
 - Internal resources, such as apps on your corporate network and intranet, along with any cloud apps developed by your own organization.
-
-[Steampipe](https://steampipe.io) is an open-source zero-ETL engine to instantly query cloud APIs using SQL.
 
 For example:
 
@@ -266,5 +266,3 @@ connection "azuread" {
   plugin = "azuread"
 }
 ```
-
-
