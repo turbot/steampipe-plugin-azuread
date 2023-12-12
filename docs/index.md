@@ -18,7 +18,7 @@ engines: ["steampipe", "sqlite", "postgres", "export"]
 - External resources, such as Microsoft 365, the Azure portal, and thousands of other SaaS applications.
 - Internal resources, such as apps on your corporate network and intranet, along with any cloud apps developed by your own organization.
 
-[Steampipe](https://steampipe.io) is an open source CLI to instantly query cloud APIs using SQL.
+[Steampipe](https://steampipe.io) is an open-source zero-ETL engine to instantly query cloud APIs using SQL.
 
 For example:
 
