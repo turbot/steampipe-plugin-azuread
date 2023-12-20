@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/iancoleman/strcase"
+	abstractions "github.com/microsoft/kiota-abstractions-go"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
@@ -13,7 +14,6 @@ import (
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/microsoftgraph/msgraph-sdk-go/serviceprincipals"
-	"github.com/microsoftgraph/msgraph-sdk-go/serviceprincipals/item/owners"
 )
 
 //// TABLE DEFINITION
@@ -134,15 +134,13 @@ func listAdServicePrincipals(ctx context.Context, d *plugin.QueryData, _ *plugin
 		return nil, errObj
 	}
 
-	pageIterator, err := msgraphcore.NewPageIterator(result, adapter, models.CreateServicePrincipalCollectionResponseFromDiscriminatorValue)
+	pageIterator, err := msgraphcore.NewPageIterator[models.ServicePrincipalable](result, adapter, models.CreateServicePrincipalCollectionResponseFromDiscriminatorValue)
 	if err != nil {
 		plugin.Logger(ctx).Error("listAdServicePrincipals", "create_iterator_instance_error", err)
 		return nil, err
 	}
 
-	err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
-		servicePrincipal := pageItem.(models.ServicePrincipalable)
-
+	err = pageIterator.Iterate(ctx, func(servicePrincipal models.ServicePrincipalable) bool {
 		d.StreamListItem(ctx, &ADServicePrincipalInfo{servicePrincipal})
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
@@ -172,7 +170,7 @@ func getAdServicePrincipal(ctx context.Context, d *plugin.QueryData, h *plugin.H
 		return nil, err
 	}
 
-	servicePrincipal, err := client.ServicePrincipalsById(servicePrincipalID).Get(ctx, nil)
+	servicePrincipal, err := client.ServicePrincipals().ByServicePrincipalId(servicePrincipalID).Get(ctx, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("getAdServicePrincipal", "get_service_principal_error", errObj)
@@ -197,36 +195,34 @@ func getServicePrincipalOwners(ctx context.Context, d *plugin.QueryData, h *plug
 		return nil, nil
 	}
 
-	headers := map[string]string{
-		"ConsistencyLevel": "eventual",
-	}
+	headers := &abstractions.RequestHeaders{}
+	headers.TryAdd("ConsistencyLevel", "eventual")
 
 	includeCount := true
-	requestParameters := &owners.OwnersRequestBuilderGetQueryParameters{
+	requestParameters := &serviceprincipals.ItemOwnersRequestBuilderGetQueryParameters{
 		Count: &includeCount,
 	}
 
-	config := &owners.OwnersRequestBuilderGetRequestConfiguration{
+	config := &serviceprincipals.ItemOwnersRequestBuilderGetRequestConfiguration{
 		Headers:         headers,
 		QueryParameters: requestParameters,
 	}
 
 	ownerIds := []*string{}
-	owners, err := client.ServicePrincipalsById(*servicePrincipalID).Owners().Get(ctx, config)
+	owners, err := client.ServicePrincipals().ByServicePrincipalId(*servicePrincipalID).Owners().Get(ctx, config)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("getServicePrincipalOwners", "get_service_principal_owners_error", errObj)
 		return nil, errObj
 	}
 
-	pageIterator, err := msgraphcore.NewPageIterator(owners, adapter, models.CreateDirectoryObjectCollectionResponseFromDiscriminatorValue)
+	pageIterator, err := msgraphcore.NewPageIterator[models.DirectoryObjectable](owners, adapter, models.CreateDirectoryObjectCollectionResponseFromDiscriminatorValue)
 	if err != nil {
 		plugin.Logger(ctx).Error("getServicePrincipalOwners", "create_iterator_instance_error", err)
 		return nil, err
 	}
 
-	err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
-		owner := pageItem.(models.DirectoryObjectable)
+	err = pageIterator.Iterate(ctx, func(owner models.DirectoryObjectable) bool {
 		ownerIds = append(ownerIds, owner.GetId())
 
 		return true

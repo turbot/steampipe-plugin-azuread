@@ -12,7 +12,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
-	"github.com/microsoftgraph/msgraph-sdk-go/identity/conditionalaccess/policies"
+	"github.com/microsoftgraph/msgraph-sdk-go/identity"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 )
 
@@ -82,7 +82,7 @@ func listAdConditionalAccessPolicies(ctx context.Context, d *plugin.QueryData, _
 	}
 
 	// List operations
-	input := &policies.PoliciesRequestBuilderGetQueryParameters{
+	input := &identity.ConditionalAccessPoliciesRequestBuilderGetQueryParameters{
 		Top: Int32(1000),
 	}
 
@@ -102,7 +102,7 @@ func listAdConditionalAccessPolicies(ctx context.Context, d *plugin.QueryData, _
 		input.Filter = &joinStr
 	}
 
-	options := &policies.PoliciesRequestBuilderGetRequestConfiguration{
+	options := &identity.ConditionalAccessPoliciesRequestBuilderGetRequestConfiguration{
 		QueryParameters: input,
 	}
 
@@ -113,15 +113,13 @@ func listAdConditionalAccessPolicies(ctx context.Context, d *plugin.QueryData, _
 		return nil, errObj
 	}
 
-	pageIterator, err := msgraphcore.NewPageIterator(result, adapter, models.CreateConditionalAccessPolicyCollectionResponseFromDiscriminatorValue)
+	pageIterator, err := msgraphcore.NewPageIterator[models.ConditionalAccessPolicyable](result, adapter, models.CreateConditionalAccessPolicyCollectionResponseFromDiscriminatorValue)
 	if err != nil {
 		plugin.Logger(ctx).Error("listAdConditionalAccessPolicies", "create_iterator_instance_error", err)
 		return nil, err
 	}
 
-	err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
-		policy := pageItem.(models.ConditionalAccessPolicyable)
-
+	err = pageIterator.Iterate(ctx, func(policy models.ConditionalAccessPolicyable) bool {
 		d.StreamListItem(ctx, &ADConditionalAccessPolicyInfo{policy})
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
@@ -151,7 +149,7 @@ func getAdConditionalAccessPolicy(ctx context.Context, d *plugin.QueryData, h *p
 		return nil, err
 	}
 
-	policy, err := client.Identity().ConditionalAccess().PoliciesById(conditionalAccessPolicyId).Get(ctx, nil)
+	policy, err := client.Identity().ConditionalAccess().Policies().ByConditionalAccessPolicyId(conditionalAccessPolicyId).Get(ctx, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("getAdConditionalAccessPolicy", "get_conditional_access_policy_error", errObj)

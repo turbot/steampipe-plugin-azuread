@@ -127,8 +127,8 @@ func (application *ADApplicationInfo) ApplicationAPI() map[string]interface{} {
 		if p.GetOrigin() != nil {
 			data["origin"] = *p.GetOrigin()
 		}
-		if p.GetType() != nil {
-			data["type"] = *p.GetType()
+		if p.GetTypeEscaped() != nil {
+			data["type"] = *p.GetTypeEscaped()
 		}
 		if p.GetUserConsentDescription() != nil {
 			data["userConsentDescription"] = p.GetUserConsentDescription()
@@ -192,8 +192,8 @@ func (application *ADApplicationInfo) ApplicationKeyCredentials() []map[string]i
 		if p.GetStartDateTime() != nil {
 			keyCredentialData["startDateTime"] = *p.GetStartDateTime()
 		}
-		if p.GetType() != nil {
-			keyCredentialData["type"] = *p.GetType()
+		if p.GetTypeEscaped() != nil {
+			keyCredentialData["type"] = *p.GetTypeEscaped()
 		}
 		if p.GetUsage() != nil {
 			keyCredentialData["usage"] = *p.GetUsage()
@@ -350,7 +350,7 @@ func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessP
 	if conditionalAccessPolicy.GetConditions() == nil {
 		return nil
 	}
-	return conditionalAccessPolicy.GetConditions().GetClientAppTypes()
+	return models.SerializeConditionalAccessClientApp(conditionalAccessPolicy.GetConditions().GetClientAppTypes())
 }
 
 func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyConditionsLocations() map[string]interface{} {
@@ -387,7 +387,7 @@ func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessP
 	if conditionalAccessPolicy.GetConditions() == nil {
 		return nil
 	}
-	return conditionalAccessPolicy.GetConditions().GetSignInRiskLevels()
+	return models.SerializeRiskLevel(conditionalAccessPolicy.GetConditions().GetSignInRiskLevels())
 }
 
 func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyConditionsUsers() map[string]interface{} {
@@ -413,14 +413,14 @@ func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessP
 	if conditionalAccessPolicy.GetConditions() == nil {
 		return nil
 	}
-	return conditionalAccessPolicy.GetConditions().GetUserRiskLevels()
+	return models.SerializeRiskLevel(conditionalAccessPolicy.GetConditions().GetUserRiskLevels())
 }
 
 func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyGrantControlsBuiltInControls() []string {
 	if conditionalAccessPolicy.GetGrantControls() == nil {
 		return nil
 	}
-	return conditionalAccessPolicy.GetGrantControls().GetBuiltInControls()
+	return models.SerializeConditionalAccessGrantControl(conditionalAccessPolicy.GetGrantControls().GetBuiltInControls())
 }
 
 func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyGrantControlsCustomAuthenticationFactors() []string {
@@ -631,8 +631,8 @@ func (directoryAuditReport *ADDirectoryAuditReportInfo) DirectoryAuditTargetReso
 		if i.GetGroupType() != nil {
 			data["groupType"] = i.GetGroupType().String()
 		}
-		if i.GetType() != nil {
-			data["type"] = *i.GetType()
+		if i.GetTypeEscaped() != nil {
+			data["type"] = *i.GetTypeEscaped()
 		}
 		if i.GetUserPrincipalName() != nil {
 			data["userPrincipalName"] = *i.GetUserPrincipalName()
@@ -712,8 +712,8 @@ func (servicePrincipal *ADServicePrincipalInfo) ServicePrincipalAddIns() []map[s
 		if p.GetId() != nil {
 			addInData["id"] = *p.GetId()
 		}
-		if p.GetType() != nil {
-			addInData["type"] = *p.GetType()
+		if p.GetTypeEscaped() != nil {
+			addInData["type"] = *p.GetTypeEscaped()
 		}
 
 		addInProperties := []map[string]interface{}{}
@@ -801,8 +801,8 @@ func (servicePrincipal *ADServicePrincipalInfo) ServicePrincipalKeyCredentials()
 		if p.GetStartDateTime() != nil {
 			keyCredentialData["startDateTime"] = *p.GetStartDateTime()
 		}
-		if p.GetType() != nil {
-			keyCredentialData["type"] = *p.GetType()
+		if p.GetTypeEscaped() != nil {
+			keyCredentialData["type"] = *p.GetTypeEscaped()
 		}
 		if p.GetUsage() != nil {
 			keyCredentialData["usage"] = *p.GetUsage()
@@ -838,8 +838,8 @@ func (servicePrincipal *ADServicePrincipalInfo) ServicePrincipalOauth2Permission
 		if p.GetIsEnabled() != nil {
 			data["isEnabled"] = *p.GetIsEnabled()
 		}
-		if p.GetType() != nil {
-			data["type"] = *p.GetType()
+		if p.GetTypeEscaped() != nil {
+			data["type"] = *p.GetTypeEscaped()
 		}
 		if p.GetOrigin() != nil {
 			data["origin"] = *p.GetOrigin()

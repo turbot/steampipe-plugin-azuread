@@ -7,10 +7,10 @@ import (
 
 	"github.com/iancoleman/strcase"
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
-	"github.com/turbot/go-kit/helpers"
 	"github.com/microsoftgraph/msgraph-sdk-go/devices"
-	"github.com/microsoftgraph/msgraph-sdk-go/devices/item"
+	"github.com/microsoftgraph/msgraph-sdk-go/deviceswithdeviceid"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
+	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
@@ -133,15 +133,13 @@ func listAdDevices(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 
 	if result.GetOdataNextLink() != nil {
 
-		pageIterator, err := msgraphcore.NewPageIterator(result, adapter, models.CreateDeviceCollectionResponseFromDiscriminatorValue)
+		pageIterator, err := msgraphcore.NewPageIterator[models.Deviceable](result, adapter, models.CreateDeviceCollectionResponseFromDiscriminatorValue)
 		if err != nil {
 			plugin.Logger(ctx).Error("azuread_device.listAdDevices", "create_iterator_instance_error", err)
 			return nil, err
 		}
 
-		err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
-			device := pageItem.(models.Deviceable)
-
+		err = pageIterator.Iterate(ctx, func(device models.Deviceable) bool {
 			d.StreamListItem(ctx, &ADDeviceInfo{device})
 
 			// Context can be cancelled due to manual cancellation or the limit has been hit
@@ -186,15 +184,16 @@ func getAdDevice(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 	givenColumns := d.QueryContext.Columns
 	selectColumns, expandColumns := buildDeviceRequestFields(ctx, givenColumns)
 
-	input := &item.DeviceItemRequestBuilderGetQueryParameters{}
-	input.Select = selectColumns
-	input.Expand = expandColumns
+	input := &deviceswithdeviceid.DevicesWithDeviceIdRequestBuilderGetQueryParameters{
+		Select: selectColumns,
+		Expand: expandColumns,
+	}
 
-	options := &item.DeviceItemRequestBuilderGetRequestConfiguration{
+	options := &deviceswithdeviceid.DevicesWithDeviceIdRequestBuilderGetRequestConfiguration{
 		QueryParameters: input,
 	}
 
-	device, err := client.DevicesById(deviceId).Get(ctx, options)
+	device, err := client.DevicesWithDeviceId(&deviceId).Get(ctx, options)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("getAdDevice", "get_device_error", errObj)

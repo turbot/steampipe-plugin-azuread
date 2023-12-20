@@ -3,12 +3,11 @@ package azuread
 import (
 	"context"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/iancoleman/strcase"
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
-	"github.com/microsoftgraph/msgraph-sdk-go/auditlogs/directoryaudits"
+	"github.com/microsoftgraph/msgraph-sdk-go/auditlogs"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
@@ -77,7 +76,7 @@ func listAdDirectoryAuditReports(ctx context.Context, d *plugin.QueryData, _ *pl
 	}
 
 	// List operations
-	input := &directoryaudits.DirectoryAuditsRequestBuilderGetQueryParameters{
+	input := &auditlogs.DirectoryAuditsRequestBuilderGetQueryParameters{
 		Top: Int32(1000),
 	}
 
@@ -94,6 +93,7 @@ func listAdDirectoryAuditReports(ctx context.Context, d *plugin.QueryData, _ *pl
 	equalQuals := d.EqualsQuals
 
 	var queryFilter string
+	// FIXME: see table_azuread_device.go#L184
 	filter := buildDirectoryAuditQueryFilter(equalQuals)
 
 	// Filter by activityDateTime
@@ -123,14 +123,14 @@ func listAdDirectoryAuditReports(ctx context.Context, d *plugin.QueryData, _ *pl
 		queryFilter = equalQuals["filter"].GetStringValue()
 	}
 
+	// FIXME: see table_azuread_device.go#L184
 	if queryFilter != "" {
-		input.Filter = &queryFilter
+		input.Select = []string{queryFilter}
 	} else if len(filter) > 0 {
-		joinStr := strings.Join(filter, " and ")
-		input.Filter = &joinStr
+		input.Select = filter
 	}
 
-	options := &directoryaudits.DirectoryAuditsRequestBuilderGetRequestConfiguration{
+	options := &auditlogs.DirectoryAuditsRequestBuilderGetRequestConfiguration{
 		QueryParameters: input,
 	}
 
@@ -141,17 +141,14 @@ func listAdDirectoryAuditReports(ctx context.Context, d *plugin.QueryData, _ *pl
 		return nil, errObj
 	}
 
-	pageIterator, err := msgraphcore.NewPageIterator(result, adapter, models.CreateSignInCollectionResponseFromDiscriminatorValue)
+	pageIterator, err := msgraphcore.NewPageIterator[models.DirectoryAuditable](result, adapter, models.CreateSignInCollectionResponseFromDiscriminatorValue)
 	if err != nil {
 		plugin.Logger(ctx).Error("listAdDirectoryAuditReports", "create_iterator_instance_error", err)
 		return nil, err
 	}
 
-	err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
-		// To prevent errors during type conversion caused by inconsistent API responses (especially with larger data sets), we may get the different type of response (models.SignInable), we need to include the following check.
-		if directoryAudit, ok := pageItem.(models.DirectoryAuditable); ok {
-			d.StreamListItem(ctx, &ADDirectoryAuditReportInfo{directoryAudit})
-		}
+	err = pageIterator.Iterate(ctx, func(directoryAudit models.DirectoryAuditable) bool {
+		d.StreamListItem(ctx, &ADDirectoryAuditReportInfo{directoryAudit})
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
 		return d.RowsRemaining(ctx) != 0
@@ -179,7 +176,7 @@ func getAdDirectoryAuditReport(ctx context.Context, d *plugin.QueryData, h *plug
 		return nil, err
 	}
 
-	directoryAudit, err := client.AuditLogs().DirectoryAuditsById(directoryAuditID).Get(ctx, nil)
+	directoryAudit, err := client.AuditLogs().DirectoryAudits().ByDirectoryAuditId(directoryAuditID).Get(ctx, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("getAdDirectoryAuditReport", "get_directory_audit_report_error", errObj)
