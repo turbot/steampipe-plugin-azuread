@@ -6,9 +6,9 @@ import (
 	"strings"
 
 	"github.com/iancoleman/strcase"
+	abstractions "github.com/microsoft/kiota-abstractions-go"
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
 	"github.com/microsoftgraph/msgraph-sdk-go/applications"
-	"github.com/microsoftgraph/msgraph-sdk-go/applications/item/owners"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
@@ -123,18 +123,16 @@ func listAdApplications(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 		return nil, errObj
 	}
 
-	pageIterator, err := msgraphcore.NewPageIterator(result, adapter, models.CreateApplicationCollectionResponseFromDiscriminatorValue)
+	pageIterator, err := msgraphcore.NewPageIterator[models.Applicationable](result, adapter, models.CreateApplicationCollectionResponseFromDiscriminatorValue)
 	if err != nil {
 		plugin.Logger(ctx).Error("listAdApplications", "create_iterator_instance_error", err)
 		return nil, err
 	}
 
-	err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
-		application := pageItem.(models.Applicationable)
+	err = pageIterator.Iterate(ctx, func(pageItem models.Applicationable) bool {
+		isAuthorizationServiceEnabled := pageItem.GetAdditionalData()["isAuthorizationServiceEnabled"]
 
-		isAuthorizationServiceEnabled := application.GetAdditionalData()["isAuthorizationServiceEnabled"]
-
-		d.StreamListItem(ctx, &ADApplicationInfo{application, isAuthorizationServiceEnabled})
+		d.StreamListItem(ctx, &ADApplicationInfo{pageItem, isAuthorizationServiceEnabled})
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
 		return d.RowsRemaining(ctx) != 0
@@ -163,7 +161,7 @@ func getAdApplication(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 		return nil, err
 	}
 
-	application, err := client.ApplicationsById(applicationId).Get(ctx, nil)
+	application, err := client.Applications().ByApplicationId(applicationId).Get(ctx, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("getAdApplication", "get_application_error", errObj)
@@ -185,37 +183,34 @@ func getAdApplicationOwners(ctx context.Context, d *plugin.QueryData, h *plugin.
 	application := h.Item.(*ADApplicationInfo)
 	applicationID := application.GetId()
 
-	headers := map[string]string{
-		"ConsistencyLevel": "eventual",
+	headers := &abstractions.RequestHeaders{}
+	headers.Add("ConsistencyLevel", "eventual")
+
+	requestParameters := &applications.ItemOwnersRequestBuilderGetQueryParameters{
+		Count: Bool(true),
 	}
 
-	includeCount := true
-	requestParameters := &owners.OwnersRequestBuilderGetQueryParameters{
-		Count: &includeCount,
-	}
-
-	config := &owners.OwnersRequestBuilderGetRequestConfiguration{
+	config := &applications.ItemOwnersRequestBuilderGetRequestConfiguration{
 		Headers:         headers,
 		QueryParameters: requestParameters,
 	}
 
 	ownerIds := []*string{}
-	owners, err := client.ApplicationsById(*applicationID).Owners().Get(ctx, config)
+	owners, err := client.Applications().ByApplicationId(*applicationID).Owners().Get(ctx, config)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("getAdApplicationOwners", "get_application_owners_error", errObj)
 		return nil, errObj
 	}
 
-	pageIterator, err := msgraphcore.NewPageIterator(owners, adapter, models.CreateDirectoryObjectCollectionResponseFromDiscriminatorValue)
+	pageIterator, err := msgraphcore.NewPageIterator[models.DirectoryObjectable](owners, adapter, models.CreateDirectoryObjectCollectionResponseFromDiscriminatorValue)
 	if err != nil {
 		plugin.Logger(ctx).Error("getAdApplicationOwners", "create_iterator_instance_error", err)
 		return nil, err
 	}
 
-	err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
-		owner := pageItem.(models.DirectoryObjectable)
-		ownerIds = append(ownerIds, owner.GetId())
+	err = pageIterator.Iterate(ctx, func(pageItem models.DirectoryObjectable) bool {
+		ownerIds = append(ownerIds, pageItem.GetId())
 
 		return true
 	})

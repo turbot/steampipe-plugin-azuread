@@ -4,7 +4,7 @@ import (
 	"context"
 
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
-	"github.com/microsoftgraph/msgraph-sdk-go/auditlogs/signins"
+	"github.com/microsoftgraph/msgraph-sdk-go/auditlogs"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
@@ -74,7 +74,7 @@ func listAdSignInReports(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 	}
 
 	// List operations
-	input := &signins.SignInsRequestBuilderGetQueryParameters{
+	input := &auditlogs.SignInsRequestBuilderGetQueryParameters{
 		Top: Int32(999),
 	}
 
@@ -88,7 +88,7 @@ func listAdSignInReports(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 		}
 	}
 
-	options := &signins.SignInsRequestBuilderGetRequestConfiguration{
+	options := &auditlogs.SignInsRequestBuilderGetRequestConfiguration{
 		QueryParameters: input,
 	}
 
@@ -99,7 +99,7 @@ func listAdSignInReports(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 		return nil, errObj
 	}
 
-	pageIterator, err := msgraphcore.NewPageIterator(result, adapter, models.CreateSignInCollectionResponseFromDiscriminatorValue)
+	pageIterator, err := msgraphcore.NewPageIterator[interface{}](result, adapter, models.CreateSignInCollectionResponseFromDiscriminatorValue)
 	if err != nil {
 		plugin.Logger(ctx).Error("listAdSignInReports", "create_iterator_instance_error", err)
 		return nil, err
@@ -137,7 +137,7 @@ func getAdSignInReport(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 		return nil, err
 	}
 
-	signIn, err := client.AuditLogs().SignInsById(signInID).Get(ctx, nil)
+	signIn, err := client.AuditLogs().SignIns().BySignInId(signInID).Get(ctx, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("getAdSignInReport", "get_sign_in_report_error", errObj)

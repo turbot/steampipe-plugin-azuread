@@ -7,10 +7,9 @@ import (
 
 	"github.com/iancoleman/strcase"
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
-	"github.com/turbot/go-kit/helpers"
 	"github.com/microsoftgraph/msgraph-sdk-go/devices"
-	"github.com/microsoftgraph/msgraph-sdk-go/devices/item"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
+	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
@@ -131,36 +130,22 @@ func listAdDevices(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 		return nil, errObj
 	}
 
-	if result.GetOdataNextLink() != nil {
-
-		pageIterator, err := msgraphcore.NewPageIterator(result, adapter, models.CreateDeviceCollectionResponseFromDiscriminatorValue)
-		if err != nil {
-			plugin.Logger(ctx).Error("azuread_device.listAdDevices", "create_iterator_instance_error", err)
-			return nil, err
-		}
-
-		err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
-			device := pageItem.(models.Deviceable)
-
-			d.StreamListItem(ctx, &ADDeviceInfo{device})
-
-			// Context can be cancelled due to manual cancellation or the limit has been hit
-			return d.RowsRemaining(ctx) != 0
-		})
-
-		if err != nil {
-			plugin.Logger(ctx).Error("azuread_device.listAdDevices", "paging_error", err)
-			return nil, err
-		}
+	pageIterator, err := msgraphcore.NewPageIterator[models.Deviceable](result, adapter, models.CreateDeviceCollectionResponseFromDiscriminatorValue)
+	if err != nil {
+		plugin.Logger(ctx).Error("azuread_device.listAdDevices", "create_iterator_instance_error", err)
+		return nil, err
 	}
 
-	for _, device := range result.GetValue() {
-		d.StreamListItem(ctx, &ADDeviceInfo{device})
+	err = pageIterator.Iterate(ctx, func(pageItem models.Deviceable) bool {
+		d.StreamListItem(ctx, &ADDeviceInfo{pageItem})
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
-		if d.RowsRemaining(ctx) == 0 {
-			return nil, nil
-		}
+		return d.RowsRemaining(ctx) != 0
+	})
+
+	if err != nil {
+		plugin.Logger(ctx).Error("azuread_device.listAdDevices", "paging_error", err)
+		return nil, err
 	}
 
 	return nil, nil
@@ -186,15 +171,15 @@ func getAdDevice(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 	givenColumns := d.QueryContext.Columns
 	selectColumns, expandColumns := buildDeviceRequestFields(ctx, givenColumns)
 
-	input := &item.DeviceItemRequestBuilderGetQueryParameters{}
+	input := &devices.DeviceItemRequestBuilderGetQueryParameters{}
 	input.Select = selectColumns
 	input.Expand = expandColumns
 
-	options := &item.DeviceItemRequestBuilderGetRequestConfiguration{
+	options := &devices.DeviceItemRequestBuilderGetRequestConfiguration{
 		QueryParameters: input,
 	}
 
-	device, err := client.DevicesById(deviceId).Get(ctx, options)
+	device, err := client.Devices().ByDeviceId(deviceId).Get(ctx, options)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("getAdDevice", "get_device_error", errObj)

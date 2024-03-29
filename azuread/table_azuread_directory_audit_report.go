@@ -8,7 +8,7 @@ import (
 
 	"github.com/iancoleman/strcase"
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
-	"github.com/microsoftgraph/msgraph-sdk-go/auditlogs/directoryaudits"
+	"github.com/microsoftgraph/msgraph-sdk-go/auditlogs"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
@@ -77,7 +77,7 @@ func listAdDirectoryAuditReports(ctx context.Context, d *plugin.QueryData, _ *pl
 	}
 
 	// List operations
-	input := &directoryaudits.DirectoryAuditsRequestBuilderGetQueryParameters{
+	input := &auditlogs.DirectoryAuditsRequestBuilderGetQueryParameters{
 		Top: Int32(1000),
 	}
 
@@ -130,7 +130,7 @@ func listAdDirectoryAuditReports(ctx context.Context, d *plugin.QueryData, _ *pl
 		input.Filter = &joinStr
 	}
 
-	options := &directoryaudits.DirectoryAuditsRequestBuilderGetRequestConfiguration{
+	options := &auditlogs.DirectoryAuditsRequestBuilderGetRequestConfiguration{
 		QueryParameters: input,
 	}
 
@@ -141,7 +141,7 @@ func listAdDirectoryAuditReports(ctx context.Context, d *plugin.QueryData, _ *pl
 		return nil, errObj
 	}
 
-	pageIterator, err := msgraphcore.NewPageIterator(result, adapter, models.CreateSignInCollectionResponseFromDiscriminatorValue)
+	pageIterator, err := msgraphcore.NewPageIterator[interface{}](result, adapter, models.CreateSignInCollectionResponseFromDiscriminatorValue)
 	if err != nil {
 		plugin.Logger(ctx).Error("listAdDirectoryAuditReports", "create_iterator_instance_error", err)
 		return nil, err
@@ -156,6 +156,7 @@ func listAdDirectoryAuditReports(ctx context.Context, d *plugin.QueryData, _ *pl
 		// Context can be cancelled due to manual cancellation or the limit has been hit
 		return d.RowsRemaining(ctx) != 0
 	})
+
 	if err != nil {
 		plugin.Logger(ctx).Error("listAdDirectoryAuditReports", "paging_error", err)
 		return nil, err
@@ -179,7 +180,7 @@ func getAdDirectoryAuditReport(ctx context.Context, d *plugin.QueryData, h *plug
 		return nil, err
 	}
 
-	directoryAudit, err := client.AuditLogs().DirectoryAuditsById(directoryAuditID).Get(ctx, nil)
+	directoryAudit, err := client.AuditLogs().DirectoryAudits().ByDirectoryAuditId(directoryAuditID).Get(ctx, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("getAdDirectoryAuditReport", "get_directory_audit_report_error", errObj)

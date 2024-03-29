@@ -13,6 +13,15 @@ type ADApplicationInfo struct {
 	IsAuthorizationServiceEnabled interface{}
 }
 
+type ADApplicationAppRoleAssignmentInfo struct {
+	models.AppRoleAssignmentable
+	ApplicationId *string
+}
+
+type ADAppRoleAssignmentInfo struct {
+	models.AppRoleAssignmentable
+}
+
 type ADAuthorizationPolicyInfo struct {
 	models.AuthorizationPolicyable
 }
@@ -65,6 +74,11 @@ type ADSignInReportInfo struct {
 type ADUserInfo struct {
 	models.Userable
 	RefreshTokensValidFromDateTime interface{}
+}
+
+type ADUserAppRoleAssignmentInfo struct {
+	models.AppRoleAssignmentable
+	UserId *string
 }
 
 func (adminConsentRequestPolicy *ADAdminConsentRequestPolicyInfo) AdminConsentRequestPolicyReviewers() []map[string]interface{} {
@@ -127,8 +141,8 @@ func (application *ADApplicationInfo) ApplicationAPI() map[string]interface{} {
 		if p.GetOrigin() != nil {
 			data["origin"] = *p.GetOrigin()
 		}
-		if p.GetType() != nil {
-			data["type"] = *p.GetType()
+		if p.GetTypeEscaped() != nil {
+			data["type"] = *p.GetTypeEscaped()
 		}
 		if p.GetUserConsentDescription() != nil {
 			data["userConsentDescription"] = p.GetUserConsentDescription()
@@ -192,8 +206,8 @@ func (application *ADApplicationInfo) ApplicationKeyCredentials() []map[string]i
 		if p.GetStartDateTime() != nil {
 			keyCredentialData["startDateTime"] = *p.GetStartDateTime()
 		}
-		if p.GetType() != nil {
-			keyCredentialData["type"] = *p.GetType()
+		if p.GetTypeEscaped() != nil {
+			keyCredentialData["type"] = *p.GetTypeEscaped()
 		}
 		if p.GetUsage() != nil {
 			keyCredentialData["usage"] = *p.GetUsage()
@@ -346,7 +360,7 @@ func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessP
 	}
 }
 
-func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyConditionsClientAppTypes() []string {
+func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyConditionsClientAppTypes() []models.ConditionalAccessClientApp {
 	if conditionalAccessPolicy.GetConditions() == nil {
 		return nil
 	}
@@ -383,7 +397,7 @@ func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessP
 	}
 }
 
-func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyConditionsSignInRiskLevels() []string {
+func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyConditionsSignInRiskLevels() []models.RiskLevel {
 	if conditionalAccessPolicy.GetConditions() == nil {
 		return nil
 	}
@@ -409,14 +423,14 @@ func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessP
 	}
 }
 
-func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyConditionsUserRiskLevels() []string {
+func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyConditionsUserRiskLevels() []models.RiskLevel {
 	if conditionalAccessPolicy.GetConditions() == nil {
 		return nil
 	}
 	return conditionalAccessPolicy.GetConditions().GetUserRiskLevels()
 }
 
-func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyGrantControlsBuiltInControls() []string {
+func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyGrantControlsBuiltInControls() []models.ConditionalAccessGrantControl {
 	if conditionalAccessPolicy.GetGrantControls() == nil {
 		return nil
 	}
@@ -631,8 +645,8 @@ func (directoryAuditReport *ADDirectoryAuditReportInfo) DirectoryAuditTargetReso
 		if i.GetGroupType() != nil {
 			data["groupType"] = i.GetGroupType().String()
 		}
-		if i.GetType() != nil {
-			data["type"] = *i.GetType()
+		if i.GetTypeEscaped() != nil {
+			data["type"] = *i.GetTypeEscaped()
 		}
 		if i.GetUserPrincipalName() != nil {
 			data["userPrincipalName"] = *i.GetUserPrincipalName()
@@ -712,8 +726,8 @@ func (servicePrincipal *ADServicePrincipalInfo) ServicePrincipalAddIns() []map[s
 		if p.GetId() != nil {
 			addInData["id"] = *p.GetId()
 		}
-		if p.GetType() != nil {
-			addInData["type"] = *p.GetType()
+		if p.GetTypeEscaped() != nil {
+			addInData["type"] = *p.GetTypeEscaped()
 		}
 
 		addInProperties := []map[string]interface{}{}
@@ -801,8 +815,8 @@ func (servicePrincipal *ADServicePrincipalInfo) ServicePrincipalKeyCredentials()
 		if p.GetStartDateTime() != nil {
 			keyCredentialData["startDateTime"] = *p.GetStartDateTime()
 		}
-		if p.GetType() != nil {
-			keyCredentialData["type"] = *p.GetType()
+		if p.GetTypeEscaped() != nil {
+			keyCredentialData["type"] = *p.GetTypeEscaped()
 		}
 		if p.GetUsage() != nil {
 			keyCredentialData["usage"] = *p.GetUsage()
@@ -838,8 +852,8 @@ func (servicePrincipal *ADServicePrincipalInfo) ServicePrincipalOauth2Permission
 		if p.GetIsEnabled() != nil {
 			data["isEnabled"] = *p.GetIsEnabled()
 		}
-		if p.GetType() != nil {
-			data["type"] = *p.GetType()
+		if p.GetTypeEscaped() != nil {
+			data["type"] = *p.GetTypeEscaped()
 		}
 		if p.GetOrigin() != nil {
 			data["origin"] = *p.GetOrigin()

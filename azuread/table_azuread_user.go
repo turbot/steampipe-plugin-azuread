@@ -9,7 +9,6 @@ import (
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/microsoftgraph/msgraph-sdk-go/users"
-	"github.com/microsoftgraph/msgraph-sdk-go/users/item"
 
 	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
@@ -140,18 +139,16 @@ func listAdUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		return nil, errObj
 	}
 
-	pageIterator, err := msgraphcore.NewPageIterator(result, adapter, models.CreateUserCollectionResponseFromDiscriminatorValue)
+	pageIterator, err := msgraphcore.NewPageIterator[models.Userable](result, adapter, models.CreateUserCollectionResponseFromDiscriminatorValue)
 	if err != nil {
 		plugin.Logger(ctx).Error("listAdUsers", "create_iterator_instance_error", err)
 		return nil, err
 	}
 
-	err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
-		user := pageItem.(models.Userable)
+	err = pageIterator.Iterate(ctx, func(pageItem models.Userable) bool {
+		refreshTokensValidFromDateTime := pageItem.GetAdditionalData()["refreshTokensValidFromDateTime"]
 
-		refreshTokensValidFromDateTime := user.GetAdditionalData()["refreshTokensValidFromDateTime"]
-
-		d.StreamListItem(ctx, &ADUserInfo{user, refreshTokensValidFromDateTime})
+		d.StreamListItem(ctx, &ADUserInfo{pageItem, refreshTokensValidFromDateTime})
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
 		return d.RowsRemaining(ctx) != 0
@@ -184,15 +181,15 @@ func getAdUser(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) 
 	givenColumns := d.QueryContext.Columns
 	selectColumns, expandColumns := buildUserRequestFields(ctx, givenColumns)
 
-	input := &item.UserItemRequestBuilderGetQueryParameters{}
+	input := &users.UserItemRequestBuilderGetQueryParameters{}
 	input.Select = selectColumns
 	input.Expand = expandColumns
 
-	options := &item.UserItemRequestBuilderGetRequestConfiguration{
+	options := &users.UserItemRequestBuilderGetRequestConfiguration{
 		QueryParameters: input,
 	}
 
-	user, err := client.UsersById(userId).Get(ctx, options)
+	user, err := client.Users().ByUserId(userId).Get(ctx, options)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("getAdUser", "get_user_error", errObj)

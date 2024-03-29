@@ -62,3 +62,8 @@ func getTenant(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) 
 func Int32(v int32) *int32 {
 	return &v
 }
+
+// Bool returns a pointer to the bool value passed in.
+func Bool(v bool) *bool {
+	return &v
+}

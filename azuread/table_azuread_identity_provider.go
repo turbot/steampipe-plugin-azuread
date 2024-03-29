@@ -10,7 +10,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
-	"github.com/microsoftgraph/msgraph-sdk-go/identity/identityproviders"
+	"github.com/microsoftgraph/msgraph-sdk-go/identity"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
@@ -63,7 +63,7 @@ func listAdIdentityProviders(ctx context.Context, d *plugin.QueryData, _ *plugin
 	}
 
 	// List operations
-	input := &identityproviders.IdentityProvidersRequestBuilderGetQueryParameters{}
+	input := &identity.IdentityProvidersRequestBuilderGetQueryParameters{}
 
 	// TODO :: Check SDK to pass the Top attribute in the request.
 	// Query option 'Top' is not allowed. To allow it, set the 'AllowedQueryOptions' property on EnableQueryAttribute or QueryValidationSettings.
@@ -88,7 +88,7 @@ func listAdIdentityProviders(ctx context.Context, d *plugin.QueryData, _ *plugin
 		input.Filter = &joinStr
 	}
 
-	options := &identityproviders.IdentityProvidersRequestBuilderGetRequestConfiguration{
+	options := &identity.IdentityProvidersRequestBuilderGetRequestConfiguration{
 		QueryParameters: input,
 	}
 
@@ -99,23 +99,22 @@ func listAdIdentityProviders(ctx context.Context, d *plugin.QueryData, _ *plugin
 		return nil, errObj
 	}
 
-	pageIterator, err := msgraphcore.NewPageIterator(result, adapter, models.CreateBuiltInIdentityProviderFromDiscriminatorValue)
+	pageIterator, err := msgraphcore.NewPageIterator[models.BuiltInIdentityProvider](result, adapter, models.CreateBuiltInIdentityProviderFromDiscriminatorValue)
 	if err != nil {
 		plugin.Logger(ctx).Error("listAdIdentityProviders", "create_iterator_instance_error", err)
 		return nil, err
 	}
 
-	err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
-		identityProvider := pageItem.(*models.BuiltInIdentityProvider)
+	err = pageIterator.Iterate(ctx, func(pageItem models.BuiltInIdentityProvider) bool {
+		clientID := pageItem.GetAdditionalData()["clientId"]
+		clientSecret := pageItem.GetAdditionalData()["clientSecret"]
 
-		clientID := identityProvider.GetAdditionalData()["clientId"]
-		clientSecret := identityProvider.GetAdditionalData()["clientSecret"]
-
-		d.StreamListItem(ctx, &ADIdentityProviderInfo{*identityProvider, clientID, clientSecret})
+		d.StreamListItem(ctx, &ADIdentityProviderInfo{pageItem, clientID, clientSecret})
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
 		return d.RowsRemaining(ctx) != 0
 	})
+
 	if err != nil {
 		plugin.Logger(ctx).Error("listAdIdentityProviders", "paging_error", err)
 		return nil, err
