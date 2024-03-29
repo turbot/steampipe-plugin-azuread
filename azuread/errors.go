@@ -24,10 +24,12 @@ func (m *RequestError) Error() string {
 
 func getErrorObject(err error) *RequestError {
 	if oDataError, ok := err.(*odataerrors.ODataError); ok {
-		errorable := oDataError.GetErrorEscaped()
-		return &RequestError{
-			Code:    *errorable.GetCode(),
-			Message: *errorable.GetMessage(),
+		terr := oDataError.GetErrorEscaped()
+		if terr != nil {
+			return &RequestError{
+				Code:    *terr.GetCode(),
+				Message: *terr.GetMessage(),
+			}
 		}
 	}
 
