@@ -106,6 +106,15 @@ func GetGraphClient(ctx context.Context, d *plugin.QueryData) (*msgraphsdkgo.Gra
 			logger.Error("GetGraphClient", "cli_credential_error", err)
 			return nil, nil, err
 		}
+		if environment == "AZURECHINACLOUD" {
+			tokenOptions := policy.TokenRequestOptions{
+				Scopes: []string{"https://management.core.chinacloudapi.cn//.default"},
+			}
+			_, err := cred.GetToken(ctx, tokenOptions)
+			if err != nil {
+				return nil, nil, err
+			}
+		}
 	} else if tenantID != "" && clientID != "" && clientSecret != "" { // Client secret authentication
 		cred, err = azidentity.NewClientSecretCredential(
 			tenantID,
