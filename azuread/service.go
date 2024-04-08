@@ -165,7 +165,9 @@ func GetGraphClient(ctx context.Context, d *plugin.QueryData) (*msgraphsdkgo.Gra
 		}
 	}
 
-	auth, err := a.NewAzureIdentityAuthenticationProvider(cred)
+	auth, err := a.NewAzureIdentityAuthenticationProviderWithScopes(cred, []string{
+		"https://microsoftgraph.chinacloudapi.cn/.default",
+	})
 	if err != nil {
 		return nil, nil, fmt.Errorf("error creating authentication provider: %v", err)
 	}
