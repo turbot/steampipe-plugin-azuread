@@ -177,7 +177,7 @@ func GetGraphClient(ctx context.Context, d *plugin.QueryData) (*msgraphsdkgo.Gra
 
 	// update the baseurl if env is china cloud
 	if environment == "AZURECHINACLOUD" {
-		adapter.SetBaseUrl("https://microsoftgraph.chinaclouapi.cn/v1.0")
+		adapter.SetBaseUrl("https://microsoftgraph.chinacloudapi.cn/v1.0")
 	}
 
 	client := msgraphsdkgo.NewGraphServiceClient(adapter)
