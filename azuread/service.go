@@ -165,7 +165,15 @@ func GetGraphClient(ctx context.Context, d *plugin.QueryData) (*msgraphsdkgo.Gra
 		}
 	}
 
-	auth, err := a.NewAzureIdentityAuthenticationProvider(cred)
+	// update the Authentication provider scope if env is china cloud
+	var auth *a.AzureIdentityAuthenticationProvider
+	if environment == "AZURECHINACLOUD" {
+		auth, err = a.NewAzureIdentityAuthenticationProviderWithScopes(cred, []string{
+			"https://microsoftgraph.chinacloudapi.cn/.default",
+		})
+	} else {
+		auth, err = a.NewAzureIdentityAuthenticationProvider(cred)
+	}
 	if err != nil {
 		return nil, nil, fmt.Errorf("error creating authentication provider: %v", err)
 	}
@@ -174,6 +182,12 @@ func GetGraphClient(ctx context.Context, d *plugin.QueryData) (*msgraphsdkgo.Gra
 	if err != nil {
 		return nil, nil, fmt.Errorf("error creating graph adapter: %v", err)
 	}
+
+	// update the baseurl if env is china cloud
+	if environment == "AZURECHINACLOUD" {
+		adapter.SetBaseUrl("https://microsoftgraph.chinacloudapi.cn/v1.0")
+	}
+
 	client := msgraphsdkgo.NewGraphServiceClient(adapter)
 
 	// See comment above as to why caching is disabled
