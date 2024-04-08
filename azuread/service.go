@@ -165,9 +165,15 @@ func GetGraphClient(ctx context.Context, d *plugin.QueryData) (*msgraphsdkgo.Gra
 		}
 	}
 
-	auth, err := a.NewAzureIdentityAuthenticationProviderWithScopes(cred, []string{
-		"https://microsoftgraph.chinacloudapi.cn/.default",
-	})
+	// update the Authentication provider scope if env is china cloud
+	var auth *a.AzureIdentityAuthenticationProvider
+	if environment == "AZURECHINACLOUD" {
+		auth, err = a.NewAzureIdentityAuthenticationProviderWithScopes(cred, []string{
+			"https://microsoftgraph.chinacloudapi.cn/.default",
+		})
+	} else {
+		auth, err = a.NewAzureIdentityAuthenticationProvider(cred)
+	}
 	if err != nil {
 		return nil, nil, fmt.Errorf("error creating authentication provider: %v", err)
 	}
