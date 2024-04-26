@@ -45,7 +45,7 @@ func tableAzureAdUser(_ context.Context) *plugin.Table {
 			},
 		},
 
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			{Name: "display_name", Type: proto.ColumnType_STRING, Description: "The name displayed in the address book for the user. This is usually the combination of the user's first name, middle initial and last name.", Transform: transform.FromMethod("GetDisplayName")},
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "The unique identifier for the user. Should be treated as an opaque identifier.", Transform: transform.FromMethod("GetId")},
 			{Name: "user_principal_name", Type: proto.ColumnType_STRING, Description: "Principal email of the active directory user.", Transform: transform.FromMethod("GetUserPrincipalName")},
@@ -74,8 +74,7 @@ func tableAzureAdUser(_ context.Context) *plugin.Table {
 
 			// Standard columns
 			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Transform: transform.From(adUserTitle)},
-			{Name: "tenant_id", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTenant, Hydrate: plugin.HydrateFunc(getTenant).WithCache(), Transform: transform.FromValue()},
-		},
+		}),
 	}
 }
 

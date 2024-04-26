@@ -42,7 +42,7 @@ func tableAzureAdDirectoryAuditReport(_ context.Context) *plugin.Table {
 			},
 		},
 
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "Indicates the unique ID for the activity.", Transform: transform.FromMethod("GetId")},
 			{Name: "activity_date_time", Type: proto.ColumnType_TIMESTAMP, Description: "Indicates the date and time the activity was performed.", Transform: transform.FromMethod("GetActivityDateTime")},
 			{Name: "activity_display_name", Type: proto.ColumnType_STRING, Description: "Indicates the activity name or the operation name.", Transform: transform.FromMethod("GetActivityDisplayName")},
@@ -60,9 +60,8 @@ func tableAzureAdDirectoryAuditReport(_ context.Context) *plugin.Table {
 
 			// Standard columns
 			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Transform: transform.FromMethod("GetId")},
-			{Name: "tenant_id", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTenant, Hydrate: plugin.HydrateFunc(getTenant).WithCache(), Transform: transform.FromValue()},
 			{Name: "filter", Type: proto.ColumnType_STRING, Transform: transform.FromQual("filter"), Description: "Odata query to search for directory audit reports."},
-		},
+		}),
 	}
 }
 

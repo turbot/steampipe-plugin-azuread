@@ -18,7 +18,7 @@ func tableAzureAdAdminConsentRequestPolicy(_ context.Context) *plugin.Table {
 			Hydrate: listAdAdminConsentRequestPolicies,
 		},
 
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			{Name: "is_enabled", Type: proto.ColumnType_BOOL, Description: "Specifies whether the admin consent request feature is enabled or disabled.", Transform: transform.FromMethod("GetIsEnabled")},
 
 			// Other fields
@@ -32,8 +32,7 @@ func tableAzureAdAdminConsentRequestPolicy(_ context.Context) *plugin.Table {
 
 			// Standard columns
 			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Default: "Admin Consent Request Policy"},
-			{Name: "tenant_id", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTenant, Hydrate: plugin.HydrateFunc(getTenant).WithCache(), Transform: transform.FromValue()},
-		},
+		}),
 	}
 }
 
