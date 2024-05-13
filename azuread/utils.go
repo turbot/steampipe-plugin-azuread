@@ -72,21 +72,28 @@ func getTenantUncached(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	plugin.Logger(ctx).Debug("getTenant")
 	var tenantID string
 	var err error
+	cacheKey := "getTenant"
 
-	// Read tenantID from config, or environment variables
-	azureADConfig := GetConfig(d.Connection)
-	if azureADConfig.TenantID != nil {
-		tenantID = *azureADConfig.TenantID
+	if cachedData, ok := d.ConnectionManager.Cache.Get(cacheKey); ok {
+		tenantID = cachedData.(string)
 	} else {
-		tenantID = os.Getenv("AZURE_TENANT_ID")
-	}
-
-	// If not set in config, get tenantID from CLI
-	if tenantID == "" {
-		tenantID, err = getTenantFromCLI()
-		if err != nil {
-			return nil, err
+		// Read tenant ID from config, or environment variables
+		microsoft365Config := GetConfig(d.Connection)
+		if microsoft365Config.TenantID != nil {
+			tenantID = *microsoft365Config.TenantID
+		} else if os.Getenv("AZURE_TENANT_ID") != "" {
+			tenantID = os.Getenv("AZURE_TENANT_ID")
 		}
+
+		// If not set in config, get tenant ID from CLI
+		if tenantID == "" {
+			tenantID, err = getTenantFromCLI()
+			if err != nil {
+				return nil, err
+			}
+		}
+		// save to extension cache
+		d.ConnectionManager.Cache.Set(cacheKey, tenantID)
 	}
 
 	return tenantID, nil
