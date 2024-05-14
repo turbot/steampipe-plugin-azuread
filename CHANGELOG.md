@@ -2,7 +2,7 @@
 
 _Enhancements_
 
-- The `tenant_id` column has now been assigned as a connection key column across all the tables which facilitates more precise and efficient querying across multiple Azure tenants. ([#175](https://github.com/turbot/steampipe-plugin-azuread/pull/175))
+- The `tenant_id` column has now been assigned as a connection key column across all the tables which facilitates more precise and efficient querying across multiple Azure subscriptions. ([#175](https://github.com/turbot/steampipe-plugin-azuread/pull/175))
 - The Plugin and the Steampipe Anywhere binaries are now built with the `netgo` package. ([#180](https://github.com/turbot/steampipe-plugin-azuread/pull/180))
 - Added support for `China cloud` endpoint and scope based on the environment. ([#174](https://github.com/turbot/steampipe-plugin-azuread/pull/174))
 - Added the `version` flag to the plugin's Export tool. ([#65](https://github.com/turbot/steampipe-export/pull/65))
