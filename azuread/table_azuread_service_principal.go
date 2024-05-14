@@ -42,7 +42,7 @@ func tableAzureAdServicePrincipal(_ context.Context) *plugin.Table {
 			},
 		},
 
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "The unique identifier for the service principal.", Transform: transform.FromMethod("GetId")},
 			{Name: "display_name", Type: proto.ColumnType_STRING, Description: "The display name for the service principal.", Transform: transform.FromMethod("GetDisplayName")},
 			{Name: "app_id", Type: proto.ColumnType_STRING, Description: "The unique identifier for the associated application (its appId property).", Transform: transform.FromMethod("GetAppId")},
@@ -76,8 +76,7 @@ func tableAzureAdServicePrincipal(_ context.Context) *plugin.Table {
 			// Standard columns
 			{Name: "tags", Type: proto.ColumnType_JSON, Description: ColumnDescriptionTags, Transform: transform.From(adServicePrincipalTags)},
 			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Transform: transform.From(adServicePrincipalTitle)},
-			{Name: "tenant_id", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTenant, Hydrate: plugin.HydrateFunc(getTenant).WithCache(), Transform: transform.FromValue()},
-		},
+		}),
 	}
 }
 

@@ -29,7 +29,7 @@ func tableAzureAdDirectoryRole(_ context.Context) *plugin.Table {
 			Hydrate: listAdDirectoryRoles,
 		},
 
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "The unique identifier for the directory role.", Transform: transform.FromMethod("GetId")},
 			{Name: "description", Type: proto.ColumnType_STRING, Description: "The description for the directory role.", Transform: transform.FromMethod("GetDescription")},
 			{Name: "display_name", Type: proto.ColumnType_STRING, Description: "The display name for the directory role.", Transform: transform.FromMethod("GetDisplayName")},
@@ -42,8 +42,7 @@ func tableAzureAdDirectoryRole(_ context.Context) *plugin.Table {
 
 			// Standard columns
 			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Transform: transform.From(adDirectoryRoleTitle)},
-			{Name: "tenant_id", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTenant, Hydrate: plugin.HydrateFunc(getTenant).WithCache(), Transform: transform.FromValue()},
-		},
+		}),
 	}
 }
 

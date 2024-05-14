@@ -18,7 +18,7 @@ func tableAzureAdSecurityDefaultsPolicy(_ context.Context) *plugin.Table {
 			Hydrate: listAdSecurityDefaultPolicies,
 		},
 
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			{Name: "display_name", Type: proto.ColumnType_STRING, Description: "Display name for this policy.", Transform: transform.FromMethod("GetDisplayName")},
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "Identifier for this policy.", Transform: transform.FromMethod("GetId")},
 			{Name: "is_enabled", Type: proto.ColumnType_BOOL, Description: "If set to true, Azure Active Directory security defaults is enabled for the tenant.", Transform: transform.FromMethod("GetIsEnabled")},
@@ -26,8 +26,7 @@ func tableAzureAdSecurityDefaultsPolicy(_ context.Context) *plugin.Table {
 
 			// Standard columns
 			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Transform: transform.FromMethod("GetDisplayName")},
-			{Name: "tenant_id", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTenant, Hydrate: plugin.HydrateFunc(getTenant).WithCache(), Transform: transform.FromValue()},
-		},
+		}),
 	}
 }
 

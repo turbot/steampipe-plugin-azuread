@@ -35,7 +35,7 @@ func tableAzureAdIdentityProvider(_ context.Context) *plugin.Table {
 			},
 		},
 
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "The ID of the identity provider.", Transform: transform.FromMethod("GetId")},
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "The display name of the identity provider.", Transform: transform.FromMethod("GetDisplayName")},
 
@@ -47,8 +47,7 @@ func tableAzureAdIdentityProvider(_ context.Context) *plugin.Table {
 
 			// Standard columns
 			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Transform: transform.From(adIdentityProviderTitle)},
-			{Name: "tenant_id", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTenant, Hydrate: plugin.HydrateFunc(getTenant).WithCache(), Transform: transform.FromValue()},
-		},
+		}),
 	}
 }
 

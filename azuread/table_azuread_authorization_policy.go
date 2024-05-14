@@ -18,7 +18,7 @@ func tableAzureAdAuthorizationPolicy(_ context.Context) *plugin.Table {
 			Hydrate: listAdAuthorizationPolicies,
 		},
 
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			{Name: "display_name", Type: proto.ColumnType_STRING, Description: "Display name for this policy.", Transform: transform.FromMethod("GetDisplayName")},
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "ID of the authorization policy.", Transform: transform.FromMethod("GetId")},
 			{Name: "description", Type: proto.ColumnType_STRING, Description: "Description of this policy.", Transform: transform.FromMethod("GetDescription")},
@@ -36,8 +36,7 @@ func tableAzureAdAuthorizationPolicy(_ context.Context) *plugin.Table {
 
 			// Standard columns
 			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Transform: transform.FromMethod("GetDisplayName")},
-			{Name: "tenant_id", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTenant, Hydrate: plugin.HydrateFunc(getTenant).WithCache(), Transform: transform.FromValue()},
-		},
+		}),
 	}
 }
 
