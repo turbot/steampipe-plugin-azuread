@@ -23,7 +23,7 @@ func tableAzureAdDirectorySetting(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: listAdDirectorySetting,
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			{Name: "display_name", Type: proto.ColumnType_STRING, Description: "Display name of this group of settings, which comes from the associated template."},
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "Unique identifier for these settings."},
 			{Name: "template_id", Type: proto.ColumnType_STRING, Description: "Unique identifier for the template used to create this group of settings."},
@@ -32,8 +32,7 @@ func tableAzureAdDirectorySetting(_ context.Context) *plugin.Table {
 
 			// Standard columns
 			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Transform: transform.FromField("Name")},
-			{Name: "tenant_id", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTenant, Hydrate: plugin.HydrateFunc(getTenant).WithCache(), Transform: transform.FromValue()},
-		},
+		}),
 	}
 }
 

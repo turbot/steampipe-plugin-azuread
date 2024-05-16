@@ -40,7 +40,7 @@ func tableAzureAdConditionalAccessPolicy(_ context.Context) *plugin.Table {
 			},
 		},
 
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "Specifies the identifier of a conditionalAccessPolicy object.", Transform: transform.FromMethod("GetId")},
 			{Name: "display_name", Type: proto.ColumnType_STRING, Description: "Specifies a display name for the conditionalAccessPolicy object.", Transform: transform.FromMethod("GetDisplayName")},
 			{Name: "state", Type: proto.ColumnType_STRING, Description: "Specifies the state of the conditionalAccessPolicy object. Possible values are: enabled, disabled, enabledForReportingButNotEnforced.", Transform: transform.FromMethod("GetState")},
@@ -66,8 +66,7 @@ func tableAzureAdConditionalAccessPolicy(_ context.Context) *plugin.Table {
 
 			// Standard columns
 			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Transform: transform.From(adConditionalAccessPolicyTitle)},
-			{Name: "tenant_id", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTenant, Hydrate: plugin.HydrateFunc(getTenant).WithCache(), Transform: transform.FromValue()},
-		},
+		}),
 	}
 }
 
