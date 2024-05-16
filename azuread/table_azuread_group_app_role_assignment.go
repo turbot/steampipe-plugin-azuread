@@ -59,7 +59,6 @@ func tableAzureAdGroupAppRoleAssignment(_ context.Context) *plugin.Table {
 
 			// Standard columns
 			{Name: "group_id", Type: proto.ColumnType_STRING, Description: "The identifier (id) of the group.", Transform: transform.FromMethod("GetPrincipalId")},
-			{Name: "tenant_id", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTenant, Hydrate: plugin.HydrateFunc(getTenant).WithCache(), Transform: transform.FromValue()},
 		},
 	}
 }

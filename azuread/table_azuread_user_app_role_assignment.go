@@ -60,7 +60,6 @@ func tableAzureAdUserAppRoleAssignment(_ context.Context) *plugin.Table {
 
 			// Standard columns
 			{Name: "user_id", Type: proto.ColumnType_STRING, Description: "The identifier (id) of the user principal.", Transform: transform.From(adUserAppRoleAssignmentUserId)},
-			{Name: "tenant_id", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTenant, Hydrate: plugin.HydrateFunc(getTenant).WithCache(), Transform: transform.FromValue()},
 		},
 	}
 }
