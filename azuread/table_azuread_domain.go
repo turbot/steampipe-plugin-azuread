@@ -90,16 +90,14 @@ func listAdDomains(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 		return nil, errObj
 	}
 
-	pageIterator, err := msgraphcore.NewPageIterator(result, adapter, models.CreateDomainCollectionResponseFromDiscriminatorValue)
+	pageIterator, err := msgraphcore.NewPageIterator[models.Domainable](result, adapter, models.CreateDomainCollectionResponseFromDiscriminatorValue)
 	if err != nil {
 		plugin.Logger(ctx).Error("listAdDomains", "create_iterator_instance_error", err)
 		return nil, err
 	}
 
-	err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
-		domain := pageItem.(models.Domainable)
-
-		d.StreamListItem(ctx, &ADDomainInfo{domain})
+	err = pageIterator.Iterate(ctx, func(pageItem models.Domainable) bool {
+		d.StreamListItem(ctx, &ADDomainInfo{pageItem})
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
 		return d.RowsRemaining(ctx) != 0
@@ -127,7 +125,7 @@ func getAdDomain(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 		return nil, err
 	}
 
-	domain, err := client.DomainsById(domainId).Get(ctx, nil)
+	domain, err := client.Domains().ByDomainId(domainId).Get(ctx, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("getAdDomain", "get_domain_error", errObj)

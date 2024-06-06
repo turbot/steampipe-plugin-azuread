@@ -7,12 +7,10 @@ import (
 
 	"github.com/iancoleman/strcase"
 
+	abstractions "github.com/microsoft/kiota-abstractions-go"
 	jsonserialization "github.com/microsoft/kiota-serialization-json-go"
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
 	"github.com/microsoftgraph/msgraph-sdk-go/groups"
-	"github.com/microsoftgraph/msgraph-sdk-go/groups/item"
-	"github.com/microsoftgraph/msgraph-sdk-go/groups/item/members"
-	"github.com/microsoftgraph/msgraph-sdk-go/groups/item/owners"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
@@ -146,19 +144,17 @@ func listAdGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		return nil, errObj
 	}
 
-	pageIterator, err := msgraphcore.NewPageIterator(result, adapter, models.CreateGroupCollectionResponseFromDiscriminatorValue)
+	pageIterator, err := msgraphcore.NewPageIterator[models.Groupable](result, adapter, models.CreateGroupCollectionResponseFromDiscriminatorValue)
 	if err != nil {
 		plugin.Logger(ctx).Error("listAdGroups", "create_iterator_instance_error", err)
 		return nil, err
 	}
 
-	err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
-		group := pageItem.(models.Groupable)
+	err = pageIterator.Iterate(ctx, func(pageItem models.Groupable) bool {
+		resourceBehaviorOptions := formatResourceBehaviorOptions(ctx, pageItem)
+		resourceProvisioningOptions := formatResourceProvisioningOptions(ctx, pageItem)
 
-		resourceBehaviorOptions := formatResourceBehaviorOptions(ctx, group)
-		resourceProvisioningOptions := formatResourceProvisioningOptions(ctx, group)
-
-		d.StreamListItem(ctx, &ADGroupInfo{group, resourceBehaviorOptions, resourceProvisioningOptions})
+		d.StreamListItem(ctx, &ADGroupInfo{pageItem, resourceBehaviorOptions, resourceProvisioningOptions})
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
 		return d.RowsRemaining(ctx) != 0
@@ -187,13 +183,13 @@ func getAdGroup(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 		return nil, err
 	}
 
-	input := &item.GroupItemRequestBuilderGetQueryParameters{}
+	input := &groups.GroupItemRequestBuilderGetQueryParameters{}
 
-	options := &item.GroupItemRequestBuilderGetRequestConfiguration{
+	options := &groups.GroupItemRequestBuilderGetRequestConfiguration{
 		QueryParameters: input,
 	}
 
-	group, err := client.GroupsById(groupId).Get(ctx, options)
+	group, err := client.Groups().ByGroupId(groupId).Get(ctx, options)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("getAdGroup", "get_group_error", errObj)
@@ -226,15 +222,15 @@ func getAdGroupIsSubscribedByMail(ctx context.Context, d *plugin.QueryData, h *p
 		return nil, err
 	}
 
-	input := &item.GroupItemRequestBuilderGetQueryParameters{
+	input := &groups.GroupItemRequestBuilderGetQueryParameters{
 		Select: []string{"isSubscribedByMail"},
 	}
 
-	options := &item.GroupItemRequestBuilderGetRequestConfiguration{
+	options := &groups.GroupItemRequestBuilderGetRequestConfiguration{
 		QueryParameters: input,
 	}
 
-	group, err := client.GroupsById(groupId).Get(ctx, options)
+	group, err := client.Groups().ByGroupId(groupId).Get(ctx, options)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("getAdGroupIsSubscribedByMail", "get_group_error", errObj)
@@ -255,37 +251,34 @@ func getAdGroupMembers(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	group := h.Item.(*ADGroupInfo)
 	groupID := group.GetId()
 
-	headers := map[string]string{
-		"ConsistencyLevel": "eventual",
+	headers := &abstractions.RequestHeaders{}
+	headers.Add("ConsistencyLevel", "eventual")
+
+	requestParameters := &groups.ItemMembersRequestBuilderGetQueryParameters{
+		Count: Bool(true),
 	}
 
-	includeCount := true
-	requestParameters := &members.MembersRequestBuilderGetQueryParameters{
-		Count: &includeCount,
-	}
-
-	config := &members.MembersRequestBuilderGetRequestConfiguration{
+	config := &groups.ItemMembersRequestBuilderGetRequestConfiguration{
 		Headers:         headers,
 		QueryParameters: requestParameters,
 	}
 
 	memberIds := []*string{}
-	members, err := client.GroupsById(*groupID).Members().Get(ctx, config)
+	members, err := client.Groups().ByGroupId(*groupID).Members().Get(ctx, config)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("getAdGroupMembers", "get_group_members_error", errObj)
 		return nil, errObj
 	}
 
-	pageIterator, err := msgraphcore.NewPageIterator(members, adapter, models.CreateDirectoryObjectCollectionResponseFromDiscriminatorValue)
+	pageIterator, err := msgraphcore.NewPageIterator[models.DirectoryObjectable](members, adapter, models.CreateDirectoryObjectCollectionResponseFromDiscriminatorValue)
 	if err != nil {
 		plugin.Logger(ctx).Error("getAdGroupMembers", "create_iterator_instance_error", err)
 		return nil, err
 	}
 
-	err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
-		member := pageItem.(models.DirectoryObjectable)
-		memberIds = append(memberIds, member.GetId())
+	err = pageIterator.Iterate(ctx, func(pageItem models.DirectoryObjectable) bool {
+		memberIds = append(memberIds, pageItem.GetId())
 
 		return true
 	})
@@ -308,37 +301,34 @@ func getAdGroupOwners(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	group := h.Item.(*ADGroupInfo)
 	groupID := group.GetId()
 
-	headers := map[string]string{
-		"ConsistencyLevel": "eventual",
+	headers := &abstractions.RequestHeaders{}
+	headers.Add("ConsistencyLevel", "eventual")
+
+	requestParameters := &groups.ItemOwnersRequestBuilderGetQueryParameters{
+		Count: Bool(true),
 	}
 
-	includeCount := true
-	requestParameters := &owners.OwnersRequestBuilderGetQueryParameters{
-		Count: &includeCount,
-	}
-
-	config := &owners.OwnersRequestBuilderGetRequestConfiguration{
+	config := &groups.ItemOwnersRequestBuilderGetRequestConfiguration{
 		Headers:         headers,
 		QueryParameters: requestParameters,
 	}
 
 	ownerIds := []*string{}
-	owners, err := client.GroupsById(*groupID).Owners().Get(ctx, config)
+	owners, err := client.Groups().ByGroupId(*groupID).Owners().Get(ctx, config)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("getAdGroupOwners", "get_group_owners_error", errObj)
 		return nil, errObj
 	}
 
-	pageIterator, err := msgraphcore.NewPageIterator(owners, adapter, models.CreateDirectoryObjectCollectionResponseFromDiscriminatorValue)
+	pageIterator, err := msgraphcore.NewPageIterator[models.DirectoryObjectable](owners, adapter, models.CreateDirectoryObjectCollectionResponseFromDiscriminatorValue)
 	if err != nil {
 		plugin.Logger(ctx).Error("getAdGroupOwners", "create_iterator_instance_error", err)
 		return nil, err
 	}
 
-	err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
-		member := pageItem.(models.DirectoryObjectable)
-		ownerIds = append(ownerIds, member.GetId())
+	err = pageIterator.Iterate(ctx, func(pageItem models.DirectoryObjectable) bool {
+		ownerIds = append(ownerIds, pageItem.GetId())
 
 		return true
 	})

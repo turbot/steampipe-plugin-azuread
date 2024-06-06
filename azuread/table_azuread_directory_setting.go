@@ -53,20 +53,18 @@ func listAdDirectorySetting(ctx context.Context, d *plugin.QueryData, _ *plugin.
 		return nil, errObj
 	}
 
-	pageIterator, err := msgraphcore.NewPageIterator(result, adapter, models.CreateGroupSettingCollectionResponseFromDiscriminatorValue)
+	pageIterator, err := msgraphcore.NewPageIterator[models.GroupSettingable](result, adapter, models.CreateGroupSettingCollectionResponseFromDiscriminatorValue)
 	if err != nil {
 		plugin.Logger(ctx).Error("listAdDirectorySetting", "create_iterator_instance_error", err)
 		return nil, err
 	}
 
-	err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
-		setting := pageItem.(models.GroupSettingable)
-
-		for _, s := range setting.GetValues() {
+	err = pageIterator.Iterate(ctx, func(pageItem models.GroupSettingable) bool {
+		for _, s := range pageItem.GetValues() {
 			d.StreamListItem(ctx, &ADDirectorySettingInfo{
-				DisplayName: setting.GetDisplayName(),
-				Id:          setting.GetId(),
-				TemplateId:  setting.GetTemplateId(),
+				DisplayName: pageItem.GetDisplayName(),
+				Id:          pageItem.GetId(),
+				TemplateId:  pageItem.GetTemplateId(),
 				Name:        s.GetName(),
 				Value:       s.GetValue(),
 			})
@@ -100,7 +98,7 @@ func getAdDirectorySetting(ctx context.Context, d *plugin.QueryData, h *plugin.H
 		return nil, err
 	}
 
-	setting, err := client.GroupSettingsById(directorySettingID).Get(ctx, nil)
+	setting, err := client.GroupSettings().ByGroupSettingId(directorySettingID).Get(ctx, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("azuread_directory_setting.getAdDirectorySetting", "get_directory_setting_error", errObj)

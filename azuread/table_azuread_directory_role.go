@@ -3,8 +3,9 @@ package azuread
 import (
 	"context"
 
+	abstractions "github.com/microsoft/kiota-abstractions-go"
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
-	"github.com/microsoftgraph/msgraph-sdk-go/directoryroles/item/members"
+	"github.com/microsoftgraph/msgraph-sdk-go/directoryroles"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
@@ -94,7 +95,7 @@ func getAdDirectoryRole(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 		return nil, err
 	}
 
-	directoryRole, err := client.DirectoryRolesById(directoryRoleId).Get(ctx, nil)
+	directoryRole, err := client.DirectoryRoles().ByDirectoryRoleId(directoryRoleId).Get(ctx, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("getAdDirectoryRole", "get_directory_role_error", errObj)
@@ -115,37 +116,34 @@ func getDirectoryRoleMembers(ctx context.Context, d *plugin.QueryData, h *plugin
 	directoryRole := h.Item.(*ADDirectoryRoleInfo)
 	directoryRoleID := directoryRole.GetId()
 
-	headers := map[string]string{
-		"ConsistencyLevel": "eventual",
+	headers := &abstractions.RequestHeaders{}
+	headers.Add("ConsistencyLevel", "eventual")
+
+	requestParameters := &directoryroles.ItemMembersRequestBuilderGetQueryParameters{
+		Count: Bool(true),
 	}
 
-	includeCount := true
-	requestParameters := &members.MembersRequestBuilderGetQueryParameters{
-		Count: &includeCount,
-	}
-
-	config := &members.MembersRequestBuilderGetRequestConfiguration{
+	config := &directoryroles.ItemMembersRequestBuilderGetRequestConfiguration{
 		Headers:         headers,
 		QueryParameters: requestParameters,
 	}
 
 	memberIds := []*string{}
-	members, err := client.DirectoryRolesById(*directoryRoleID).Members().Get(ctx, config)
+	members, err := client.DirectoryRoles().ByDirectoryRoleId(*directoryRoleID).Members().Get(ctx, config)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("getDirectoryRoleMembers", "get_directory_role_members_error", errObj)
 		return nil, errObj
 	}
 
-	pageIterator, err := msgraphcore.NewPageIterator(members, adapter, models.CreateDirectoryObjectCollectionResponseFromDiscriminatorValue)
+	pageIterator, err := msgraphcore.NewPageIterator[models.DirectoryObjectable](members, adapter, models.CreateDirectoryObjectCollectionResponseFromDiscriminatorValue)
 	if err != nil {
 		plugin.Logger(ctx).Error("getDirectoryRoleMembers", "create_iterator_instance_error", err)
 		return nil, err
 	}
 
-	err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
-		member := pageItem.(models.DirectoryObjectable)
-		memberIds = append(memberIds, member.GetId())
+	err = pageIterator.Iterate(ctx, func(pageItem models.DirectoryObjectable) bool {
+		memberIds = append(memberIds, pageItem.GetId())
 
 		return true
 	})

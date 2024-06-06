@@ -5,13 +5,14 @@ go 1.21.0
 toolchain go1.21.1
 
 require (
-	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.1.3
+	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.10.0
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.1.0
 	github.com/iancoleman/strcase v0.3.0
-	github.com/microsoft/kiota-authentication-azure-go v0.4.1
-	github.com/microsoft/kiota-serialization-json-go v0.5.6
-	github.com/microsoftgraph/msgraph-sdk-go v0.37.0
-	github.com/microsoftgraph/msgraph-sdk-go-core v0.28.0
+	github.com/microsoft/kiota-abstractions-go v1.6.0
+	github.com/microsoft/kiota-authentication-azure-go v1.0.2
+	github.com/microsoft/kiota-serialization-json-go v1.0.7
+	github.com/microsoftgraph/msgraph-sdk-go v1.37.0
+	github.com/microsoftgraph/msgraph-sdk-go-core v1.1.0
 	github.com/turbot/go-kit v0.10.0-rc.0
 	github.com/turbot/steampipe-plugin-sdk/v5 v5.10.1
 )
@@ -22,10 +23,10 @@ require (
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	cloud.google.com/go/iam v1.1.6 // indirect
 	cloud.google.com/go/storage v1.36.0 // indirect
-	github.com/Azure/azure-sdk-for-go/sdk/internal v1.0.0 // indirect
+	github.com/Azure/azure-sdk-for-go/sdk/internal v1.5.2 // indirect
 	github.com/AzureAD/microsoft-authentication-library-for-go v0.5.1 // indirect
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d // indirect
-	github.com/agext/levenshtein v1.2.2 // indirect
+	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/allegro/bigcache/v3 v3.1.0 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/aws/aws-sdk-go v1.44.122 // indirect
@@ -34,7 +35,7 @@ require (
 	github.com/btubbs/datetime v0.1.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
-	github.com/cjlapao/common-go v0.0.25 // indirect
+	github.com/cjlapao/common-go v0.0.39 // indirect
 	github.com/danwakefield/fnmatch v0.0.0-20160403171240-cbb64ac3d964 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgraph-io/ristretto v0.1.1 // indirect
@@ -72,15 +73,16 @@ require (
 	github.com/klauspost/compress v1.15.11 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
-	github.com/mattn/go-isatty v0.0.19 // indirect
-	github.com/mattn/go-runewidth v0.0.13 // indirect
-	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
-	github.com/microsoft/kiota-abstractions-go v0.9.1 // indirect
-	github.com/microsoft/kiota-http-go v0.7.0 // indirect
-	github.com/microsoft/kiota-serialization-text-go v0.4.2 // indirect
+	github.com/mattn/go-isatty v0.0.17 // indirect
+	github.com/mattn/go-runewidth v0.0.9 // indirect
+	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
+	github.com/microsoft/kiota-http-go v1.3.1 // indirect
+	github.com/microsoft/kiota-serialization-form-go v1.0.0 // indirect
+	github.com/microsoft/kiota-serialization-multipart-go v1.0.0 // indirect
+	github.com/microsoft/kiota-serialization-text-go v1.0.0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
-	github.com/mitchellh/go-wordwrap v1.0.0 // indirect
+	github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/oklog/run v1.0.0 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
@@ -91,13 +93,12 @@ require (
 	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/common v0.37.0 // indirect
 	github.com/prometheus/procfs v0.8.0 // indirect
-	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/sethvargo/go-retry v0.2.4 // indirect
+	github.com/std-uritemplate/std-uritemplate/go v0.0.55 // indirect
 	github.com/stevenle/topsort v0.2.0 // indirect
 	github.com/stretchr/testify v1.9.0 // indirect
 	github.com/tkrajina/go-reflector v0.5.6 // indirect
 	github.com/ulikunitz/xz v0.5.10 // indirect
-	github.com/yosida95/uritemplate/v3 v3.0.2 // indirect
 	github.com/zclconf/go-cty v1.14.4 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.47.0 // indirect
