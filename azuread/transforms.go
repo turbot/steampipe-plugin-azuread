@@ -437,6 +437,16 @@ func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessP
 	return conditionalAccessPolicy.GetGrantControls().GetBuiltInControls()
 }
 
+func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyGrantAuthenticationStrength() []models.AuthenticationMethodModes  {
+	if conditionalAccessPolicy.GetGrantControls() == nil {
+		return nil
+	}
+	if conditionalAccessPolicy.GetGrantControls().GetAuthenticationStrength() == nil {
+		return nil
+	}	
+	return conditionalAccessPolicy.GetGrantControls().GetAuthenticationStrength().GetAllowedCombinations()
+}
+
 func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyGrantControlsCustomAuthenticationFactors() []string {
 	if conditionalAccessPolicy.GetGrantControls() == nil {
 		return nil
