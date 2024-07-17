@@ -59,6 +59,10 @@ type ADIdentityProviderInfo struct {
 	ClientSecret interface{}
 }
 
+type ADLocationInfo struct {
+	models.NamedLocationable
+}
+
 type ADSecurityDefaultsPolicyInfo struct {
 	models.IdentitySecurityDefaultsEnforcementPolicyable
 }
