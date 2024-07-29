@@ -568,19 +568,9 @@ func (device *ADDeviceInfo) DeviceMemberOf() []map[string]interface{} {
 	return members
 }
 
-// NEW!!!
-/*
-func (ipLocationInfo *ADIpNamedLocationInfo) GetIsIpTrusted() *bool {
-	return ipLocationInfo.GetIsTrusted()
-}
-
-func (countryLocationInfo *ADCountryNamedLocationInfo) GetIsIpTrusted() *bool {
-	return nil
-}
-*/
 func (ipLocationInfo *ADIpNamedLocationInfo) GetLocationInfo() map[string]interface{} {
 	var ipRangesArray []models.IpRangeable = ipLocationInfo.GetIpRanges()
-	var x = make(map[string]interface{})
+	var locationInfoJSON = make(map[string]interface{})
 	max_elements := len(ipRangesArray)
 	IPv4CidrArr := make([]map[string]interface{}, max_elements)
 	IPv4RangeArr := make([]map[string]interface{}, max_elements)
@@ -591,7 +581,7 @@ func (ipLocationInfo *ADIpNamedLocationInfo) GetLocationInfo() map[string]interf
 		switch t := ipRangesArray[i].(type) {
 		case *models.IPv4CidrRange:
 			IPv4CidrPair := make(map[string]interface{})
-			IPv4CidrPair["CidrAddress"] = *t.GetCidrAddress()
+			IPv4CidrPair["Address"] = *t.GetCidrAddress()
 			IPv4CidrArr[i] = IPv4CidrPair
 		case *models.IPv4Range:
 			IPv4AddressPair := make(map[string]interface{})
@@ -600,7 +590,7 @@ func (ipLocationInfo *ADIpNamedLocationInfo) GetLocationInfo() map[string]interf
 			IPv4RangeArr[i] = IPv4AddressPair
 		case *models.IPv6CidrRange:
 			IPv6CidrPair := make(map[string]interface{})
-			IPv6CidrPair["CidrAddress"] = *t.GetCidrAddress()
+			IPv6CidrPair["Address"] = *t.GetCidrAddress()
 			IPv6CidrArr[i] = IPv6CidrPair
 		case *models.IPv6Range:
 			IPv6AddressPair := make(map[string]interface{})
@@ -609,29 +599,22 @@ func (ipLocationInfo *ADIpNamedLocationInfo) GetLocationInfo() map[string]interf
 			IPv6RangeArr[i] = IPv6AddressPair
 		}
 	}
-	x["type"] = "IP"
-	x["IPv4Cidr"] = IPv4CidrArr
-	x["IPv4Range"] = IPv4RangeArr
-	x["IPv6Cidr"] = IPv6CidrArr
-	x["IPv6Range"] = IPv6RangeArr
-	x["IsTrusted"] = ipLocationInfo.GetIsTrusted()
-	return x
-	/*
-		res, err := m[0].GetBackingStore().Get("cidrAddress")
-		if err != nil {
-			return nil
-		}
-		return res.(*string)
-	*/
+	locationInfoJSON["type"] = "IP"
+	locationInfoJSON["IPv4Cidr"] = IPv4CidrArr
+	locationInfoJSON["IPv4Range"] = IPv4RangeArr
+	locationInfoJSON["IPv6Cidr"] = IPv6CidrArr
+	locationInfoJSON["IPv6Range"] = IPv6RangeArr
+	locationInfoJSON["IsTrusted"] = ipLocationInfo.GetIsTrusted()
+	return locationInfoJSON
 }
 
 func (countryLocationInfo *ADCountryNamedLocationInfo) GetLocationInfo() map[string]interface{} {
-	var x = make(map[string]interface{})
-	x["type"] = "Country"
-	x["Countries_and_Regions"] = countryLocationInfo.GetCountriesAndRegions()
-	x["Get_Unknown_Countries_and_Regions"] = countryLocationInfo.GetIncludeUnknownCountriesAndRegions()
-	x["Lookup_Method"] = countryLocationInfo.GetCountryLookupMethod().String()
-	return x
+	var locationInfoJSON = make(map[string]interface{})
+	locationInfoJSON["type"] = "Country"
+	locationInfoJSON["Countries_and_Regions"] = countryLocationInfo.GetCountriesAndRegions()
+	locationInfoJSON["Get_Unknown_Countries_and_Regions"] = countryLocationInfo.GetIncludeUnknownCountriesAndRegions()
+	locationInfoJSON["Lookup_Method"] = countryLocationInfo.GetCountryLookupMethod().String()
+	return locationInfoJSON
 }
 
 func (ipLocationInfo *ADIpNamedLocationInfo) GetType() string {
