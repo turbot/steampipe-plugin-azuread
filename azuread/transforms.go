@@ -63,6 +63,14 @@ type ADLocationInfo struct {
 	models.NamedLocationable
 }
 
+type ADIpNamedLocationInfo struct {
+	models.IpNamedLocationable
+}
+
+type ADCountryNamedLocationInfo struct {
+	models.CountryNamedLocationable
+}
+
 type ADSecurityDefaultsPolicyInfo struct {
 	models.IdentitySecurityDefaultsEnforcementPolicyable
 }
@@ -441,13 +449,13 @@ func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessP
 	return conditionalAccessPolicy.GetGrantControls().GetBuiltInControls()
 }
 
-func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyGrantAuthenticationStrength() []models.AuthenticationMethodModes  {
+func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyGrantAuthenticationStrength() []models.AuthenticationMethodModes {
 	if conditionalAccessPolicy.GetGrantControls() == nil {
 		return nil
 	}
 	if conditionalAccessPolicy.GetGrantControls().GetAuthenticationStrength() == nil {
 		return nil
-	}	
+	}
 	return conditionalAccessPolicy.GetGrantControls().GetAuthenticationStrength().GetAllowedCombinations()
 }
 
@@ -558,6 +566,87 @@ func (device *ADDeviceInfo) DeviceMemberOf() []map[string]interface{} {
 		members = append(members, member)
 	}
 	return members
+}
+
+// NEW!!!
+/*
+func (ipLocationInfo *ADIpNamedLocationInfo) GetIsIpTrusted() *bool {
+	return ipLocationInfo.GetIsTrusted()
+}
+
+func (countryLocationInfo *ADCountryNamedLocationInfo) GetIsIpTrusted() *bool {
+	return nil
+}
+*/
+func (ipLocationInfo *ADIpNamedLocationInfo) GetLocationInfo() map[string]interface{} {
+	var ipRangesArray []models.IpRangeable = ipLocationInfo.GetIpRanges()
+	var x = make(map[string]interface{})
+	max_elements := len(ipRangesArray)
+	IPv4CidrArr := make([]map[string]interface{}, max_elements)
+	IPv4RangeArr := make([]map[string]interface{}, max_elements) // The IPv4Range type contains to value: upper address and lower address,
+	// so we need an array of arrays to represent a list of items of this type
+	IPv6CidrArr := make([]map[string]interface{}, max_elements)
+	IPv6RangeArr := make([]map[string]interface{}, max_elements)
+
+	for i := 0; i < len(ipRangesArray); i++ {
+		switch t := ipRangesArray[i].(type) {
+		case *models.IPv4CidrRange:
+			IPv4CidrPair := make(map[string]interface{})
+			IPv4CidrPair["CidrAddress"] = *t.GetCidrAddress()
+			IPv4CidrPair["OdataType"] = t.GetOdataType()
+			IPv4CidrArr[i] = IPv4CidrPair
+			//IPv4CidrArr[i] = *t.GetCidrAddress()
+		case *models.IPv4Range:
+			IPv4AddressPair := make(map[string]interface{})
+			IPv4AddressPair["Lower"] = *t.GetLowerAddress()
+			IPv4AddressPair["Upper"] = *t.GetUpperAddress()
+			IPv4AddressPair["OdataType"] = *t.GetOdataType()
+			IPv4RangeArr[i] = IPv4AddressPair
+		case *models.IPv6CidrRange:
+			IPv6CidrPair := make(map[string]interface{})
+			IPv6CidrPair["CidrAddress"] = *t.GetCidrAddress()
+			IPv6CidrPair["OdataType"] = t.GetOdataType()
+			IPv6CidrArr[i] = IPv6CidrPair
+			//IPv6CidrArr[i] = *t.GetCidrAddress()
+		case *models.IPv6Range:
+			IPv6AddressPair := make(map[string]interface{}) // Each address of this type consists of two values
+			IPv6AddressPair["Lower"] = *t.GetLowerAddress()
+			IPv6AddressPair["Upper"] = *t.GetUpperAddress()
+			IPv6AddressPair["OdataType"] = *t.GetOdataType()
+			IPv6RangeArr[i] = IPv6AddressPair
+		}
+	}
+	x["type"] = "IP"
+	x["IPv4Cidr"] = IPv4CidrArr
+	x["IPv4Range"] = IPv4RangeArr
+	x["IPv6Cidr"] = IPv6CidrArr
+	x["IPv6Range"] = IPv6RangeArr
+	x["IsTrusted"] = ipLocationInfo.GetIsTrusted()
+	return x
+	/*
+		res, err := m[0].GetBackingStore().Get("cidrAddress")
+		if err != nil {
+			return nil
+		}
+		return res.(*string)
+	*/
+}
+
+func (countryLocationInfo *ADCountryNamedLocationInfo) GetLocationInfo() map[string]interface{} {
+	var x = make(map[string]interface{})
+	x["type"] = "Country"
+	x["Countries_and_Regions"] = countryLocationInfo.GetCountriesAndRegions()
+	x["Get_Unknown_Countries_and_Regions"] = countryLocationInfo.GetIncludeUnknownCountriesAndRegions()
+	x["Lookup_Method"] = countryLocationInfo.GetCountryLookupMethod().String()
+	return x
+}
+
+func (ipLocationInfo *ADIpNamedLocationInfo) GetType() string {
+	return "IP"
+}
+
+func (countryLocationInfo *ADCountryNamedLocationInfo) GetType() string {
+	return "Country"
 }
 
 func (directoryAuditReport *ADDirectoryAuditReportInfo) DirectoryAuditAdditionalDetails() []map[string]interface{} {
