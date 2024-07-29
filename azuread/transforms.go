@@ -583,8 +583,7 @@ func (ipLocationInfo *ADIpNamedLocationInfo) GetLocationInfo() map[string]interf
 	var x = make(map[string]interface{})
 	max_elements := len(ipRangesArray)
 	IPv4CidrArr := make([]map[string]interface{}, max_elements)
-	IPv4RangeArr := make([]map[string]interface{}, max_elements) // The IPv4Range type contains to value: upper address and lower address,
-	// so we need an array of arrays to represent a list of items of this type
+	IPv4RangeArr := make([]map[string]interface{}, max_elements)
 	IPv6CidrArr := make([]map[string]interface{}, max_elements)
 	IPv6RangeArr := make([]map[string]interface{}, max_elements)
 
@@ -593,26 +592,20 @@ func (ipLocationInfo *ADIpNamedLocationInfo) GetLocationInfo() map[string]interf
 		case *models.IPv4CidrRange:
 			IPv4CidrPair := make(map[string]interface{})
 			IPv4CidrPair["CidrAddress"] = *t.GetCidrAddress()
-			IPv4CidrPair["OdataType"] = t.GetOdataType()
 			IPv4CidrArr[i] = IPv4CidrPair
-			//IPv4CidrArr[i] = *t.GetCidrAddress()
 		case *models.IPv4Range:
 			IPv4AddressPair := make(map[string]interface{})
 			IPv4AddressPair["Lower"] = *t.GetLowerAddress()
 			IPv4AddressPair["Upper"] = *t.GetUpperAddress()
-			IPv4AddressPair["OdataType"] = *t.GetOdataType()
 			IPv4RangeArr[i] = IPv4AddressPair
 		case *models.IPv6CidrRange:
 			IPv6CidrPair := make(map[string]interface{})
 			IPv6CidrPair["CidrAddress"] = *t.GetCidrAddress()
-			IPv6CidrPair["OdataType"] = t.GetOdataType()
 			IPv6CidrArr[i] = IPv6CidrPair
-			//IPv6CidrArr[i] = *t.GetCidrAddress()
 		case *models.IPv6Range:
-			IPv6AddressPair := make(map[string]interface{}) // Each address of this type consists of two values
+			IPv6AddressPair := make(map[string]interface{})
 			IPv6AddressPair["Lower"] = *t.GetLowerAddress()
 			IPv6AddressPair["Upper"] = *t.GetUpperAddress()
-			IPv6AddressPair["OdataType"] = *t.GetOdataType()
 			IPv6RangeArr[i] = IPv6AddressPair
 		}
 	}
