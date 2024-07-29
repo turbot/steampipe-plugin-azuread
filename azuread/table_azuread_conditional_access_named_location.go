@@ -42,6 +42,8 @@ func tableAzureAdConditionalAccessNamedLocation(_ context.Context) *plugin.Table
 		Columns: commonColumns([]*plugin.Column{
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "Specifies the identifier of a Named Location object.", Transform: transform.FromMethod("GetId")},
 			{Name: "display_name", Type: proto.ColumnType_STRING, Description: "Specifies a display name for the Named Location object.", Transform: transform.FromMethod("GetDisplayName")},
+			{Name: "location_info", Type: proto.ColumnType_JSON, Description: "Specifies some location information for the Named Location object. Now supported: IP (v4/6 and CIDR/Range), odata_type, IsTrusted (for IP named locations only). Country (and regions, if exist), lookup method, UnkownCountriesAndRegions (for country named locations only)", Transform: transform.FromMethod("GetLocationInfo")},
+			{Name: "type", Type: proto.ColumnType_STRING, Description: "Specifies the type of the Named Location object: IP or Country", Transform: transform.FromMethod("GetType")},
 			{Name: "created_date_time", Type: proto.ColumnType_TIMESTAMP, Description: "The create date of the Named Location object.", Transform: transform.FromMethod("GetCreatedDateTime")},
 			{Name: "modified_date_time", Type: proto.ColumnType_TIMESTAMP, Description: "The modification date of Named Location object.", Transform: transform.FromMethod("GetModifiedDateTime")},
 		}),
@@ -97,7 +99,12 @@ func listAdConditionalAccessNamedLocations(ctx context.Context, d *plugin.QueryD
 	}
 
 	err = pageIterator.Iterate(ctx, func(pageItem models.NamedLocationable) bool {
-		d.StreamListItem(ctx, &ADLocationInfo{pageItem})
+		switch t := pageItem.(type) {
+		case *models.IpNamedLocation:
+			d.StreamListItem(ctx, &ADIpNamedLocationInfo{t})
+		case *models.CountryNamedLocation:
+			d.StreamListItem(ctx, &ADCountryNamedLocationInfo{t})
+		}
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
 		return d.RowsRemaining(ctx) != 0
