@@ -569,36 +569,37 @@ func (device *ADDeviceInfo) DeviceMemberOf() []map[string]interface{} {
 }
 
 func (ipLocationInfo *ADIpNamedLocationInfo) GetLocationInfo() map[string]interface{} {
-	var ipRangesArray []models.IpRangeable = ipLocationInfo.GetIpRanges()
-	var locationInfoJSON = make(map[string]interface{})
-	max_elements := len(ipRangesArray)
-	IPv4CidrArr := make([]map[string]interface{}, max_elements)
-	IPv4RangeArr := make([]map[string]interface{}, max_elements)
-	IPv6CidrArr := make([]map[string]interface{}, max_elements)
-	IPv6RangeArr := make([]map[string]interface{}, max_elements)
+	ipRangesArray := ipLocationInfo.GetIpRanges()
+	locationInfoJSON := map[string]interface{}{}
+
+	IPv4CidrArr := []map[string]interface{}{}
+	IPv4RangeArr := []map[string]interface{}{}
+	IPv6CidrArr := []map[string]interface{}{}
+	IPv6RangeArr := m[]map[string]interface{}{}
 
 	for i := 0; i < len(ipRangesArray); i++ {
 		switch t := ipRangesArray[i].(type) {
 		case *models.IPv4CidrRange:
-			IPv4CidrPair := make(map[string]interface{})
+			IPv4CidrPair := map[string]interface{}{}
 			IPv4CidrPair["Address"] = *t.GetCidrAddress()
 			IPv4CidrArr[i] = IPv4CidrPair
 		case *models.IPv4Range:
-			IPv4AddressPair := make(map[string]interface{})
+			IPv4AddressPair := map[string]interface{}{}
 			IPv4AddressPair["Lower"] = *t.GetLowerAddress()
 			IPv4AddressPair["Upper"] = *t.GetUpperAddress()
 			IPv4RangeArr[i] = IPv4AddressPair
 		case *models.IPv6CidrRange:
-			IPv6CidrPair := make(map[string]interface{})
+			IPv6CidrPair := map[string]interface{}{}
 			IPv6CidrPair["Address"] = *t.GetCidrAddress()
 			IPv6CidrArr[i] = IPv6CidrPair
 		case *models.IPv6Range:
-			IPv6AddressPair := make(map[string]interface{})
+			IPv6AddressPair := map[string]interface{}{}
 			IPv6AddressPair["Lower"] = *t.GetLowerAddress()
 			IPv6AddressPair["Upper"] = *t.GetUpperAddress()
 			IPv6RangeArr[i] = IPv6AddressPair
 		}
 	}
+	
 	locationInfoJSON["type"] = "IP"
 	locationInfoJSON["IPv4Cidr"] = IPv4CidrArr
 	locationInfoJSON["IPv4Range"] = IPv4RangeArr
@@ -609,7 +610,7 @@ func (ipLocationInfo *ADIpNamedLocationInfo) GetLocationInfo() map[string]interf
 }
 
 func (countryLocationInfo *ADCountryNamedLocationInfo) GetLocationInfo() map[string]interface{} {
-	var locationInfoJSON = make(map[string]interface{})
+	locationInfoJSON := map[string]interface{}{}
 	locationInfoJSON["type"] = "Country"
 	locationInfoJSON["Countries_and_Regions"] = countryLocationInfo.GetCountriesAndRegions()
 	locationInfoJSON["Get_Unknown_Countries_and_Regions"] = countryLocationInfo.GetIncludeUnknownCountriesAndRegions()
