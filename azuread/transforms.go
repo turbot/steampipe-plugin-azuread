@@ -582,21 +582,21 @@ func (ipLocationInfo *ADIpNamedLocationInfo) GetLocationInfo() map[string]interf
 		case *models.IPv4CidrRange:
 			IPv4CidrPair := map[string]interface{}{}
 			IPv4CidrPair["Address"] = *t.GetCidrAddress()
-			IPv4CidrArr[i] = IPv4CidrPair
+			IPv4CidrArr = append(IPv4CidrArr, IPv4CidrPair)
 		case *models.IPv4Range:
 			IPv4AddressPair := map[string]interface{}{}
 			IPv4AddressPair["Lower"] = *t.GetLowerAddress()
 			IPv4AddressPair["Upper"] = *t.GetUpperAddress()
-			IPv4RangeArr[i] = IPv4AddressPair
+			IPv4RangeArr = append(IPv4RangeArr, IPv4AddressPair)
 		case *models.IPv6CidrRange:
 			IPv6CidrPair := map[string]interface{}{}
 			IPv6CidrPair["Address"] = *t.GetCidrAddress()
-			IPv6CidrArr[i] = IPv6CidrPair
+			IPv6CidrArr = append(IPv6CidrArr, IPv6CidrPair)
 		case *models.IPv6Range:
 			IPv6AddressPair := map[string]interface{}{}
 			IPv6AddressPair["Lower"] = *t.GetLowerAddress()
 			IPv6AddressPair["Upper"] = *t.GetUpperAddress()
-			IPv6RangeArr[i] = IPv6AddressPair
+			IPv6RangeArr = append(IPv6RangeArr, IPv6AddressPair)
 		}
 	}
 	
