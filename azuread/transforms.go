@@ -59,6 +59,18 @@ type ADIdentityProviderInfo struct {
 	ClientSecret interface{}
 }
 
+type ADLocationInfo struct {
+	models.NamedLocationable
+}
+
+type ADIpNamedLocationInfo struct {
+	models.IpNamedLocationable
+}
+
+type ADCountryNamedLocationInfo struct {
+	models.CountryNamedLocationable
+}
+
 type ADSecurityDefaultsPolicyInfo struct {
 	models.IdentitySecurityDefaultsEnforcementPolicyable
 }
@@ -437,13 +449,13 @@ func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessP
 	return conditionalAccessPolicy.GetGrantControls().GetBuiltInControls()
 }
 
-func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyGrantAuthenticationStrength() []models.AuthenticationMethodModes  {
+func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyGrantAuthenticationStrength() []models.AuthenticationMethodModes {
 	if conditionalAccessPolicy.GetGrantControls() == nil {
 		return nil
 	}
 	if conditionalAccessPolicy.GetGrantControls().GetAuthenticationStrength() == nil {
 		return nil
-	}	
+	}
 	return conditionalAccessPolicy.GetGrantControls().GetAuthenticationStrength().GetAllowedCombinations()
 }
 
@@ -554,6 +566,64 @@ func (device *ADDeviceInfo) DeviceMemberOf() []map[string]interface{} {
 		members = append(members, member)
 	}
 	return members
+}
+
+func (ipLocationInfo *ADIpNamedLocationInfo) GetLocationInfo() map[string]interface{} {
+	ipRangesArray := ipLocationInfo.GetIpRanges()
+	locationInfoJSON := map[string]interface{}{}
+
+	IPv4CidrArr := []map[string]interface{}{}
+	IPv4RangeArr := []map[string]interface{}{}
+	IPv6CidrArr := []map[string]interface{}{}
+	IPv6RangeArr := []map[string]interface{}{}
+
+	for i := 0; i < len(ipRangesArray); i++ {
+		switch t := ipRangesArray[i].(type) {
+		case *models.IPv4CidrRange:
+			IPv4CidrPair := map[string]interface{}{}
+			IPv4CidrPair["Address"] = *t.GetCidrAddress()
+			IPv4CidrArr = append(IPv4CidrArr, IPv4CidrPair)
+		case *models.IPv4Range:
+			IPv4AddressPair := map[string]interface{}{}
+			IPv4AddressPair["Lower"] = *t.GetLowerAddress()
+			IPv4AddressPair["Upper"] = *t.GetUpperAddress()
+			IPv4RangeArr = append(IPv4RangeArr, IPv4AddressPair)
+		case *models.IPv6CidrRange:
+			IPv6CidrPair := map[string]interface{}{}
+			IPv6CidrPair["Address"] = *t.GetCidrAddress()
+			IPv6CidrArr = append(IPv6CidrArr, IPv6CidrPair)
+		case *models.IPv6Range:
+			IPv6AddressPair := map[string]interface{}{}
+			IPv6AddressPair["Lower"] = *t.GetLowerAddress()
+			IPv6AddressPair["Upper"] = *t.GetUpperAddress()
+			IPv6RangeArr = append(IPv6RangeArr, IPv6AddressPair)
+		}
+	}
+	
+	locationInfoJSON["type"] = "IP"
+	locationInfoJSON["IPv4Cidr"] = IPv4CidrArr
+	locationInfoJSON["IPv4Range"] = IPv4RangeArr
+	locationInfoJSON["IPv6Cidr"] = IPv6CidrArr
+	locationInfoJSON["IPv6Range"] = IPv6RangeArr
+	locationInfoJSON["IsTrusted"] = ipLocationInfo.GetIsTrusted()
+	return locationInfoJSON
+}
+
+func (countryLocationInfo *ADCountryNamedLocationInfo) GetLocationInfo() map[string]interface{} {
+	locationInfoJSON := map[string]interface{}{}
+	locationInfoJSON["type"] = "Country"
+	locationInfoJSON["Countries_and_Regions"] = countryLocationInfo.GetCountriesAndRegions()
+	locationInfoJSON["Get_Unknown_Countries_and_Regions"] = countryLocationInfo.GetIncludeUnknownCountriesAndRegions()
+	locationInfoJSON["Lookup_Method"] = countryLocationInfo.GetCountryLookupMethod().String()
+	return locationInfoJSON
+}
+
+func (ipLocationInfo *ADIpNamedLocationInfo) GetType() string {
+	return "IP"
+}
+
+func (countryLocationInfo *ADCountryNamedLocationInfo) GetType() string {
+	return "Country"
 }
 
 func (directoryAuditReport *ADDirectoryAuditReportInfo) DirectoryAuditAdditionalDetails() []map[string]interface{} {
