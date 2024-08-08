@@ -8,7 +8,6 @@ import (
 	"github.com/iancoleman/strcase"
 
 	abstractions "github.com/microsoft/kiota-abstractions-go"
-	jsonserialization "github.com/microsoft/kiota-serialization-json-go"
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
 	"github.com/microsoftgraph/msgraph-sdk-go/groups"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
@@ -429,13 +428,14 @@ func buildGroupBoolNEFilter(quals plugin.KeyColumnQualMap) []string {
 func formatResourceBehaviorOptions(ctx context.Context, group models.Groupable) []string {
 	var resourceBehaviorOptions []string
 	data := group.GetAdditionalData()["resourceBehaviorOptions"]
+
 	if data != nil {
-		parsedData := group.GetAdditionalData()["resourceBehaviorOptions"].([]*jsonserialization.JsonParseNode)
+		parsedData := group.GetAdditionalData()["resourceBehaviorOptions"].([]interface{})
 
 		for _, r := range parsedData {
-			val, err := r.GetStringValue()
-			if err != nil {
-				plugin.Logger(ctx).Error("failed to parse resourceBehaviorOptions: %v", err)
+			val, ok := r.(*string)
+			if !ok {
+				plugin.Logger(ctx).Error("failed to parse resourceBehaviorOptions: %v", r)
 				val = nil
 			}
 
@@ -450,13 +450,14 @@ func formatResourceBehaviorOptions(ctx context.Context, group models.Groupable) 
 func formatResourceProvisioningOptions(ctx context.Context, group models.Groupable) []string {
 	var resourceProvisioningOptions []string
 	data := group.GetAdditionalData()["resourceProvisioningOptions"]
+
 	if data != nil {
-		parsedData := data.([]*jsonserialization.JsonParseNode)
+		parsedData := data.([]interface{})
 
 		for _, r := range parsedData {
-			val, err := r.GetStringValue()
-			if err != nil {
-				plugin.Logger(ctx).Error("failed to parse resourceProvisioningOptions: %v", err)
+			val, ok := r.(*string)
+			if !ok {
+				plugin.Logger(ctx).Error("failed to parse resourceProvisioningOptions: %v", r)
 				val = nil
 			}
 
