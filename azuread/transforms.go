@@ -575,7 +575,7 @@ func (ipLocationInfo *ADIpNamedLocationInfo) GetLocationInfo() map[string]interf
 	IPv4CidrArr := []map[string]interface{}{}
 	IPv4RangeArr := []map[string]interface{}{}
 	IPv6CidrArr := []map[string]interface{}{}
-	IPv6RangeArr := m[]map[string]interface{}{}
+	IPv6RangeArr := []map[string]interface{}{}
 
 	for i := 0; i < len(ipRangesArray); i++ {
 		switch t := ipRangesArray[i].(type) {

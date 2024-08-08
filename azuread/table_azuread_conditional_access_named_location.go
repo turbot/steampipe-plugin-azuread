@@ -161,19 +161,3 @@ func buildConditionalAccessNamedLocationQueryFilter(equalQuals plugin.KeyColumnE
 
 	return filters
 }
-
-//// TRANSFORM FUNCTIONS
-
-func adConditionalAccessNamedLocationTitle(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	data := d.HydrateItem.(*ADLocationInfo)
-	if data == nil {
-		return nil, nil
-	}
-
-	title := data.GetDisplayName()
-	if title == nil {
-		title = data.GetId()
-	}
-
-	return title, nil
-}
