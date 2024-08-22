@@ -59,8 +59,9 @@ type ADIdentityProviderInfo struct {
 	ClientSecret interface{}
 }
 
-type ADLocationInfo struct {
+type ADNamedLocationInfo struct {
 	models.NamedLocationable
+	detailedNamedLocation models.NamedLocationable
 }
 
 type ADIpNamedLocationInfo struct {
@@ -568,7 +569,7 @@ func (device *ADDeviceInfo) DeviceMemberOf() []map[string]interface{} {
 	return members
 }
 
-func (ipLocationInfo *ADIpNamedLocationInfo) GetLocationInfo() map[string]interface{} {
+func IpGetLocationInfo(ipLocationInfo *ADIpNamedLocationInfo) map[string]interface{} {
 	ipRangesArray := ipLocationInfo.GetIpRanges()
 	locationInfoJSON := map[string]interface{}{}
 
@@ -600,7 +601,6 @@ func (ipLocationInfo *ADIpNamedLocationInfo) GetLocationInfo() map[string]interf
 		}
 	}
 	
-	locationInfoJSON["type"] = "IP"
 	locationInfoJSON["IPv4Cidr"] = IPv4CidrArr
 	locationInfoJSON["IPv4Range"] = IPv4RangeArr
 	locationInfoJSON["IPv6Cidr"] = IPv6CidrArr
@@ -609,22 +609,34 @@ func (ipLocationInfo *ADIpNamedLocationInfo) GetLocationInfo() map[string]interf
 	return locationInfoJSON
 }
 
-func (countryLocationInfo *ADCountryNamedLocationInfo) GetLocationInfo() map[string]interface{} {
+func CountryGetLocationInfo(countryLocationInfo *ADCountryNamedLocationInfo) map[string]interface{} {
 	locationInfoJSON := map[string]interface{}{}
-	locationInfoJSON["type"] = "Country"
 	locationInfoJSON["Countries_and_Regions"] = countryLocationInfo.GetCountriesAndRegions()
 	locationInfoJSON["Get_Unknown_Countries_and_Regions"] = countryLocationInfo.GetIncludeUnknownCountriesAndRegions()
 	locationInfoJSON["Lookup_Method"] = countryLocationInfo.GetCountryLookupMethod().String()
 	return locationInfoJSON
 }
 
-func (ipLocationInfo *ADIpNamedLocationInfo) GetType() string {
-	return "IP"
+func (locationInfo *ADNamedLocationInfo) GetLocationInfo() map[string]interface{} {
+	switch t := locationInfo.detailedNamedLocation.(type) {
+		case ADIpNamedLocationInfo:
+			return IpGetLocationInfo(&ADIpNamedLocationInfo{t})
+		case ADCountryNamedLocationInfo:
+			return CountryGetLocationInfo(&ADCountryNamedLocationInfo{t})
+		}
+	return nil
 }
 
-func (countryLocationInfo *ADCountryNamedLocationInfo) GetType() string {
-	return "Country"
+func (locationInfo *ADNamedLocationInfo) GetType() string {
+	switch locationInfo.detailedNamedLocation.(type) {
+		case ADIpNamedLocationInfo:
+			return "IP"
+		case ADCountryNamedLocationInfo:
+			return "Country"
+		}
+	return "Unkown"
 }
+
 
 func (directoryAuditReport *ADDirectoryAuditReportInfo) DirectoryAuditAdditionalDetails() []map[string]interface{} {
 	if directoryAuditReport.GetAdditionalDetails() == nil {

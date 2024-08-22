@@ -20,7 +20,7 @@ Analyze the settings to understand the status and creation date of the Named Loc
 select
   id,
   display_name,
-  type,
+  location_type,
   created_date_time,
   modified_date_time
 from
@@ -31,21 +31,21 @@ from
 select
   id,
   display_name,
-  type,
+  location_type,
   created_date_time,
   modified_date_time
 from
   azuread_conditional_access_named_location;
 ```
 
-### Detailed information about the Namedl Location definitions
+### Detailed information about the Named Location definitions
 Analyze detailed information about the definition of Named Locations in your Microsoft Entra Named Locations. This can help you understand the locations elements within your Conditional Access Policy and assure the definitions are compliance within your organization policies.
 
 ```sql+postgres
 select
   id,
   display_name,
-  type,
+  location_type,
   location_info
 from
   azuread_conditional_access_named_location;
@@ -55,8 +55,30 @@ from
 select
   id,
   display_name,
-  type,
+  location_type,
   location_info
 from
   azuread_conditional_access_named_location;
 ```
+
+### Detailed information about IP based named location
+Retrieve IP based Named Locations in your Microsoft Entra Named Locations. This can help you understand the locations elements within your Conditional Access Policy distringuishes between different types of named locations (Options: [IP, Country]).
+
+```sql+postgres
+select
+  id,
+  display_name,
+  location_info
+from
+  azuread_conditional_access_named_location where location_type = 'IP';
+```
+
+```sql+sqlite
+select
+  id,
+  display_name,
+  location_info
+from
+  azuread_conditional_access_named_location where location_type = 'IP';
+```
+

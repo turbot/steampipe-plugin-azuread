@@ -36,16 +36,21 @@ func tableAzureAdConditionalAccessNamedLocation(_ context.Context) *plugin.Table
 			},
 			KeyColumns: []*plugin.KeyColumn{
 				{Name: "display_name", Require: plugin.Optional},
+				{Name: "id", Require: plugin.Optional},
+				{Name: "location_type", Require: plugin.Optional},
 			},
 		},
 
 		Columns: commonColumns([]*plugin.Column{
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "Specifies the identifier of a Named Location object.", Transform: transform.FromMethod("GetId")},
 			{Name: "display_name", Type: proto.ColumnType_STRING, Description: "Specifies a display name for the Named Location object.", Transform: transform.FromMethod("GetDisplayName")},
-			{Name: "location_info", Type: proto.ColumnType_JSON, Description: "Specifies some location information for the Named Location object. Now supported: IP (v4/6 and CIDR/Range), odata_type, IsTrusted (for IP named locations only). Country (and regions, if exist), lookup method, UnkownCountriesAndRegions (for country named locations only)", Transform: transform.FromMethod("GetLocationInfo")},
-			{Name: "type", Type: proto.ColumnType_STRING, Description: "Specifies the type of the Named Location object: IP or Country", Transform: transform.FromMethod("GetType")},
+			{Name: "location_type", Type: proto.ColumnType_STRING, Description: "Specifies the type of the Named Location object: IP or Country", Transform: transform.FromMethod("GetType")},
 			{Name: "created_date_time", Type: proto.ColumnType_TIMESTAMP, Description: "The create date of the Named Location object.", Transform: transform.FromMethod("GetCreatedDateTime")},
 			{Name: "modified_date_time", Type: proto.ColumnType_TIMESTAMP, Description: "The modification date of Named Location object.", Transform: transform.FromMethod("GetModifiedDateTime")},
+			{Name: "location_info", Type: proto.ColumnType_JSON, Description: "Specifies some location information for the Named Location object. Now supported: IP (v4/6 and CIDR/Range), odata_type, IsTrusted (for IP named locations only). Country (and regions, if exist), lookup method, UnkownCountriesAndRegions (for country named locations only)", Transform: transform.FromMethod("GetLocationInfo")},
+
+			// Standard columns
+{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Transform: transform.FromMethod("GetDisplayName")},
 		}),
 	}
 }
@@ -88,29 +93,30 @@ func listAdConditionalAccessNamedLocations(ctx context.Context, d *plugin.QueryD
 	result, err := client.Identity().ConditionalAccess().NamedLocations().Get(ctx, options)
 	if err != nil {
 		errObj := getErrorObject(err)
-		plugin.Logger(ctx).Error("listAdConditionalAccessNamedLocations", "list_conditional_access_named_location_error", errObj)
+		plugin.Logger(ctx).Error("azuread_conditional_access_named_location.listAdConditionalAccessNamedLocations", "list_conditional_access_named_location_error", errObj)
 		return nil, errObj
 	}
 
 	pageIterator, err := msgraphcore.NewPageIterator[models.NamedLocationable](result, adapter, models.CreateNamedLocationCollectionResponseFromDiscriminatorValue)
 	if err != nil {
-		plugin.Logger(ctx).Error("listAdConditionalAccessNamedLocations", "create_iterator_instance_error", err)
+		plugin.Logger(ctx).Error("azuread_conditional_access_named_location.listAdConditionalAccessNamedLocations", "create_iterator_instance_error", err)
 		return nil, err
 	}
 
 	err = pageIterator.Iterate(ctx, func(pageItem models.NamedLocationable) bool {
-		switch t := pageItem.(type) {
-		case *models.IpNamedLocation:
-			d.StreamListItem(ctx, &ADIpNamedLocationInfo{t})
-		case *models.CountryNamedLocation:
-			d.StreamListItem(ctx, &ADCountryNamedLocationInfo{t})
-		}
-
+		
+		
+		d.StreamListItem(ctx, ADNamedLocationInfo{
+			NamedLocationable: pageItem,
+			detailedNamedLocation:   getNamedLocationDetails(pageItem),
+			})
+	
+		
 		// Context can be cancelled due to manual cancellation or the limit has been hit
 		return d.RowsRemaining(ctx) != 0
 	})
 	if err != nil {
-		plugin.Logger(ctx).Error("listAdConditionalAccessNamedLocations", "paging_error", err)
+		plugin.Logger(ctx).Error("azuread_conditional_access_named_location.listAdConditionalAccessNamedLocations", "paging_error", err)
 		return nil, err
 	}
 
@@ -136,10 +142,14 @@ func getAdConditionalAccessNamedLocation(ctx context.Context, d *plugin.QueryDat
 	location, err := client.Identity().ConditionalAccess().NamedLocations().ByNamedLocationId(conditionalAccessNamedLocationId).Get(ctx, nil)
 	if err != nil {
 		errObj := getErrorObject(err)
-		plugin.Logger(ctx).Error("getAdConditionalAccessNamedLocation", "get_conditional_access_location_error", errObj)
+		plugin.Logger(ctx).Error("azuread_conditional_access_named_location.getAdConditionalAccessNamedLocation", "get_conditional_access_location_error", errObj)
 		return nil, errObj
 	}
-	return &ADLocationInfo{location}, nil
+
+	return &ADNamedLocationInfo{
+			NamedLocationable: location,
+			detailedNamedLocation:   getNamedLocationDetails(location),
+			} , nil
 }
 
 func buildConditionalAccessNamedLocationQueryFilter(equalQuals plugin.KeyColumnEqualsQualMap) []string {
@@ -147,17 +157,35 @@ func buildConditionalAccessNamedLocationQueryFilter(equalQuals plugin.KeyColumnE
 
 	filterQuals := map[string]string{
 		"display_name": "string",
-		"state":        "string",
+		"id":           "string",
 	}
 
 	for qual, qualType := range filterQuals {
 		switch qualType {
 		case "string":
 			if equalQuals[qual] != nil {
-				filters = append(filters, fmt.Sprintf("%s eq '%s'", strcase.ToCamel(qual), equalQuals[qual].GetStringValue()))
+				if qual == "location_type" {
+					filters = append(filters, fmt.Sprintf("type eq '%s'", equalQuals[qual].GetStringValue()))
+				} else {
+					filters = append(filters, fmt.Sprintf("%s eq '%s'", strcase.ToLowerCamel(qual), equalQuals[qual].GetStringValue()))
+				}
 			}
 		}
 	}
 
 	return filters
+}
+
+/// UTILITY FUNCTION
+
+func getNamedLocationDetails(i interface{}) models.NamedLocationable {
+
+	switch t := i.(type) {
+		case *models.IpNamedLocation:
+			return ADIpNamedLocationInfo{t}
+		case *models.CountryNamedLocation:
+			return ADCountryNamedLocationInfo{t}
+		}
+	
+	return nil
 }
