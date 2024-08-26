@@ -61,7 +61,7 @@ type ADIdentityProviderInfo struct {
 
 type ADNamedLocationInfo struct {
 	models.NamedLocationable
-	detailedNamedLocation models.NamedLocationable
+	NamedLocation models.NamedLocationable
 }
 
 type ADIpNamedLocationInfo struct {
@@ -568,75 +568,6 @@ func (device *ADDeviceInfo) DeviceMemberOf() []map[string]interface{} {
 	}
 	return members
 }
-
-func IpGetLocationInfo(ipLocationInfo *ADIpNamedLocationInfo) map[string]interface{} {
-	ipRangesArray := ipLocationInfo.GetIpRanges()
-	locationInfoJSON := map[string]interface{}{}
-
-	IPv4CidrArr := []map[string]interface{}{}
-	IPv4RangeArr := []map[string]interface{}{}
-	IPv6CidrArr := []map[string]interface{}{}
-	IPv6RangeArr := []map[string]interface{}{}
-
-	for i := 0; i < len(ipRangesArray); i++ {
-		switch t := ipRangesArray[i].(type) {
-		case *models.IPv4CidrRange:
-			IPv4CidrPair := map[string]interface{}{}
-			IPv4CidrPair["Address"] = *t.GetCidrAddress()
-			IPv4CidrArr = append(IPv4CidrArr, IPv4CidrPair)
-		case *models.IPv4Range:
-			IPv4AddressPair := map[string]interface{}{}
-			IPv4AddressPair["Lower"] = *t.GetLowerAddress()
-			IPv4AddressPair["Upper"] = *t.GetUpperAddress()
-			IPv4RangeArr = append(IPv4RangeArr, IPv4AddressPair)
-		case *models.IPv6CidrRange:
-			IPv6CidrPair := map[string]interface{}{}
-			IPv6CidrPair["Address"] = *t.GetCidrAddress()
-			IPv6CidrArr = append(IPv6CidrArr, IPv6CidrPair)
-		case *models.IPv6Range:
-			IPv6AddressPair := map[string]interface{}{}
-			IPv6AddressPair["Lower"] = *t.GetLowerAddress()
-			IPv6AddressPair["Upper"] = *t.GetUpperAddress()
-			IPv6RangeArr = append(IPv6RangeArr, IPv6AddressPair)
-		}
-	}
-	
-	locationInfoJSON["IPv4Cidr"] = IPv4CidrArr
-	locationInfoJSON["IPv4Range"] = IPv4RangeArr
-	locationInfoJSON["IPv6Cidr"] = IPv6CidrArr
-	locationInfoJSON["IPv6Range"] = IPv6RangeArr
-	locationInfoJSON["IsTrusted"] = ipLocationInfo.GetIsTrusted()
-	return locationInfoJSON
-}
-
-func CountryGetLocationInfo(countryLocationInfo *ADCountryNamedLocationInfo) map[string]interface{} {
-	locationInfoJSON := map[string]interface{}{}
-	locationInfoJSON["Countries_and_Regions"] = countryLocationInfo.GetCountriesAndRegions()
-	locationInfoJSON["Get_Unknown_Countries_and_Regions"] = countryLocationInfo.GetIncludeUnknownCountriesAndRegions()
-	locationInfoJSON["Lookup_Method"] = countryLocationInfo.GetCountryLookupMethod().String()
-	return locationInfoJSON
-}
-
-func (locationInfo *ADNamedLocationInfo) GetLocationInfo() map[string]interface{} {
-	switch t := locationInfo.detailedNamedLocation.(type) {
-		case ADIpNamedLocationInfo:
-			return IpGetLocationInfo(&ADIpNamedLocationInfo{t})
-		case ADCountryNamedLocationInfo:
-			return CountryGetLocationInfo(&ADCountryNamedLocationInfo{t})
-		}
-	return nil
-}
-
-func (locationInfo *ADNamedLocationInfo) GetType() string {
-	switch locationInfo.detailedNamedLocation.(type) {
-		case ADIpNamedLocationInfo:
-			return "IP"
-		case ADCountryNamedLocationInfo:
-			return "Country"
-		}
-	return "Unkown"
-}
-
 
 func (directoryAuditReport *ADDirectoryAuditReportInfo) DirectoryAuditAdditionalDetails() []map[string]interface{} {
 	if directoryAuditReport.GetAdditionalDetails() == nil {
