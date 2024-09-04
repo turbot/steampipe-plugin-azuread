@@ -59,6 +59,19 @@ type ADIdentityProviderInfo struct {
 	ClientSecret interface{}
 }
 
+type ADNamedLocationInfo struct {
+	models.NamedLocationable
+	NamedLocation models.NamedLocationable
+}
+
+type ADIpNamedLocationInfo struct {
+	models.IpNamedLocationable
+}
+
+type ADCountryNamedLocationInfo struct {
+	models.CountryNamedLocationable
+}
+
 type ADSecurityDefaultsPolicyInfo struct {
 	models.IdentitySecurityDefaultsEnforcementPolicyable
 }
@@ -437,13 +450,13 @@ func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessP
 	return conditionalAccessPolicy.GetGrantControls().GetBuiltInControls()
 }
 
-func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyGrantAuthenticationStrength() []models.AuthenticationMethodModes  {
+func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyGrantAuthenticationStrength() []models.AuthenticationMethodModes {
 	if conditionalAccessPolicy.GetGrantControls() == nil {
 		return nil
 	}
 	if conditionalAccessPolicy.GetGrantControls().GetAuthenticationStrength() == nil {
 		return nil
-	}	
+	}
 	return conditionalAccessPolicy.GetGrantControls().GetAuthenticationStrength().GetAllowedCombinations()
 }
 
