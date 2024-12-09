@@ -8,7 +8,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.10.0
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.1.0
 	github.com/iancoleman/strcase v0.3.0
-	github.com/microsoft/kiota-abstractions-go v1.6.0
+	github.com/microsoft/kiota-abstractions-go v1.8.1
 	github.com/microsoft/kiota-authentication-azure-go v1.0.2
 	github.com/microsoftgraph/msgraph-sdk-go v1.37.0
 	github.com/microsoftgraph/msgraph-sdk-go-core v1.1.0
@@ -94,7 +94,7 @@ require (
 	github.com/prometheus/common v0.37.0 // indirect
 	github.com/prometheus/procfs v0.8.0 // indirect
 	github.com/sethvargo/go-retry v0.2.4 // indirect
-	github.com/std-uritemplate/std-uritemplate/go v0.0.55 // indirect
+	github.com/std-uritemplate/std-uritemplate/go/v2 v2.0.1 // indirect
 	github.com/stevenle/topsort v0.2.0 // indirect
 	github.com/stretchr/testify v1.9.0 // indirect
 	github.com/tkrajina/go-reflector v0.5.6 // indirect
