@@ -317,24 +317,3 @@ func buildBoolNEFilter(quals plugin.KeyColumnQualMap) []string {
 
 	return filters
 }
-
-func getUserIdentityProperties(ctx context.Context, d *transform.TransformData) (interface{}, error) {
-	identities := d.HydrateItem.(*ADUserInfo).GetIdentities()
-	idents := make([]map[string]interface{}, len(identities))
-	if len(identities) > 0 {
-		for _, ids := range identities {
-			identity := make(map[string]interface{})
-			identity["a"] = ids.GetIssuer()
-			identity["b"] = ids.GetBackingStore()
-			// identity["c"] = ids.GetFieldDeserializers()
-			identity["d"] = ids.GetIssuerAssignedId()
-			identity["d"] = ids.GetOdataType()
-			identity["e"] = ids.GetSignInType()
-			identity["f"] = ids.GetAdditionalData()
-
-			idents = append(idents, identity)
-		}
-	}
-
-	return idents, nil
-}
