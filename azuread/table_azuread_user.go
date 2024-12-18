@@ -52,18 +52,36 @@ func tableAzureAdUser(_ context.Context) *plugin.Table {
 			{Name: "user_type", Type: proto.ColumnType_STRING, Description: "A string value that can be used to classify user types in your directory.", Transform: transform.FromMethod("GetUserType")},
 			{Name: "given_name", Type: proto.ColumnType_STRING, Description: "The given name (first name) of the user.", Transform: transform.FromMethod("GetGivenName")},
 			{Name: "surname", Type: proto.ColumnType_STRING, Description: "Family name or last name of the active directory user.", Transform: transform.FromMethod("GetSurname")},
-			{Name: "department", Type: proto.ColumnType_STRING, Description: "The name of the department in which the user works.", Transform: transform.FromMethod("GetDepartment")},
 
 			{Name: "filter", Type: proto.ColumnType_STRING, Transform: transform.FromQual("filter"), Description: "Odata query to search for resources."},
 
 			// Other fields
-			{Name: "on_premises_immutable_id", Type: proto.ColumnType_STRING, Description: "Used to associate an on-premises Active Directory user account with their Azure AD user object.", Transform: transform.FromMethod("GetOnPremisesImmutableId")},
 			{Name: "created_date_time", Type: proto.ColumnType_TIMESTAMP, Description: "The time at which the user was created.", Transform: transform.FromMethod("GetCreatedDateTime")},
 			{Name: "mail", Type: proto.ColumnType_STRING, Description: "The SMTP address for the user, for example, jeff@contoso.onmicrosoft.com.", Transform: transform.FromMethod("GetMail")},
 			{Name: "mail_nickname", Type: proto.ColumnType_STRING, Description: "The mail alias for the user.", Transform: transform.FromMethod("GetMailNickname")},
 			{Name: "password_policies", Type: proto.ColumnType_STRING, Description: "Specifies password policies for the user. This value is an enumeration with one possible value being DisableStrongPassword, which allows weaker passwords than the default policy to be specified. DisablePasswordExpiration can also be specified. The two may be specified together; for example: DisablePasswordExpiration, DisableStrongPassword.", Transform: transform.FromMethod("GetPasswordPolicies")},
 			{Name: "sign_in_sessions_valid_from_date_time", Type: proto.ColumnType_TIMESTAMP, Description: "Any refresh tokens or sessions tokens (session cookies) issued before this time are invalid, and applications will get an error when using an invalid refresh or sessions token to acquire a delegated access token (to access APIs such as Microsoft Graph).", Transform: transform.FromMethod("GetSignInSessionsValidFromDateTime")},
 			{Name: "usage_location", Type: proto.ColumnType_STRING, Description: "A two letter country code (ISO standard 3166), required for users that will be assigned licenses due to legal requirement to check for availability of services in countries.", Transform: transform.FromMethod("GetUsageLocation")},
+
+			// Job Information
+			{Name: "employee_id", Type: proto.ColumnType_STRING, Description: "The unique identifier assigned to the employee.", Transform: transform.FromMethod("GetEmployeeId")},
+			{Name: "employee_type", Type: proto.ColumnType_STRING, Description: "The type of employment (e.g., full-time, part-time, contractor).", Transform: transform.FromMethod("GetEmployeeType")},
+			{Name: "company_name", Type: proto.ColumnType_STRING, Description: "The name of the company the user is associated with.", Transform: transform.FromMethod("GetCompanyName")},
+			{Name: "job_title", Type: proto.ColumnType_STRING, Description: "The job title of the user.", Transform: transform.FromMethod("GetJobTitle")},
+			{Name: "department", Type: proto.ColumnType_STRING, Description: "The name of the department in which the user works.", Transform: transform.FromMethod("GetDepartment")},
+			{Name: "office_location", Type: proto.ColumnType_STRING, Description: "The physical location of the user's office.", Transform: transform.FromMethod("GetOfficeLocation")},
+			{Name: "manager", Type: proto.ColumnType_STRING, Description: "The manager of the user.", Transform: transform.FromMethod("GetManager")},
+			{Name: "employee_hire_date", Type: proto.ColumnType_TIMESTAMP, Description: "The date when the user was hired.", Transform: transform.FromMethod("GetEmployeeHireDate")},
+
+			// On-premises
+			{Name: "on_premises_distinguished_name", Type: proto.ColumnType_STRING, Description: "The distinguished name of the user in the on-premises Active Directory.", Transform: transform.FromMethod("GetOnPremisesDistinguishedName")},
+			{Name: "on_premises_domain_name", Type: proto.ColumnType_STRING, Description: "The domain name of the user in the on-premises Active Directory.", Transform: transform.FromMethod("GetOnPremisesDomainName")},
+			{Name: "on_premises_immutable_id", Type: proto.ColumnType_STRING, Description: "Used to associate an on-premises Active Directory user account with their Azure AD user object.", Transform: transform.FromMethod("GetOnPremisesImmutableId")},
+			{Name: "on_premises_sam_account_name", Type: proto.ColumnType_STRING, Description: "The Security Account Manager (SAM) account name of the user in the on-premises Active Directory.", Transform: transform.FromMethod("GetOnPremisesSamAccountName")},
+			{Name: "on_premises_security_identifier", Type: proto.ColumnType_STRING, Description: "The security identifier (SID) of the user in the on-premises Active Directory.", Transform: transform.FromMethod("GetOnPremisesSecurityIdentifier")},
+			{Name: "on_premises_user_principal_name", Type: proto.ColumnType_STRING, Description: "The User Principal Name (UPN) of the user in the on-premises Active Directory.", Transform: transform.FromMethod("GetOnPremisesUserPrincipalName")},
+			{Name: "on_premises_sync_enabled", Type: proto.ColumnType_BOOL, Description: "Indicates whether the user is synchronized with on-premises Active Directory.", Transform: transform.FromMethod("GetOnPremisesSyncEnabled")},
+			{Name: "on_premises_last_sync_date_time", Type: proto.ColumnType_TIMESTAMP, Description: "The date and time when the user's information was last synchronized with the on-premises Active Directory.", Transform: transform.FromMethod("GetOnPremisesLastSyncDateTime")},
 
 			// Json fields
 			{Name: "member_of", Type: proto.ColumnType_JSON, Description: "A list the groups and directory roles that the user is a direct member of.", Transform: transform.FromMethod("UserMemberOf")},
@@ -298,4 +316,25 @@ func buildBoolNEFilter(quals plugin.KeyColumnQualMap) []string {
 	}
 
 	return filters
+}
+
+func getUserIdentityProperties(ctx context.Context, d *transform.TransformData) (interface{}, error) {
+	identities := d.HydrateItem.(*ADUserInfo).GetIdentities()
+	idents := make([]map[string]interface{}, len(identities))
+	if len(identities) > 0 {
+		for _, ids := range identities {
+			identity := make(map[string]interface{})
+			identity["a"] = ids.GetIssuer()
+			identity["b"] = ids.GetBackingStore()
+			// identity["c"] = ids.GetFieldDeserializers()
+			identity["d"] = ids.GetIssuerAssignedId()
+			identity["d"] = ids.GetOdataType()
+			identity["e"] = ids.GetSignInType()
+			identity["f"] = ids.GetAdditionalData()
+
+			idents = append(idents, identity)
+		}
+	}
+
+	return idents, nil
 }
