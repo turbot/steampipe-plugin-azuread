@@ -3,6 +3,7 @@ package azuread
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/iancoleman/strcase"
@@ -10,7 +11,6 @@ import (
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/microsoftgraph/msgraph-sdk-go/users"
 
-	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
@@ -231,10 +231,10 @@ func buildUserRequestFields(ctx context.Context, queryColumns []string) ([]strin
 		}
 
 		if columnName == "title" {
-			if !helpers.StringSliceContains(queryColumns, "display_name") {
+			if !slices.Contains(queryColumns, "display_name") {
 				selectColumns = append(selectColumns, []string{"displayName"}...)
 			}
-			if !helpers.StringSliceContains(queryColumns, "user_principal_name") {
+			if !slices.Contains(queryColumns, "user_principal_name") {
 				selectColumns = append(selectColumns, []string{"userPrincipalName"}...)
 			}
 			continue
