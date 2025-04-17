@@ -1,3 +1,10 @@
+## v1.1.0 [2025-04-17]
+
+_Dependencies_
+
+- Recompiled plugin with Go version `1.23.1`. ([#231](https://github.com/turbot/steampipe-plugin-azuread/pull/231))
+- Recompiled plugin with [steampipe-plugin-sdk v5.11.5](https://github.com/turbot/steampipe-plugin-sdk/blob/v5.11.5/CHANGELOG.md#v5115-2025-03-31) that addresses critical and high vulnerabilities in dependent packages. ([#231](https://github.com/turbot/steampipe-plugin-azuread/pull/231))
+
 ## v0.16.0 [2024-05-14]
 
 _Enhancements_
