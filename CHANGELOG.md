@@ -1,4 +1,8 @@
-## v1.1.0 [2025-04-17]
+## v1.1.0 [2025-04-18]
+
+_Enhancements_
+
+- Added `employee_*` and `on_premises_*` columns to the `azuread_user` table. ([#210](https://github.com/turbot/steampipe-plugin-azuread/pull/210))
 
 _Dependencies_
 
