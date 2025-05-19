@@ -108,3 +108,29 @@ from
 where
   not allowed_email_verified_users_to_join_organization;
 ```
+
+
+### Check if Non-admin users can create tenants
+To enhance security practices, it is highly recommended to disable the feature that allows non-admin users to create Azure AD tenants.
+
+```sql+postgres
+select
+  id,
+  display_name,
+  default_user_role_permissions
+from
+	azuread_authorization_policy
+where
+	(default_user_role_permissions ->> 'allowedToCreateTenants')::boolean = True;
+```
+
+```sql+sqlite
+select
+  id,
+  display_name,
+  default_user_role_permissions
+from
+	azuread_authorization_policy
+where
+  json_extract(default_user_role_permissions, '$.allowedToCreateTenants')::boolean = True;
+```

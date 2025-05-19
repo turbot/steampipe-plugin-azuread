@@ -336,6 +336,9 @@ func (authorizationPolicy *ADAuthorizationPolicyInfo) AuthorizationPolicyDefault
 	if authorizationPolicy.GetDefaultUserRolePermissions().GetAllowedToCreateApps() != nil {
 		data["allowedToCreateApps"] = *authorizationPolicy.GetDefaultUserRolePermissions().GetAllowedToCreateApps()
 	}
+	if authorizationPolicy.GetDefaultUserRolePermissions().GetAllowedToCreateTenants() != nil {
+		data["allowedToCreateTenants"] = *authorizationPolicy.GetDefaultUserRolePermissions().GetAllowedToCreateTenants()
+	}
 	if authorizationPolicy.GetDefaultUserRolePermissions().GetAllowedToCreateSecurityGroups() != nil {
 		data["allowedToCreateSecurityGroups"] = *authorizationPolicy.GetDefaultUserRolePermissions().GetAllowedToCreateSecurityGroups()
 	}
