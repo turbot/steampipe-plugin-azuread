@@ -109,7 +109,6 @@ where
   not allowed_email_verified_users_to_join_organization;
 ```
 
-
 ### Check if Non-admin users can create tenants
 To enhance security practices, it is highly recommended to disable the feature that allows non-admin users to create Azure AD tenants.
 
