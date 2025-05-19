@@ -119,9 +119,9 @@ select
   display_name,
   default_user_role_permissions
 from
-	azuread_authorization_policy
+  azuread_authorization_policy
 where
-	(default_user_role_permissions ->> 'allowedToCreateTenants')::boolean = True;
+  (default_user_role_permissions ->> 'allowedToCreateTenants')::boolean = True;
 ```
 
 ```sql+sqlite
@@ -130,7 +130,7 @@ select
   display_name,
   default_user_role_permissions
 from
-	azuread_authorization_policy
+  azuread_authorization_policy
 where
   json_extract(default_user_role_permissions, '$.allowedToCreateTenants')::boolean = True;
 ```
