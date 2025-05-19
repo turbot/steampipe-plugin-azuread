@@ -111,15 +111,13 @@ where
 
 
 ### Check if Non-admin users can create tenants
-To enhance security practices, it is highly recommended to disable
-the feature that allows non-admin users to create Azure AD tenants.
-
+To enhance security practices, it is highly recommended to disable the feature that allows non-admin users to create Azure AD tenants.
 
 ```sql+postgres
 select
   id,
-	display_name,
-	default_user_role_permissions
+  display_name,
+  default_user_role_permissions
 from
 	azuread_authorization_policy
 where
@@ -129,8 +127,8 @@ where
 ```sql+sqlite
 select
   id,
-	display_name,
-	default_user_role_permissions
+  display_name,
+  default_user_role_permissions
 from
 	azuread_authorization_policy
 where
