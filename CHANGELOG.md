@@ -1,3 +1,9 @@
+## v1.2.0 [2025-05-20]
+
+_Enhancements_
+
+- Added `allowedToCreateTenants` field under `default_user_role_permissions` column of `azuread_authorization_policy` table. ([#243](https://github.com/turbot/steampipe-plugin-azuread/pull/243)) (Thanks [@MarkusGnigler](https://github.com/MarkusGnigler) for the contribution!)
+
 ## v1.1.0 [2025-04-18]
 
 _Enhancements_
