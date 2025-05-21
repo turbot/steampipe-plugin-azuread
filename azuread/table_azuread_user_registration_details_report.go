@@ -77,21 +77,24 @@ func listAdUserRegistrationDetailsReport(ctx context.Context, d *plugin.QueryDat
 		}
 	}
 
-	result, err := client.Reports().AuthenticationMethods().UserRegistrationDetails().Get(ctx, nil)
+	conf := &reports.AuthenticationMethodsUserRegistrationDetailsRequestBuilderGetRequestConfiguration{
+		QueryParameters: input,
+	}
+	result, err := client.Reports().AuthenticationMethods().UserRegistrationDetails().Get(ctx, conf)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("listAdUserRegistrationDetailsReport", "list_user_registration_details_report_error", errObj)
 		return nil, errObj
 	}
 
-	pageIterator, err := msgraphcore.NewPageIterator[interface{}](result, adapter, models.CreateSignInCollectionResponseFromDiscriminatorValue)
+	pageIterator, err := msgraphcore.NewPageIterator[interface{}](result, adapter, models.CreateUserRegistrationDetailsCollectionResponseFromDiscriminatorValue)
 	if err != nil {
 		plugin.Logger(ctx).Error("listAdUserRegistrationDetailsReport", "create_iterator_instance_error", err)
 		return nil, err
 	}
 
 	err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
-		// To prevent errors during type conversion caused by inconsistent API responses (especially with larger data sets), we may get the different type of response (models.DirectoryAuditable), we need to include the following check.
+		// To prevent errors during type conversion caused by inconsistent API responses (especially with larger data sets), we may get a different type of response (models.DirectoryAuditable). We need to include the following check.
 		if details, ok := pageItem.(models.UserRegistrationDetailsable); ok {
 			d.StreamListItem(ctx, &ADUserRegistrationDetailsReport{details})
 		}
