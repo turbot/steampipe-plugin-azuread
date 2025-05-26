@@ -64,6 +64,7 @@ func tableAzureAdConditionalAccessPolicy(_ context.Context) *plugin.Table {
 			{Name: "terms_of_use", Type: proto.ColumnType_JSON, Description: "List of terms of use IDs required by the policy.", Transform: transform.FromMethod("ConditionalAccessPolicyGrantControlsTermsOfUse")},
 			{Name: "users", Type: proto.ColumnType_JSON, Description: "Users, groups, and roles included in and excluded from the policy.", Transform: transform.FromMethod("ConditionalAccessPolicyConditionsUsers")},
 			{Name: "user_risk_levels", Type: proto.ColumnType_JSON, Description: "User risk levels included in the policy. Possible values are: low, medium, high, hidden, none, unknownFutureValue.", Transform: transform.FromMethod("ConditionalAccessPolicyConditionsUserRiskLevels")},
+			{Name: "disable_resilience_defaults", Type: proto.ColumnType_BOOL, Description: "Session control that determines whether it is acceptable for Microsoft Entra ID to extend existing sessions based on information collected prior to an outage or not.", Transform: transform.FromMethod("ConditionalAccessPolicySessionControlsDisableResilienceDefaults")},
 
 			// Standard columns
 			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Transform: transform.From(adConditionalAccessPolicyTitle)},
