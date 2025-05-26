@@ -244,7 +244,7 @@ func buildUserRequestFields(ctx context.Context, queryColumns []string) ([]strin
 
 		selectColumns = append(selectColumns, strcase.ToLowerCamel(columnName))
 	}
-	fmt.Println("#### selecte columns",selectColumns)
+	
 	return selectColumns, expandColumns
 }
 

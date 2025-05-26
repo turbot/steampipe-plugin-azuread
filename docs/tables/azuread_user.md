@@ -158,8 +158,8 @@ order by
   username;
 ```
 
-### List users signin_activity
-Discover the signin_activity of users within your Azure Active Directory, allowing you to query for inactive users. This is particularly useful in maintaining security posture.
+### List users sign_in_activity
+Discover the sign_in_activity of users within your Azure Active Directory, allowing you to query for inactive users. This is particularly useful in maintaining security posture.
 
 ```sql+postgres
 select
@@ -168,8 +168,8 @@ select
   id,
   mail,
   external_user_state,
-  sign_in_activity ->> 'LastSignInDateTime' AS last_sign_in,
-  sign_in_activity ->> 'LastNonInteractiveSignInDateTime' AS last_non_interactive_sign_in
+  sign_in_activity ->> 'LastSignInDateTime' as last_sign_in,
+  sign_in_activity ->> 'LastNonInteractiveSignInDateTime' as last_non_interactive_sign_in
 from
   azuread_user
 ```
@@ -181,8 +181,8 @@ select
   id,
   mail,
   external_user_state,
-  sign_in_activity ->> 'LastSignInDateTime' AS last_sign_in,
-  sign_in_activity ->> 'LastNonInteractiveSignInDateTime' AS last_non_interactive_sign_in
+  sign_in_activity ->> 'LastSignInDateTime' as last_sign_in,
+  sign_in_activity ->> 'LastNonInteractiveSignInDateTime' as last_non_interactive_sign_in
 from
   azuread_user
 ```
