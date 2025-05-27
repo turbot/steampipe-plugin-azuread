@@ -567,15 +567,6 @@ func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessP
 	}
 	
 	return sessionControls.GetDisableResilienceDefaults()
-
-	// data := map[string]interface{}{}
-	// if conditionalAccessPolicy.GetSessionControls().GetSignInFrequency().GetIsEnabled() != nil {
-	// 	data["isEnabled"] = conditionalAccessPolicy.GetSessionControls().GetSignInFrequency().GetIsEnabled()
-	// }
-	// if conditionalAccessPolicy.GetSessionControls().GetSignInFrequency().GetValue() != nil {
-	// 	data["value"] = conditionalAccessPolicy.GetSessionControls().GetSignInFrequency().GetValue()
-	// }
-	// return data
 }
 
 func (device *ADDeviceInfo) DeviceMemberOf() []map[string]interface{} {
