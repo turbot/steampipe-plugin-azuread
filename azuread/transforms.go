@@ -556,6 +556,19 @@ func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessP
 	return data
 }
 
+
+func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicySessionControlsDisableResilienceDefaults() *bool{ //map[string]interface{} {
+	sessionControls := conditionalAccessPolicy.GetSessionControls()
+	if sessionControls == nil {
+		return nil
+	}
+	if sessionControls.GetDisableResilienceDefaults() == nil {
+		return nil
+	}
+	
+	return sessionControls.GetDisableResilienceDefaults()
+}
+
 func (device *ADDeviceInfo) DeviceMemberOf() []map[string]interface{} {
 	if device.GetMemberOf() == nil {
 		return nil
