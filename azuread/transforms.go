@@ -1084,3 +1084,18 @@ func (user *ADUserInfo) UserPasswordProfile() map[string]interface{} {
 
 	return passwordProfileData
 }
+
+func (user *ADUserInfo) SignInActivity() map[string]interface{} {
+	actiity := user.GetSignInActivity()
+	if actiity == nil {
+		return nil
+	}
+
+	return map[string]interface{}{
+		"LastSignInDateTime": actiity.GetLastSignInDateTime(),
+		"LastSignInRequestId": actiity.GetLastSignInRequestId(),
+		"LastNonInteractiveSignInDateTime": actiity.GetLastNonInteractiveSignInDateTime(),
+		"LastNonInteractiveSignInRequestId": actiity.GetLastNonInteractiveSignInRequestId(),
+	}
+}
+

@@ -62,6 +62,7 @@ func tableAzureAdUser(_ context.Context) *plugin.Table {
 			{Name: "password_policies", Type: proto.ColumnType_STRING, Description: "Specifies password policies for the user. This value is an enumeration with one possible value being DisableStrongPassword, which allows weaker passwords than the default policy to be specified. DisablePasswordExpiration can also be specified. The two may be specified together; for example: DisablePasswordExpiration, DisableStrongPassword.", Transform: transform.FromMethod("GetPasswordPolicies")},
 			{Name: "sign_in_sessions_valid_from_date_time", Type: proto.ColumnType_TIMESTAMP, Description: "Any refresh tokens or sessions tokens (session cookies) issued before this time are invalid, and applications will get an error when using an invalid refresh or sessions token to acquire a delegated access token (to access APIs such as Microsoft Graph).", Transform: transform.FromMethod("GetSignInSessionsValidFromDateTime")},
 			{Name: "usage_location", Type: proto.ColumnType_STRING, Description: "A two letter country code (ISO standard 3166), required for users that will be assigned licenses due to legal requirement to check for availability of services in countries.", Transform: transform.FromMethod("GetUsageLocation")},
+			{Name: "external_user_state", Type: proto.ColumnType_STRING, Description: "For an external user invited to the tenant using the invitation API, this property represents the invited user's invitation status", Transform: transform.FromMethod("GetExternalUserState")},
 
 			// Job Information
 			{Name: "employee_id", Type: proto.ColumnType_STRING, Description: "The unique identifier assigned to the employee.", Transform: transform.FromMethod("GetEmployeeId")},
@@ -88,6 +89,7 @@ func tableAzureAdUser(_ context.Context) *plugin.Table {
 			{Name: "im_addresses", Type: proto.ColumnType_JSON, Description: "The instant message voice over IP (VOIP) session initiation protocol (SIP) addresses for the user.", Transform: transform.FromMethod("GetImAddresses")},
 			{Name: "other_mails", Type: proto.ColumnType_JSON, Description: "A list of additional email addresses for the user.", Transform: transform.FromMethod("GetOtherMails")},
 			{Name: "password_profile", Type: proto.ColumnType_JSON, Description: "Specifies the password profile for the user. The profile contains the user’s password. This property is required when a user is created.", Transform: transform.FromMethod("UserPasswordProfile")},
+			{Name: "sign_in_activity", Type: proto.ColumnType_JSON, Description: "Get the last signed-in date and request ID of the sign-in for a given user", Transform: transform.FromMethod("SignInActivity")},
 
 			// Standard columns
 			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Transform: transform.From(adUserTitle)},
@@ -242,7 +244,7 @@ func buildUserRequestFields(ctx context.Context, queryColumns []string) ([]strin
 
 		selectColumns = append(selectColumns, strcase.ToLowerCamel(columnName))
 	}
-
+	
 	return selectColumns, expandColumns
 }
 
