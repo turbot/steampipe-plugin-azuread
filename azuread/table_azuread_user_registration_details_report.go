@@ -62,22 +62,18 @@ func listAdUserRegistrationDetailsReport(ctx context.Context, d *plugin.QueryDat
 		return nil, err
 	}
 
-	// List operations
-	input := &reports.AuthenticationMethodsUserRegistrationDetailsRequestBuilderGetQueryParameters{
-		Top: Int32(999),
-	}
-
 	// Limiting the results
-	maxLimit := int32(500)
+	maxLimit := int32(999)
 	if d.QueryContext.Limit != nil {
 		limit := int32(*d.QueryContext.Limit)
 		if limit < maxLimit {
-			if limit < 5 {
-				maxLimit = 5
-			} else {
-				maxLimit = limit
-			}
+			maxLimit = limit
 		}
+	}
+
+	// List operations
+	input := &reports.AuthenticationMethodsUserRegistrationDetailsRequestBuilderGetQueryParameters{
+		Top: &maxLimit,
 	}
 
 	conf := &reports.AuthenticationMethodsUserRegistrationDetailsRequestBuilderGetRequestConfiguration{
