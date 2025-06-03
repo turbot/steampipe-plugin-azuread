@@ -67,13 +67,16 @@ func listAdUserRegistrationDetailsReport(ctx context.Context, d *plugin.QueryDat
 		Top: Int32(999),
 	}
 
-	// Restrict the limit value to be passed in the query parameter which is not between 1 and 999, otherwise API will throw an error as follow
-	// unexpected status 400 with OData error: Request_UnsupportedQuery: Invalid page size specified: '1000'. Must be between 1 and 999 inclusive.
-	limit := d.QueryContext.Limit
-	if limit != nil {
-		if *limit > 0 && *limit < 999 {
-			l := int32(*limit)
-			input.Top = Int32(l)
+	// Limiting the results
+	maxLimit := int32(500)
+	if d.QueryContext.Limit != nil {
+		limit := int32(*d.QueryContext.Limit)
+		if limit < maxLimit {
+			if limit < 5 {
+				maxLimit = 5
+			} else {
+				maxLimit = limit
+			}
 		}
 	}
 
