@@ -58,7 +58,7 @@ func listAdUserRegistrationDetailsReport(ctx context.Context, d *plugin.QueryDat
 	// Create client
 	client, adapter, err := GetGraphClient(ctx, d)
 	if err != nil {
-		plugin.Logger(ctx).Error("table_azuread_user_registration_details_report.listAdUserRegistrationDetailsReport", "connection_error", err)
+		plugin.Logger(ctx).Error("azuread_user_registration_details_report.listAdUserRegistrationDetailsReport", "connection_error", err)
 		return nil, err
 	}
 
@@ -121,7 +121,7 @@ func getAdUserRegistrationDetailsReport(ctx context.Context, d *plugin.QueryData
 	// Create client
 	client, _, err := GetGraphClient(ctx, d)
 	if err != nil {
-		plugin.Logger(ctx).Error("azuread_sign_in_report.getAdUserRegistrationDetailsReport", "connection_error", err)
+		plugin.Logger(ctx).Error("azuread_user_registration_details_report.getAdUserRegistrationDetailsReport", "connection_error", err)
 		return nil, err
 	}
 
@@ -134,15 +134,3 @@ func getAdUserRegistrationDetailsReport(ctx context.Context, d *plugin.QueryData
 
 	return &ADUserRegistrationDetailsReport{result}, nil
 }
-
-// //// TRANSFORM FUNCTIONS
-
-// func formatSignInReportRiskEventTypes(_ context.Context, d *transform.TransformData) (interface{}, error) {
-// 	data := d.HydrateItem.(*ADSignInReportInfo)
-// 	riskEventTypes := data.GetRiskEventTypes()
-// 	if len(riskEventTypes) == 0 {
-// 		return nil, nil
-// 	}
-
-// 	return riskEventTypes, nil
-// }

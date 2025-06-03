@@ -1,6 +1,6 @@
 ---
-title: "Steampipe Table: azuread_user_registration_details_report - Query Azure AD Sign-In Reports using SQL"
-description: "Allows users to query Azure AD Sign-In Reports, providing detailed information about user sign-in activities, including the location, device, and application used for sign-in."
+title: "Steampipe Table: azuread_user_registration_details_report - Query Azure AD User-Registration-Details Reports using SQL"
+description: "Allows users to query Azure AD User-Registration-Details Reports, providing detailed information about user registered authentication methods."
 ---
 
 # Table: azuread_user_registration_details_report - Query Azure AD User-Registration-Details Reports using SQL
