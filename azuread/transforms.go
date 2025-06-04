@@ -560,6 +560,19 @@ func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessP
 	return data
 }
 
+
+func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicySessionControlsDisableResilienceDefaults() *bool{ //map[string]interface{} {
+	sessionControls := conditionalAccessPolicy.GetSessionControls()
+	if sessionControls == nil {
+		return nil
+	}
+	if sessionControls.GetDisableResilienceDefaults() == nil {
+		return nil
+	}
+	
+	return sessionControls.GetDisableResilienceDefaults()
+}
+
 func (device *ADDeviceInfo) DeviceMemberOf() []map[string]interface{} {
 	if device.GetMemberOf() == nil {
 		return nil
@@ -1075,3 +1088,18 @@ func (user *ADUserInfo) UserPasswordProfile() map[string]interface{} {
 
 	return passwordProfileData
 }
+
+func (user *ADUserInfo) SignInActivity() map[string]interface{} {
+	actiity := user.GetSignInActivity()
+	if actiity == nil {
+		return nil
+	}
+
+	return map[string]interface{}{
+		"LastSignInDateTime": actiity.GetLastSignInDateTime(),
+		"LastSignInRequestId": actiity.GetLastSignInRequestId(),
+		"LastNonInteractiveSignInDateTime": actiity.GetLastNonInteractiveSignInDateTime(),
+		"LastNonInteractiveSignInRequestId": actiity.GetLastNonInteractiveSignInRequestId(),
+	}
+}
+

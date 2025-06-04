@@ -1,3 +1,14 @@
+## v1.3.0 [2025-05-30]
+
+_Enhancements_
+
+- Added `external_user_state` and `sign_in_activity` columns to `azuread_user` table. ([#250](https://github.com/turbot/steampipe-plugin-azuread/pull/250)) (Thanks [@MarkusGnigler](https://github.com/MarkusGnigler) for the contribution!)
+- Added `disable_resilience_defaults` column to `azuread_conditional_access_policy` table. ([#251](https://github.com/turbot/steampipe-plugin-azuread/pull/251)) (Thanks [@MarkusGnigler](https://github.com/MarkusGnigler) for the contribution!)
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v5.11.6](https://github.com/turbot/steampipe-plugin-sdk/blob/develop/CHANGELOG.md#v5116-2025-05-22) which improves how errors are handled during query execution. ([#249](https://github.com/turbot/steampipe-plugin-azuread/pull/249))
+
 ## v1.2.0 [2025-05-20]
 
 _Enhancements_
