@@ -84,6 +84,10 @@ type ADSignInReportInfo struct {
 	models.SignInable
 }
 
+type ADUserRegistrationDetailsReport struct {
+	models.UserRegistrationDetailsable
+}
+
 type ADUserInfo struct {
 	models.Userable
 	RefreshTokensValidFromDateTime interface{}
