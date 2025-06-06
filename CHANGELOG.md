@@ -1,3 +1,10 @@
+## v1.4.0 [2025-06-06]
+
+_What's new?_
+
+- New tables added
+  - [azuread_user_registration_details_report](https://hub.steampipe.io/plugins/turbot/azuread/tables/azuread_user_registration_details_report) ([#248](https://github.com/turbot/steampipe-plugin-azuread/pull/248)) (Thanks [@MarkusGnigler](https://github.com/MarkusGnigler) for the contribution!)
+
 ## v1.3.0 [2025-05-30]
 
 _Enhancements_
