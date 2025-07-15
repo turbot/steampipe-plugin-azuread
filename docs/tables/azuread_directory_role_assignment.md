@@ -24,8 +24,7 @@ select
   directory_scope_id,
   app_scope_id,
   condition,
-  principal,
-  role_definition
+  principal
 from
   azuread_directory_role_assignment;
 ```
@@ -38,8 +37,7 @@ select
   directory_scope_id,
   app_scope_id,
   condition,
-  principal,
-  role_definition
+  principal
 from
   azuread_directory_role_assignment;
 ```
@@ -150,8 +148,7 @@ select
   principal_id,
   role_definition_id,
   app_scope_id,
-  condition,
-  app_scope
+  condition
 from
   azuread_directory_role_assignment
 where
@@ -164,8 +161,7 @@ select
   principal_id,
   role_definition_id,
   app_scope_id,
-  condition,
-  app_scope
+  condition
 from
   azuread_directory_role_assignment
 where
@@ -179,32 +175,30 @@ Get detailed information about the role definitions and principals assigned to r
 select
   id,
   principal_id,
-  role_definition ->> 'display_name' as role_name,
-  role_definition ->> 'description' as role_description,
+  role_definition_id,
   principal ->> '@odata.type' as principal_type,
+  principal ->> 'id' as principal_object_id,
   directory_scope_id,
   condition
 from
   azuread_directory_role_assignment
 where
-  role_definition is not null
-  and principal is not null;
+  principal is not null;
 ```
 
 ```sql+sqlite
 select
   id,
   principal_id,
-  json_extract(role_definition, '$.display_name') as role_name,
-  json_extract(role_definition, '$.description') as role_description,
+  role_definition_id,
   json_extract(principal, '$."@odata.type"') as principal_type,
+  json_extract(principal, '$.id') as principal_object_id,
   directory_scope_id,
   condition
 from
   azuread_directory_role_assignment
 where
-  role_definition is not null
-  and principal is not null;
+  principal is not null;
 ```
 
 ### Role assignments with specific directory scope

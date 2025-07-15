@@ -2,9 +2,11 @@ package azuread
 
 import (
 	"context"
+	"slices"
 
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
+	"github.com/microsoftgraph/msgraph-sdk-go/rolemanagement"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
@@ -36,10 +38,7 @@ func tableAzureAdDirectoryRoleAssignment(_ context.Context) *plugin.Table {
 			{Name: "condition", Type: proto.ColumnType_STRING, Description: "The condition which describes the circumstances under which the role assignment is valid.", Transform: transform.FromMethod("GetCondition")},
 
 			// JSON fields
-			{Name: "app_scope", Type: proto.ColumnType_JSON, Description: "The app scope of the role assignment. Contains information about the application scope.", Transform: transform.FromMethod("DirectoryRoleAssignmentAppScope")},
-			{Name: "directory_scope", Type: proto.ColumnType_JSON, Description: "The directory scope of the role assignment. Contains information about the directory scope.", Transform: transform.FromMethod("DirectoryRoleAssignmentDirectoryScope")},
 			{Name: "principal", Type: proto.ColumnType_JSON, Description: "The principal (user, group, or service principal) that the role is assigned to.", Transform: transform.FromMethod("DirectoryRoleAssignmentPrincipal")},
-			{Name: "role_definition", Type: proto.ColumnType_JSON, Description: "The role definition that describes the role being assigned.", Transform: transform.FromMethod("DirectoryRoleAssignmentRoleDefinition")},
 
 			// Standard columns
 			{Name: "title", Type: proto.ColumnType_STRING, Description: ColumnDescriptionTitle, Transform: transform.From(adDirectoryRoleAssignmentTitle)},
@@ -57,8 +56,23 @@ func listAdDirectoryRoleAssignments(ctx context.Context, d *plugin.QueryData, _ 
 		return nil, err
 	}
 
+	expand := []string{}
+	queryParams := &rolemanagement.DirectoryRoleAssignmentsRequestBuilderGetRequestConfiguration{
+		QueryParameters: &rolemanagement.DirectoryRoleAssignmentsRequestBuilderGetQueryParameters{
+			Expand: []string{},
+		},
+	}
+
+	if slices.Contains(d.QueryContext.Columns, "principal") {
+		expand = append(expand, "principal($select=id,type)")
+	}
+
+	if len(expand) > 0 {
+		queryParams.QueryParameters.Expand = expand
+	}
+
 	// List operations
-	result, err := client.RoleManagement().Directory().RoleAssignments().Get(ctx, nil)
+	result, err := client.RoleManagement().Directory().RoleAssignments().Get(ctx, queryParams)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("listAdDirectoryRoleAssignments", "list_directory_role_assignment_error", errObj)
@@ -100,7 +114,22 @@ func getAdDirectoryRoleAssignment(ctx context.Context, d *plugin.QueryData, h *p
 		return nil, err
 	}
 
-	roleAssignment, err := client.RoleManagement().Directory().RoleAssignments().ByUnifiedRoleAssignmentId(roleAssignmentId).Get(ctx, nil)
+	expand := []string{}
+	queryParams := &rolemanagement.DirectoryRoleAssignmentsUnifiedRoleAssignmentItemRequestBuilderGetRequestConfiguration{
+		QueryParameters: &rolemanagement.DirectoryRoleAssignmentsUnifiedRoleAssignmentItemRequestBuilderGetQueryParameters{
+			Expand: []string{},
+		},
+	}
+
+	if slices.Contains(d.QueryContext.Columns, "principal") {
+		expand = append(expand, "principal($select=id,type)")
+	}
+
+	if len(expand) > 0 {
+		queryParams.QueryParameters.Expand = expand
+	}
+
+	roleAssignment, err := client.RoleManagement().Directory().RoleAssignments().ByUnifiedRoleAssignmentId(roleAssignmentId).Get(ctx, queryParams)
 	if err != nil {
 		errObj := getErrorObject(err)
 		plugin.Logger(ctx).Error("getAdDirectoryRoleAssignment", "get_directory_role_assignment_error", errObj)

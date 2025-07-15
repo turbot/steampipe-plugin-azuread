@@ -110,39 +110,8 @@ type ADDirectoryRoleAssignmentInfo struct {
 	models.UnifiedRoleAssignmentable
 }
 
-func (roleAssignment *ADDirectoryRoleAssignmentInfo) DirectoryRoleAssignmentAppScope() map[string]interface{} {
-	if roleAssignment.GetAppScope() == nil {
-		return nil
-	}
-	data := map[string]interface{}{}
-
-	if roleAssignment.GetAppScope().GetId() != nil {
-		data["id"] = *roleAssignment.GetAppScope().GetId()
-	}
-	if roleAssignment.GetAppScope().GetDisplayName() != nil {
-		data["display_name"] = *roleAssignment.GetAppScope().GetDisplayName()
-	}
-	if roleAssignment.GetAppScope().GetOdataType() != nil {
-		data["@odata.type"] = *roleAssignment.GetAppScope().GetOdataType()
-	}
-
-	return data
-}
-
-func (roleAssignment *ADDirectoryRoleAssignmentInfo) DirectoryRoleAssignmentDirectoryScope() map[string]interface{} {
-	if roleAssignment.GetDirectoryScope() == nil {
-		return nil
-	}
-	data := map[string]interface{}{}
-
-	if roleAssignment.GetDirectoryScope().GetId() != nil {
-		data["id"] = *roleAssignment.GetDirectoryScope().GetId()
-	}
-	if roleAssignment.GetDirectoryScope().GetOdataType() != nil {
-		data["@odata.type"] = *roleAssignment.GetDirectoryScope().GetOdataType()
-	}
-
-	return data
+type ADDirectoryRoleDefinitionInfo struct {
+	models.UnifiedRoleDefinitionable
 }
 
 func (roleAssignment *ADDirectoryRoleAssignmentInfo) DirectoryRoleAssignmentPrincipal() map[string]interface{} {
