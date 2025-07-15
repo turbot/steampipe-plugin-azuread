@@ -98,6 +98,133 @@ type ADUserAppRoleAssignmentInfo struct {
 	UserId *string
 }
 
+type ADDirectoryRoleTemplateInfo struct {
+	models.DirectoryRoleTemplateable
+}
+
+type ADDirectoryRoleEligibilityScheduleInstanceInfo struct {
+	models.UnifiedRoleEligibilityScheduleInstanceable
+}
+
+type ADDirectoryRoleAssignmentInfo struct {
+	models.UnifiedRoleAssignmentable
+}
+
+type ADDirectoryRoleDefinitionInfo struct {
+	models.UnifiedRoleDefinitionable
+}
+
+func (roleAssignment *ADDirectoryRoleAssignmentInfo) DirectoryRoleAssignmentPrincipal() map[string]interface{} {
+	if roleAssignment.GetPrincipal() == nil {
+		return nil
+	}
+	data := map[string]interface{}{}
+
+	if roleAssignment.GetPrincipal().GetId() != nil {
+		data["id"] = *roleAssignment.GetPrincipal().GetId()
+	}
+	if roleAssignment.GetPrincipal().GetOdataType() != nil {
+		data["@odata.type"] = *roleAssignment.GetPrincipal().GetOdataType()
+	}
+
+	return data
+}
+
+func (roleAssignment *ADDirectoryRoleAssignmentInfo) DirectoryRoleAssignmentRoleDefinition() map[string]interface{} {
+	if roleAssignment.GetRoleDefinition() == nil {
+		return nil
+	}
+	data := map[string]interface{}{}
+
+	if roleAssignment.GetRoleDefinition().GetId() != nil {
+		data["id"] = *roleAssignment.GetRoleDefinition().GetId()
+	}
+	if roleAssignment.GetRoleDefinition().GetDisplayName() != nil {
+		data["display_name"] = *roleAssignment.GetRoleDefinition().GetDisplayName()
+	}
+	if roleAssignment.GetRoleDefinition().GetDescription() != nil {
+		data["description"] = *roleAssignment.GetRoleDefinition().GetDescription()
+	}
+	if roleAssignment.GetRoleDefinition().GetOdataType() != nil {
+		data["@odata.type"] = *roleAssignment.GetRoleDefinition().GetOdataType()
+	}
+
+	return data
+}
+
+func (roleEligibilityScheduleInstance *ADDirectoryRoleEligibilityScheduleInstanceInfo) DirectoryRoleEligibilityScheduleInstanceAppScope() map[string]interface{} {
+	if roleEligibilityScheduleInstance.GetAppScope() == nil {
+		return nil
+	}
+	data := map[string]interface{}{}
+
+	if roleEligibilityScheduleInstance.GetAppScope().GetId() != nil {
+		data["id"] = *roleEligibilityScheduleInstance.GetAppScope().GetId()
+	}
+	if roleEligibilityScheduleInstance.GetAppScope().GetDisplayName() != nil {
+		data["display_name"] = *roleEligibilityScheduleInstance.GetAppScope().GetDisplayName()
+	}
+	if roleEligibilityScheduleInstance.GetAppScope().GetOdataType() != nil {
+		data["@odata.type"] = *roleEligibilityScheduleInstance.GetAppScope().GetOdataType()
+	}
+
+	return data
+}
+
+func (roleEligibilityScheduleInstance *ADDirectoryRoleEligibilityScheduleInstanceInfo) DirectoryRoleEligibilityScheduleInstanceDirectoryScope() map[string]interface{} {
+	if roleEligibilityScheduleInstance.GetDirectoryScope() == nil {
+		return nil
+	}
+	data := map[string]interface{}{}
+
+	if roleEligibilityScheduleInstance.GetDirectoryScope().GetId() != nil {
+		data["id"] = *roleEligibilityScheduleInstance.GetDirectoryScope().GetId()
+	}
+	if roleEligibilityScheduleInstance.GetDirectoryScope().GetOdataType() != nil {
+		data["@odata.type"] = *roleEligibilityScheduleInstance.GetDirectoryScope().GetOdataType()
+	}
+
+	return data
+}
+
+func (roleEligibilityScheduleInstance *ADDirectoryRoleEligibilityScheduleInstanceInfo) DirectoryRoleEligibilityScheduleInstancePrincipal() map[string]interface{} {
+	if roleEligibilityScheduleInstance.GetPrincipal() == nil {
+		return nil
+	}
+	data := map[string]interface{}{}
+
+	if roleEligibilityScheduleInstance.GetPrincipal().GetId() != nil {
+		data["id"] = *roleEligibilityScheduleInstance.GetPrincipal().GetId()
+	}
+	if roleEligibilityScheduleInstance.GetPrincipal().GetOdataType() != nil {
+		data["@odata.type"] = *roleEligibilityScheduleInstance.GetPrincipal().GetOdataType()
+	}
+
+	return data
+}
+
+func (roleEligibilityScheduleInstance *ADDirectoryRoleEligibilityScheduleInstanceInfo) DirectoryRoleEligibilityScheduleInstanceRoleDefinition() map[string]interface{} {
+	if roleEligibilityScheduleInstance.GetRoleDefinition() == nil {
+		return nil
+	}
+	data := map[string]interface{}{}
+
+	if roleEligibilityScheduleInstance.GetRoleDefinition().GetId() != nil {
+		data["id"] = *roleEligibilityScheduleInstance.GetRoleDefinition().GetId()
+	}
+	if roleEligibilityScheduleInstance.GetRoleDefinition().GetDisplayName() != nil {
+		data["display_name"] = *roleEligibilityScheduleInstance.GetRoleDefinition().GetDisplayName()
+	}
+	if roleEligibilityScheduleInstance.GetRoleDefinition().GetDescription() != nil {
+		data["description"] = *roleEligibilityScheduleInstance.GetRoleDefinition().GetDescription()
+	}
+	if roleEligibilityScheduleInstance.GetRoleDefinition().GetOdataType() != nil {
+		data["@odata.type"] = *roleEligibilityScheduleInstance.GetRoleDefinition().GetOdataType()
+	}
+
+	return data
+}
+
 func (adminConsentRequestPolicy *ADAdminConsentRequestPolicyInfo) AdminConsentRequestPolicyReviewers() []map[string]interface{} {
 	if adminConsentRequestPolicy.GetReviewers() == nil {
 		return nil
@@ -560,8 +687,7 @@ func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessP
 	return data
 }
 
-
-func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicySessionControlsDisableResilienceDefaults() *bool{ //map[string]interface{} {
+func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicySessionControlsDisableResilienceDefaults() *bool { //map[string]interface{} {
 	sessionControls := conditionalAccessPolicy.GetSessionControls()
 	if sessionControls == nil {
 		return nil
@@ -569,7 +695,7 @@ func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessP
 	if sessionControls.GetDisableResilienceDefaults() == nil {
 		return nil
 	}
-	
+
 	return sessionControls.GetDisableResilienceDefaults()
 }
 
@@ -1096,10 +1222,9 @@ func (user *ADUserInfo) SignInActivity() map[string]interface{} {
 	}
 
 	return map[string]interface{}{
-		"LastSignInDateTime": actiity.GetLastSignInDateTime(),
-		"LastSignInRequestId": actiity.GetLastSignInRequestId(),
-		"LastNonInteractiveSignInDateTime": actiity.GetLastNonInteractiveSignInDateTime(),
+		"LastSignInDateTime":                actiity.GetLastSignInDateTime(),
+		"LastSignInRequestId":               actiity.GetLastSignInRequestId(),
+		"LastNonInteractiveSignInDateTime":  actiity.GetLastNonInteractiveSignInDateTime(),
 		"LastNonInteractiveSignInRequestId": actiity.GetLastNonInteractiveSignInRequestId(),
 	}
 }
-
