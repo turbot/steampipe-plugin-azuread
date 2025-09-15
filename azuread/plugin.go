@@ -35,6 +35,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"azuread_authorization_policy":                         tableAzureAdAuthorizationPolicy(ctx),
 			"azuread_conditional_access_named_location":            tableAzureAdConditionalAccessNamedLocation(ctx),
 			"azuread_conditional_access_policy":                    tableAzureAdConditionalAccessPolicy(ctx),
+			"azuread_cross_tenant_access_policy":                   tableAzureAdCrossTenantAccessPolicy(ctx),
 			"azuread_device":                                       tableAzureAdDevice(ctx),
 			"azuread_directory_audit_report":                       tableAzureAdDirectoryAuditReport(ctx),
 			"azuread_directory_role":                               tableAzureAdDirectoryRole(ctx),
