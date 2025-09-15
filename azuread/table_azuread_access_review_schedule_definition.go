@@ -2,6 +2,7 @@ package azuread
 
 import (
 	"context"
+	"time"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
@@ -73,7 +74,7 @@ func (definition *ADAccessReviewScheduleDefinitionInfo) GetDescriptionForReviewe
 
 func (definition *ADAccessReviewScheduleDefinitionInfo) GetCreatedDateTime() *string {
 	if definition.AccessReviewScheduleDefinitionable.GetCreatedDateTime() != nil {
-		dateTime := definition.AccessReviewScheduleDefinitionable.GetCreatedDateTime().String()
+		dateTime := definition.AccessReviewScheduleDefinitionable.GetCreatedDateTime().Format(time.RFC3339)
 		return &dateTime
 	}
 	return nil
@@ -81,12 +82,11 @@ func (definition *ADAccessReviewScheduleDefinitionInfo) GetCreatedDateTime() *st
 
 func (definition *ADAccessReviewScheduleDefinitionInfo) GetLastModifiedDateTime() *string {
 	if definition.AccessReviewScheduleDefinitionable.GetLastModifiedDateTime() != nil {
-		dateTime := definition.AccessReviewScheduleDefinitionable.GetLastModifiedDateTime().String()
+		dateTime := definition.AccessReviewScheduleDefinitionable.GetLastModifiedDateTime().Format(time.RFC3339)
 		return &dateTime
 	}
 	return nil
 }
-
 func (definition *ADAccessReviewScheduleDefinitionInfo) GetScope() map[string]interface{} {
 	if definition.AccessReviewScheduleDefinitionable.GetScope() != nil {
 		scope := definition.AccessReviewScheduleDefinitionable.GetScope()
@@ -102,6 +102,58 @@ func (definition *ADAccessReviewScheduleDefinitionInfo) GetScope() map[string]in
 			}
 			if queryScope.GetQueryRoot() != nil {
 				scopeInfo["queryRoot"] = *queryScope.GetQueryRoot()
+			}
+			scopeInfo["@odata.type"] = "#microsoft.graph.accessReviewQueryScope"
+		} else if principalResourceScope, ok := scope.(betamodels.PrincipalResourceMembershipsScopeable); ok {
+			// Handle principalResourceMembershipsScope
+			scopeInfo["@odata.type"] = "#microsoft.graph.principalResourceMembershipsScope"
+			
+			// Extract principal scopes
+			if principalResourceScope.GetPrincipalScopes() != nil {
+				principalScopes := make([]map[string]interface{}, 0, len(principalResourceScope.GetPrincipalScopes()))
+				for _, principalScope := range principalResourceScope.GetPrincipalScopes() {
+					if principalScope != nil {
+						principalScopeInfo := make(map[string]interface{})
+						if queryScope, ok := principalScope.(betamodels.AccessReviewQueryScopeable); ok {
+							if queryScope.GetQuery() != nil {
+								principalScopeInfo["query"] = *queryScope.GetQuery()
+							}
+							if queryScope.GetQueryType() != nil {
+								principalScopeInfo["queryType"] = *queryScope.GetQueryType()
+							}
+							if queryScope.GetQueryRoot() != nil {
+								principalScopeInfo["queryRoot"] = *queryScope.GetQueryRoot()
+							}
+							principalScopeInfo["@odata.type"] = "#microsoft.graph.accessReviewQueryScope"
+						}
+						principalScopes = append(principalScopes, principalScopeInfo)
+					}
+				}
+				scopeInfo["principalScopes"] = principalScopes
+			}
+			
+			// Extract resource scopes
+			if principalResourceScope.GetResourceScopes() != nil {
+				resourceScopes := make([]map[string]interface{}, 0, len(principalResourceScope.GetResourceScopes()))
+				for _, resourceScope := range principalResourceScope.GetResourceScopes() {
+					if resourceScope != nil {
+						resourceScopeInfo := make(map[string]interface{})
+						if queryScope, ok := resourceScope.(betamodels.AccessReviewQueryScopeable); ok {
+							if queryScope.GetQuery() != nil {
+								resourceScopeInfo["query"] = *queryScope.GetQuery()
+							}
+							if queryScope.GetQueryType() != nil {
+								resourceScopeInfo["queryType"] = *queryScope.GetQueryType()
+							}
+							if queryScope.GetQueryRoot() != nil {
+								resourceScopeInfo["queryRoot"] = *queryScope.GetQueryRoot()
+							}
+							resourceScopeInfo["@odata.type"] = "#microsoft.graph.accessReviewQueryScope"
+						}
+						resourceScopes = append(resourceScopes, resourceScopeInfo)
+					}
+				}
+				scopeInfo["resourceScopes"] = resourceScopes
 			}
 		}
 
