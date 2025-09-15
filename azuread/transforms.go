@@ -30,6 +30,10 @@ type ADConditionalAccessPolicyInfo struct {
 	models.ConditionalAccessPolicyable
 }
 
+type ADCrossTenantAccessPolicyInfo struct {
+	models.CrossTenantAccessPolicyable
+}
+
 type ADDeviceInfo struct {
 	models.Deviceable
 }
@@ -697,6 +701,61 @@ func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessP
 	}
 
 	return sessionControls.GetDisableResilienceDefaults()
+}
+
+// Cross-Tenant Access Policy Transform Functions
+
+func (crossTenantAccessPolicy *ADCrossTenantAccessPolicyInfo) CrossTenantAccessPolicyAllowedCloudEndpoints() []string {
+	return crossTenantAccessPolicy.GetAllowedCloudEndpoints()
+}
+
+func (crossTenantAccessPolicy *ADCrossTenantAccessPolicyInfo) CrossTenantAccessPolicyDefault() map[string]interface{} {
+	if crossTenantAccessPolicy.GetDefaultEscaped() == nil {
+		return nil
+	}
+
+	defaultConfig := crossTenantAccessPolicy.GetDefaultEscaped()
+	return map[string]interface{}{
+		"b2bCollaborationInbound":  defaultConfig.GetB2bCollaborationInbound(),
+		"b2bCollaborationOutbound": defaultConfig.GetB2bCollaborationOutbound(),
+		"b2bDirectConnectInbound":  defaultConfig.GetB2bDirectConnectInbound(),
+		"b2bDirectConnectOutbound": defaultConfig.GetB2bDirectConnectOutbound(),
+		"inboundTrust":             defaultConfig.GetInboundTrust(),
+	}
+}
+
+func (crossTenantAccessPolicy *ADCrossTenantAccessPolicyInfo) CrossTenantAccessPolicyPartners() []map[string]interface{} {
+	partners := crossTenantAccessPolicy.GetPartners()
+	if partners == nil {
+		return nil
+	}
+
+	var result []map[string]interface{}
+	for _, partner := range partners {
+		partnerData := map[string]interface{}{
+			"tenantId": partner.GetTenantId(),
+		}
+
+		if partner.GetB2bCollaborationInbound() != nil {
+			partnerData["b2bCollaborationInbound"] = partner.GetB2bCollaborationInbound()
+		}
+		if partner.GetB2bCollaborationOutbound() != nil {
+			partnerData["b2bCollaborationOutbound"] = partner.GetB2bCollaborationOutbound()
+		}
+		if partner.GetB2bDirectConnectInbound() != nil {
+			partnerData["b2bDirectConnectInbound"] = partner.GetB2bDirectConnectInbound()
+		}
+		if partner.GetB2bDirectConnectOutbound() != nil {
+			partnerData["b2bDirectConnectOutbound"] = partner.GetB2bDirectConnectOutbound()
+		}
+		if partner.GetInboundTrust() != nil {
+			partnerData["inboundTrust"] = partner.GetInboundTrust()
+		}
+
+		result = append(result, partnerData)
+	}
+
+	return result
 }
 
 func (device *ADDeviceInfo) DeviceMemberOf() []map[string]interface{} {
