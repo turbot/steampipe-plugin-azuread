@@ -42,6 +42,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"azuread_directory_role_assignment":                    tableAzureAdDirectoryRoleAssignment(ctx),
 			"azuread_directory_role_definition":                    tableAzureAdDirectoryRoleDefinition(ctx),
 			"azuread_directory_role_eligibility_schedule_instance": tableAzureAdDirectoryRoleEligibilityScheduleInstance(ctx),
+			"azuread_external_identity_policy":                     tableAzureAdExternalIdentityPolicy(ctx),
 			"azuread_directory_role_template":                      tableAzureAdDirectoryRoleTemplate(ctx),
 			"azuread_directory_setting":                            tableAzureAdDirectorySetting(ctx),
 			"azuread_domain":                                       tableAzureAdDomain(ctx),

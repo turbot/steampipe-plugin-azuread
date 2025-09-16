@@ -1,6 +1,7 @@
 package azuread
 
 import (
+	betamodels "github.com/microsoftgraph/msgraph-beta-sdk-go/models"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 )
 
@@ -116,6 +117,10 @@ type ADDirectoryRoleAssignmentInfo struct {
 
 type ADDirectoryRoleDefinitionInfo struct {
 	models.UnifiedRoleDefinitionable
+}
+
+type ADExternalIdentitiesPolicyInfo struct {
+	betamodels.ExternalIdentitiesPolicyable
 }
 
 func (roleAssignment *ADDirectoryRoleAssignmentInfo) DirectoryRoleAssignmentPrincipal() map[string]interface{} {
