@@ -23,7 +23,7 @@ func tableAzureAdEmailAuthenticationMethodConfiguration(_ context.Context) *plug
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "The identifier for the authentication method configuration.", Transform: transform.FromMethod("GetId")},
 			{Name: "state", Type: proto.ColumnType_STRING, Description: "The state of the authentication method configuration. Possible values are: enabled, disabled.", Transform: transform.FromMethod("GetState")},
 			{Name: "allow_external_id_to_use_email_otp", Type: proto.ColumnType_STRING, Description: "Determines whether email OTP is usable by external users for authentication. Possible values are: default, enabled, disabled.", Transform: transform.FromMethod("GetAllowExternalIdToUseEmailOtp")},
-			{Name: "include_targets", Type: proto.ColumnType_JSON, Description: "A collection of users or groups who are enabled to use the authentication method.", Transform:  transform.FromMethod("GetIncludeTargets").Transform(transformEmailAuthIncludeTargets)},
+			{Name: "include_targets", Type: proto.ColumnType_JSON, Description: "A collection of users or groups who are enabled to use the authentication method.", Transform: transform.FromMethod("GetIncludeTargets").Transform(transformEmailAuthIncludeTargets)},
 			{Name: "exclude_targets", Type: proto.ColumnType_JSON, Description: "A collection of users or groups who are excluded from using the authentication method.", Transform: transform.FromMethod("GetExcludeTargets").Transform(transformEmailAuthExcludeTargets)},
 
 			// Standard columns
