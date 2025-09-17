@@ -2,7 +2,10 @@ package azuread
 
 import (
 	betamodels "github.com/microsoftgraph/msgraph-beta-sdk-go/models"
+	"context"
+
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 type ADAdminConsentRequestPolicyInfo struct {
@@ -79,6 +82,10 @@ type ADCountryNamedLocationInfo struct {
 
 type ADSecurityDefaultsPolicyInfo struct {
 	models.IdentitySecurityDefaultsEnforcementPolicyable
+}
+
+type ADEmailAuthenticationMethodConfigurationInfo struct {
+	models.EmailAuthenticationMethodConfigurationable
 }
 
 type ADServicePrincipalInfo struct {
@@ -1338,4 +1345,70 @@ func (user *ADUserInfo) SignInActivity() map[string]interface{} {
 		"LastNonInteractiveSignInDateTime":  actiity.GetLastNonInteractiveSignInDateTime(),
 		"LastNonInteractiveSignInRequestId": actiity.GetLastNonInteractiveSignInRequestId(),
 	}
+}
+
+// Helper function to safely get string value from pointer
+func getStringValue(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
+}
+
+// Transform function for include_targets and exclude_targets
+func transformAuthenticationMethodTargets(targets []models.AuthenticationMethodTargetable) (interface{}, error) {
+	if targets == nil {
+		return nil, nil
+	}
+
+	result := make([]map[string]interface{}, 0, len(targets))
+	for _, target := range targets {
+		if target == nil {
+			continue
+		}
+
+		var targetType string
+		if target.GetTargetType() != nil {
+			targetType = target.GetTargetType().String()
+		}
+
+		targetMap := map[string]interface{}{
+			"id":                       getStringValue(target.GetId()),
+			"target_type":              targetType,
+			"is_registration_required": target.GetIsRegistrationRequired(),
+		}
+		result = append(result, targetMap)
+	}
+
+	return result, nil
+}
+
+// Transform function for include_targets
+func transformEmailAuthIncludeTargets(ctx context.Context, d *transform.TransformData) (interface{}, error) {
+	if d.Value == nil {
+		return nil, nil
+	}
+
+	// d.Value contains the result from GetIncludeTargets() which is []models.AuthenticationMethodTargetable
+	targets, ok := d.Value.([]models.AuthenticationMethodTargetable)
+	if !ok {
+		return nil, nil
+	}
+
+	return transformAuthenticationMethodTargets(targets)
+}
+
+// Transform function for exclude_targets
+func transformEmailAuthExcludeTargets(ctx context.Context, d *transform.TransformData) (interface{}, error) {
+	if d.Value == nil {
+		return nil, nil
+	}
+
+	// d.Value contains the result from GetExcludeTargets() which is []models.AuthenticationMethodTargetable
+	targets, ok := d.Value.([]models.AuthenticationMethodTargetable)
+	if !ok {
+		return nil, nil
+	}
+
+	return transformAuthenticationMethodTargets(targets)
 }
