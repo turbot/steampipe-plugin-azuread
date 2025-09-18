@@ -511,7 +511,7 @@ func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessP
 		}
 		additionalData = addData
 	}
-	
+
 	return additionalData
 }
 
@@ -569,11 +569,42 @@ func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessP
 	}
 }
 
-func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyConditionsSignInRiskLevels() []models.RiskLevel {
+func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyConditionsSignInRiskLevels() []string {
 	if conditionalAccessPolicy.GetConditions() == nil {
 		return nil
 	}
-	return conditionalAccessPolicy.GetConditions().GetSignInRiskLevels()
+
+	riskLevels := conditionalAccessPolicy.GetConditions().GetSignInRiskLevels()
+	if riskLevels == nil {
+		return nil
+	}
+
+	// Convert RiskLevel enums to strings for better readability
+	result := make([]string, 0, len(riskLevels))
+	for _, riskLevel := range riskLevels {
+		result = append(result, riskLevel.String())
+	}
+
+	return result
+}
+
+func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyConditionsServicePrincipalRiskLevels() []string {
+	if conditionalAccessPolicy.GetConditions() == nil {
+		return nil
+	}
+
+	riskLevels := conditionalAccessPolicy.GetConditions().GetSignInRiskLevels()
+	if riskLevels == nil {
+		return nil
+	}
+
+	// Convert RiskLevel enums to strings for better readability
+	result := make([]string, 0, len(riskLevels))
+	for _, riskLevel := range riskLevels {
+		result = append(result, riskLevel.String())
+	}
+
+	return result
 }
 
 func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyConditionsUsers() map[string]interface{} {
