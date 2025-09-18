@@ -509,7 +509,7 @@ func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessP
 		for k, v := range conditionalAccessPolicy.GetConditions().GetAdditionalData() {
 			addData[k] = v
 		}
-		additionalData["additionalData"] = addData
+		additionalData = addData
 	}
 	
 	return additionalData
