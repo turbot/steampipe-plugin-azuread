@@ -1,3 +1,19 @@
+## v1.5.0 [2025-09-19]
+
+_What's new?_
+
+- New tables added
+  - [azuread_cross_tenant_access_policy](https://hub.steampipe.io/plugins/turbot/azuread/tables/azuread_cross_tenant_access_policy) ([#279](https://github.com/turbot/steampipe-plugin-azuread/pull/279))
+  - [azuread_directory_role_assignment](https://hub.steampipe.io/plugins/turbot/azuread/tables/azuread_directory_role_assignment) ([#265](https://github.com/turbot/steampipe-plugin-azuread/pull/265))
+  - [azuread_directory_role_definition](https://hub.steampipe.io/plugins/turbot/azuread/tables/azuread_directory_role_definition) ([#265](https://github.com/turbot/steampipe-plugin-azuread/pull/265))
+  - [azuread_directory_role_eligibility_schedule_instance](https://hub.steampipe.io/plugins/turbot/azuread/tables/azuread_directory_role_eligibility_schedule_instance) ([#265](https://github.com/turbot/steampipe-plugin-azuread/pull/265))
+  - [azuread_directory_role_template](https://hub.steampipe.io/plugins/turbot/azuread/tables/azuread_directory_role_template) ([#265](https://github.com/turbot/steampipe-plugin-azuread/pull/265))
+
+_Dependencies_
+
+- Recompiled plugin with Go version `1.24`. ([#267](https://github.com/turbot/steampipe-plugin-azuread/pull/267))
+- Recompiled plugin with [steampipe-plugin-sdk v5.13.0](https://github.com/turbot/steampipe-plugin-sdk/blob/develop/CHANGELOG.md#v5130-2025-07-21) that addresses critical and high vulnerabilities in dependent packages. ([#267](https://github.com/turbot/steampipe-plugin-azuread/pull/267))
+
 ## v1.4.0 [2025-06-06]
 
 _What's new?_
