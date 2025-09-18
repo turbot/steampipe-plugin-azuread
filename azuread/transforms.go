@@ -499,6 +499,22 @@ func (authorizationPolicy *ADAuthorizationPolicyInfo) AuthorizationPolicyAllowIn
 	return authorizationPolicy.GetAllowInvitesFrom().String()
 }
 
+func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyConditionsAdditionalData() interface{} {
+	if conditionalAccessPolicy.GetConditions() == nil {
+		return nil
+	}
+	additionalData := make(map[string]interface{})
+	if conditionalAccessPolicy.GetConditions().GetAdditionalData() != nil {
+		addData := make(map[string]interface{})
+		for k, v := range conditionalAccessPolicy.GetConditions().GetAdditionalData() {
+			addData[k] = v
+		}
+		additionalData["additionalData"] = addData
+	}
+	
+	return additionalData
+}
+
 func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyConditionsApplications() map[string]interface{} {
 	if conditionalAccessPolicy.GetConditions() == nil {
 		return nil

@@ -50,6 +50,7 @@ func tableAzureAdConditionalAccessPolicy(_ context.Context) *plugin.Table {
 
 			// Json fields
 			{Name: "applications", Type: proto.ColumnType_JSON, Description: "Applications and user actions included in and excluded from the policy.", Transform: transform.FromMethod("ConditionalAccessPolicyConditionsApplications")},
+			{Name: "additional_data", Type: proto.ColumnType_JSON, Description: "The additional information about the policy.", Transform: transform.FromMethod("ConditionalAccessPolicyConditionsAdditionalData")},
 			{Name: "application_enforced_restrictions", Type: proto.ColumnType_JSON, Description: "Session control to enforce application restrictions. Only Exchange Online and Sharepoint Online support this session control.", Transform: transform.FromMethod("ConditionalAccessPolicySessionControlsApplicationEnforcedRestrictions")},
 			{Name: "built_in_controls", Type: proto.ColumnType_JSON, Description: "List of values of built-in controls required by the policy. Possible values: block, mfa, compliantDevice, domainJoinedDevice, approvedApplication, compliantApplication, passwordChange, unknownFutureValue.", Transform: transform.FromMethod("ConditionalAccessPolicyGrantControlsBuiltInControls")},
 			{Name: "authentication_strength", Type: proto.ColumnType_JSON, Description: "List combinations of authentication methods allowed by the policy. For example: password, Federated Multi-Factor, FIDO2 security key", Transform: transform.FromMethod("ConditionalAccessPolicyGrantAuthenticationStrength")},
