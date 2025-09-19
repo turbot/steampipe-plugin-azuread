@@ -369,7 +369,7 @@ func (methodPolicy *ADAuthenticationMethodPolicyInfo) AuthenticationMethodConfig
 
 			// Type-specific properties
 			switch configType := config.(type) {
-			case models.EmailAuthenticationMethodConfigurationable:
+			case betamodels.EmailAuthenticationMethodConfigurationable:
 				// Email-specific properties
 				if configType.GetAllowExternalIdToUseEmailOtp() != nil {
 					configData["allowExternalIdToUseEmailOtp"] = configType.GetAllowExternalIdToUseEmailOtp().String()
@@ -404,7 +404,7 @@ func (methodPolicy *ADAuthenticationMethodPolicyInfo) AuthenticationMethodConfig
 					configData["includeTargets"] = includeTargets
 				}
 
-			case models.Fido2AuthenticationMethodConfigurationable:
+			case betamodels.Fido2AuthenticationMethodConfigurationable:
 				// FIDO2-specific properties
 				if configType.GetIsAttestationEnforced() != nil {
 					configData["isAttestationEnforced"] = *configType.GetIsAttestationEnforced()
@@ -457,7 +457,7 @@ func (methodPolicy *ADAuthenticationMethodPolicyInfo) AuthenticationMethodConfig
 					configData["includeTargets"] = includeTargets
 				}
 
-			case models.SmsAuthenticationMethodConfigurationable:
+			case betamodels.SmsAuthenticationMethodConfigurationable:
 				// SMS-specific properties
 				if configType.GetIncludeTargets() != nil {
 					includeTargets := make([]map[string]interface{}, 0, len(configType.GetIncludeTargets()))
@@ -484,10 +484,8 @@ func (methodPolicy *ADAuthenticationMethodPolicyInfo) AuthenticationMethodConfig
 								targetData["additionalData"] = data
 							}
 							// SMS-specific property
-							if smsTarget, ok := target.(models.SmsAuthenticationMethodTargetable); ok {
-								if smsTarget.GetIsUsableForSignIn() != nil {
-									targetData["isUsableForSignIn"] = *smsTarget.GetIsUsableForSignIn()
-								}
+							if target.GetIsUsableForSignIn() != nil {
+								targetData["isUsableForSignIn"] = *target.GetIsUsableForSignIn()
 							}
 							includeTargets = append(includeTargets, targetData)
 						}
@@ -763,7 +761,7 @@ func (methodPolicy *ADAuthenticationMethodPolicyInfo) AuthenticationMethodConfig
 					configData["featureSettings"] = featureSettingsData
 				}
 
-			case models.X509CertificateAuthenticationMethodConfigurationable:
+			case betamodels.X509CertificateAuthenticationMethodConfigurationable:
 				// X509 Certificate-specific properties
 				if configType.GetAuthenticationModeConfiguration() != nil {
 					authModeConfig := configType.GetAuthenticationModeConfiguration()
@@ -839,7 +837,7 @@ func (methodPolicy *ADAuthenticationMethodPolicyInfo) AuthenticationMethodConfig
 					configData["includeTargets"] = includeTargets
 				}
 
-			case models.TemporaryAccessPassAuthenticationMethodConfigurationable:
+			case betamodels.TemporaryAccessPassAuthenticationMethodConfigurationable:
 				// Temporary Access Pass-specific properties
 				if configType.GetDefaultLength() != nil {
 					configData["defaultLength"] = *configType.GetDefaultLength()
@@ -886,7 +884,7 @@ func (methodPolicy *ADAuthenticationMethodPolicyInfo) AuthenticationMethodConfig
 					configData["includeTargets"] = includeTargets
 				}
 
-			case models.VoiceAuthenticationMethodConfigurationable:
+			case betamodels.VoiceAuthenticationMethodConfigurationable:
 				// Voice-specific properties
 				if configType.GetIsOfficePhoneAllowed() != nil {
 					configData["isOfficePhoneAllowed"] = *configType.GetIsOfficePhoneAllowed()
