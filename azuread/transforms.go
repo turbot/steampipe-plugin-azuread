@@ -3,6 +3,7 @@ package azuread
 import (
 	"time"
 
+	betamodels "github.com/microsoftgraph/msgraph-beta-sdk-go/models"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 )
 
@@ -83,7 +84,7 @@ type ADSecurityDefaultsPolicyInfo struct {
 }
 
 type ADAuthenticationMethodPolicyInfo struct {
-	models.AuthenticationMethodsPolicyable
+	betamodels.AuthenticationMethodsPolicyable
 }
 
 type ADServicePrincipalInfo struct {
@@ -494,7 +495,7 @@ func (methodPolicy *ADAuthenticationMethodPolicyInfo) AuthenticationMethodConfig
 					configData["includeTargets"] = includeTargets
 				}
 
-			case models.MicrosoftAuthenticatorAuthenticationMethodConfigurationable:
+			case betamodels.MicrosoftAuthenticatorAuthenticationMethodConfigurationable:
 				// Microsoft Authenticator-specific properties
 				if configType.GetIsSoftwareOathEnabled() != nil {
 					configData["isSoftwareOathEnabled"] = *configType.GetIsSoftwareOathEnabled()
@@ -648,6 +649,117 @@ func (methodPolicy *ADAuthenticationMethodPolicyInfo) AuthenticationMethodConfig
 						}
 						featureSettingsData["displayLocationInformationRequiredState"] = displayLocationInfoData
 					}
+
+					// Add numberMatchingRequiredState using beta SDK method
+					if featureSettings.GetNumberMatchingRequiredState() != nil {
+						numberMatchingInfo := featureSettings.GetNumberMatchingRequiredState()
+						numberMatchingData := map[string]interface{}{}
+						if numberMatchingInfo.GetOdataType() != nil {
+							numberMatchingData["@odata.type"] = *numberMatchingInfo.GetOdataType()
+						}
+						if numberMatchingInfo.GetState() != nil {
+							numberMatchingData["state"] = numberMatchingInfo.GetState().String()
+						}
+						if numberMatchingInfo.GetExcludeTarget() != nil {
+							excludeTarget := numberMatchingInfo.GetExcludeTarget()
+							excludeTargetData := map[string]interface{}{}
+							if excludeTarget.GetId() != nil {
+								excludeTargetData["id"] = *excludeTarget.GetId()
+							}
+							if excludeTarget.GetOdataType() != nil {
+								excludeTargetData["@odata.type"] = *excludeTarget.GetOdataType()
+							}
+							if excludeTarget.GetTargetType() != nil {
+								excludeTargetData["targetType"] = excludeTarget.GetTargetType().String()
+							}
+							if excludeTarget.GetAdditionalData() != nil {
+								data := map[string]interface{}{}
+								for key, value := range excludeTarget.GetAdditionalData() {
+									data[key] = value
+								}
+								excludeTargetData["additionalData"] = data
+							}
+							numberMatchingData["excludeTarget"] = excludeTargetData
+						}
+						if numberMatchingInfo.GetIncludeTarget() != nil {
+							includeTarget := numberMatchingInfo.GetIncludeTarget()
+							includeTargetData := map[string]interface{}{}
+							if includeTarget.GetId() != nil {
+								includeTargetData["id"] = *includeTarget.GetId()
+							}
+							if includeTarget.GetOdataType() != nil {
+								includeTargetData["@odata.type"] = *includeTarget.GetOdataType()
+							}
+							if includeTarget.GetTargetType() != nil {
+								includeTargetData["targetType"] = includeTarget.GetTargetType().String()
+							}
+							if includeTarget.GetAdditionalData() != nil {
+								data := map[string]interface{}{}
+								for key, value := range includeTarget.GetAdditionalData() {
+									data[key] = value
+								}
+								includeTargetData["additionalData"] = data
+							}
+							numberMatchingData["includeTarget"] = includeTargetData
+						}
+						featureSettingsData["numberMatchingRequiredState"] = numberMatchingData
+					}
+
+					// Add companionAppAllowedState using beta SDK method
+					if featureSettings.GetCompanionAppAllowedState() != nil {
+						companionAppInfo := featureSettings.GetCompanionAppAllowedState()
+						companionAppData := map[string]interface{}{}
+						if companionAppInfo.GetOdataType() != nil {
+							companionAppData["@odata.type"] = *companionAppInfo.GetOdataType()
+						}
+						if companionAppInfo.GetState() != nil {
+							companionAppData["state"] = companionAppInfo.GetState().String()
+						}
+						if companionAppInfo.GetExcludeTarget() != nil {
+							excludeTarget := companionAppInfo.GetExcludeTarget()
+							excludeTargetData := map[string]interface{}{}
+							if excludeTarget.GetId() != nil {
+								excludeTargetData["id"] = *excludeTarget.GetId()
+							}
+							if excludeTarget.GetOdataType() != nil {
+								excludeTargetData["@odata.type"] = *excludeTarget.GetOdataType()
+							}
+							if excludeTarget.GetTargetType() != nil {
+								excludeTargetData["targetType"] = excludeTarget.GetTargetType().String()
+							}
+							if excludeTarget.GetAdditionalData() != nil {
+								data := map[string]interface{}{}
+								for key, value := range excludeTarget.GetAdditionalData() {
+									data[key] = value
+								}
+								excludeTargetData["additionalData"] = data
+							}
+							companionAppData["excludeTarget"] = excludeTargetData
+						}
+						if companionAppInfo.GetIncludeTarget() != nil {
+							includeTarget := companionAppInfo.GetIncludeTarget()
+							includeTargetData := map[string]interface{}{}
+							if includeTarget.GetId() != nil {
+								includeTargetData["id"] = *includeTarget.GetId()
+							}
+							if includeTarget.GetOdataType() != nil {
+								includeTargetData["@odata.type"] = *includeTarget.GetOdataType()
+							}
+							if includeTarget.GetTargetType() != nil {
+								includeTargetData["targetType"] = includeTarget.GetTargetType().String()
+							}
+							if includeTarget.GetAdditionalData() != nil {
+								data := map[string]interface{}{}
+								for key, value := range includeTarget.GetAdditionalData() {
+									data[key] = value
+								}
+								includeTargetData["additionalData"] = data
+							}
+							companionAppData["includeTarget"] = includeTargetData
+						}
+						featureSettingsData["companionAppAllowedState"] = companionAppData
+					}
+
 					configData["featureSettings"] = featureSettingsData
 				}
 

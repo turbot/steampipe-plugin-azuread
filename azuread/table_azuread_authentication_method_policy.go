@@ -39,8 +39,8 @@ func tableAzureAdAuthenticationMethodPolicy(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listAdAuthenticationMethodPolicy(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	// Create client
-	client, _, err := GetGraphClient(ctx, d)
+	// Create beta client to access additional properties like numberMatchingRequiredState
+	client, _, err := GetGraphBetaClient(ctx, d)
 	if err != nil {
 		plugin.Logger(ctx).Error("azuread_authentication_method_policy.listAdAuthenticationMethodPolicy", "connection_error", err)
 		return nil, err
