@@ -14,7 +14,6 @@ The `azuread_authentication_method_policy` table provides insights into Authenti
 ## Examples
 
 ### Basic info
-
 Analyze the authentication methods policy to understand the current configuration and settings in your Azure Active Directory tenant.
 
 ```sql+postgres
@@ -44,7 +43,6 @@ from
 ```
 
 ### List all authentication method configurations
-
 Explore all available authentication methods and their key properties to understand what authentication options are configured in your tenant.
 
 ```sql+postgres
@@ -112,7 +110,6 @@ order by
 ```
 
 ### Find enabled authentication methods
-
 Identify which authentication methods are currently enabled in your tenant to assess the available authentication options.
 
 ```sql+postgres
@@ -140,7 +137,6 @@ where
 ```
 
 ### Analyze Microsoft Authenticator settings
-
 Examine the Microsoft Authenticator configuration including feature settings like number matching and companion app access to understand the security requirements.
 
 ```sql+postgres
@@ -174,7 +170,6 @@ where
 ```
 
 ### Check registration enforcement settings
-
 Review the registration enforcement configuration to understand how authentication method registration is managed in your tenant.
 
 ```sql+postgres
@@ -196,7 +191,6 @@ from
 ```
 
 ### List authentication methods with include targets
-
 Identify authentication methods that have specific include targets configured to understand the scope of authentication method availability.
 
 ```sql+postgres
@@ -225,7 +219,6 @@ where
 ```
 
 ### Policy compliance check
-
 Assess the overall policy configuration to ensure proper authentication method settings are in place for security compliance.
 
 ```sql+postgres
