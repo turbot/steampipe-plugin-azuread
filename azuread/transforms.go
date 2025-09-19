@@ -1,6 +1,8 @@
 package azuread
 
 import (
+	"time"
+
 	betamodels "github.com/microsoftgraph/msgraph-beta-sdk-go/models"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 )
@@ -81,6 +83,10 @@ type ADSecurityDefaultsPolicyInfo struct {
 	models.IdentitySecurityDefaultsEnforcementPolicyable
 }
 
+type ADAuthenticationMethodPolicyInfo struct {
+	betamodels.AuthenticationMethodsPolicyable
+}
+
 type ADServicePrincipalInfo struct {
 	models.ServicePrincipalable
 }
@@ -137,6 +143,791 @@ func (roleAssignment *ADDirectoryRoleAssignmentInfo) DirectoryRoleAssignmentPrin
 	}
 
 	return data
+}
+
+func (methodPolicy *ADAuthenticationMethodPolicyInfo) ResourceId() *string {
+	if methodPolicy.GetId() != nil {
+		return methodPolicy.GetId()
+	}
+	return nil
+}
+
+func (methodPolicy *ADAuthenticationMethodPolicyInfo) DisplayName() *string {
+	if methodPolicy.GetDisplayName() != nil {
+		return methodPolicy.GetDisplayName()
+	}
+	return nil
+}
+
+func (methodPolicy *ADAuthenticationMethodPolicyInfo) Description() *string {
+	if methodPolicy.GetDescription() != nil {
+		return methodPolicy.GetDescription()
+	}
+	return nil
+}
+
+func (methodPolicy *ADAuthenticationMethodPolicyInfo) LastModifiedDateTime() *time.Time {
+	if methodPolicy.GetLastModifiedDateTime() != nil {
+		return methodPolicy.GetLastModifiedDateTime()
+	}
+	return nil
+}
+
+func (methodPolicy *ADAuthenticationMethodPolicyInfo) PolicyMigrationState() string {
+	if methodPolicy.GetPolicyMigrationState() != nil {
+		return methodPolicy.GetPolicyMigrationState().String()
+	}
+	return ""
+}
+
+func (methodPolicy *ADAuthenticationMethodPolicyInfo) PolicyVersion() *string {
+	if methodPolicy.GetPolicyVersion() != nil {
+		return methodPolicy.GetPolicyVersion()
+	}
+	return nil
+}
+
+func (methodPolicy *ADAuthenticationMethodPolicyInfo) ReconfirmationInDays() *int32 {
+	if methodPolicy.GetReconfirmationInDays() != nil {
+		return methodPolicy.GetReconfirmationInDays()
+	}
+	return nil
+}
+func (methodPolicy *ADAuthenticationMethodPolicyInfo) AdditionalData() map[string]interface{} {
+	if methodPolicy.GetAdditionalData() != nil {
+		data := map[string]interface{}{}
+		for key, value := range methodPolicy.GetAdditionalData() {
+			data[key] = value
+		}
+		return data
+	}
+	return nil
+}
+
+func (methodPolicy *ADAuthenticationMethodPolicyInfo) RegistrationEnforcement() map[string]interface{} {
+	if methodPolicy.GetRegistrationEnforcement() != nil {
+		data := map[string]interface{}{}
+
+		// Get authentication methods registration campaign
+		if methodPolicy.GetRegistrationEnforcement().GetAuthenticationMethodsRegistrationCampaign() != nil {
+			campaign := methodPolicy.GetRegistrationEnforcement().GetAuthenticationMethodsRegistrationCampaign()
+			campaignData := map[string]interface{}{}
+
+			// Additional data
+			if campaign.GetAdditionalData() != nil {
+				data := map[string]interface{}{}
+				for key, value := range campaign.GetAdditionalData() {
+					data[key] = value
+				}
+				campaignData["additionalData"] = data
+			}
+
+			// Exclude targets
+			if campaign.GetExcludeTargets() != nil {
+				excludeTargets := make([]map[string]interface{}, 0, len(campaign.GetExcludeTargets()))
+				for _, target := range campaign.GetExcludeTargets() {
+					if target != nil {
+						targetData := map[string]interface{}{}
+						if target.GetId() != nil {
+							targetData["id"] = *target.GetId()
+						}
+						if target.GetOdataType() != nil {
+							targetData["@odata.type"] = *target.GetOdataType()
+						}
+						if target.GetTargetType() != nil {
+							targetData["targetType"] = target.GetTargetType().String()
+						}
+						if target.GetAdditionalData() != nil {
+							targetData["additionalData"] = target.GetAdditionalData()
+						}
+						excludeTargets = append(excludeTargets, targetData)
+					}
+				}
+				campaignData["excludeTargets"] = excludeTargets
+			}
+
+			// Include targets
+			if campaign.GetIncludeTargets() != nil {
+				includeTargets := make([]map[string]interface{}, 0, len(campaign.GetIncludeTargets()))
+				for _, target := range campaign.GetIncludeTargets() {
+					if target != nil {
+						targetData := map[string]interface{}{}
+						if target.GetId() != nil {
+							targetData["id"] = *target.GetId()
+						}
+						if target.GetOdataType() != nil {
+							targetData["@odata.type"] = *target.GetOdataType()
+						}
+						if target.GetTargetType() != nil {
+							targetData["targetType"] = target.GetTargetType().String()
+						}
+						if target.GetTargetedAuthenticationMethod() != nil {
+							targetData["targetedAuthenticationMethod"] = *target.GetTargetedAuthenticationMethod()
+						}
+						if target.GetAdditionalData() != nil {
+							targetData["additionalData"] = target.GetAdditionalData()
+						}
+						includeTargets = append(includeTargets, targetData)
+					}
+				}
+				campaignData["includeTargets"] = includeTargets
+			}
+
+			// Snooze duration in days
+			if campaign.GetSnoozeDurationInDays() != nil {
+				campaignData["snoozeDurationInDays"] = *campaign.GetSnoozeDurationInDays()
+			}
+
+			// State
+			if campaign.GetState() != nil {
+				campaignData["state"] = campaign.GetState().String()
+			}
+
+			// OData type
+			if campaign.GetOdataType() != nil {
+				campaignData["@odata.type"] = *campaign.GetOdataType()
+			}
+
+			data["authenticationMethodsRegistrationCampaign"] = campaignData
+		}
+
+		// OData type
+		if methodPolicy.GetRegistrationEnforcement().GetOdataType() != nil {
+			data["@odata.type"] = *methodPolicy.GetRegistrationEnforcement().GetOdataType()
+		}
+
+		// Additional data
+		if methodPolicy.GetRegistrationEnforcement().GetAdditionalData() != nil {
+			addData := make(map[string]interface{}, len(methodPolicy.GetRegistrationEnforcement().GetAdditionalData()))
+			for key, value := range methodPolicy.GetRegistrationEnforcement().GetAdditionalData() {
+				addData[key] = value
+			}
+			data["additionalData"] = addData
+		}
+
+		return data
+	}
+	return nil
+}
+
+func (methodPolicy *ADAuthenticationMethodPolicyInfo) AuthenticationMethodConfigurations() []map[string]interface{} {
+	if methodPolicy.GetAuthenticationMethodConfigurations() != nil {
+		configurations := make([]map[string]interface{}, 0, len(methodPolicy.GetAuthenticationMethodConfigurations()))
+
+		for _, config := range methodPolicy.GetAuthenticationMethodConfigurations() {
+			if config == nil {
+				continue
+			}
+
+			configData := map[string]interface{}{}
+
+			// Base properties from AuthenticationMethodConfiguration
+			if config.GetId() != nil {
+				configData["id"] = *config.GetId()
+			}
+			if config.GetOdataType() != nil {
+				configData["@odata.type"] = *config.GetOdataType()
+			}
+			if config.GetState() != nil {
+				configData["state"] = config.GetState().String()
+			}
+			if config.GetAdditionalData() != nil {
+				data := map[string]interface{}{}
+				for key, value := range config.GetAdditionalData() {
+					data[key] = value
+				}
+				configData["additionalData"] = data
+			}
+
+			// Exclude targets (common to all configurations)
+			if config.GetExcludeTargets() != nil {
+				excludeTargets := make([]map[string]interface{}, 0, len(config.GetExcludeTargets()))
+				for _, target := range config.GetExcludeTargets() {
+					if target != nil {
+						targetData := map[string]interface{}{}
+						if target.GetId() != nil {
+							targetData["id"] = *target.GetId()
+						}
+						if target.GetOdataType() != nil {
+							targetData["@odata.type"] = *target.GetOdataType()
+						}
+						if target.GetTargetType() != nil {
+							targetData["targetType"] = target.GetTargetType().String()
+						}
+						if target.GetAdditionalData() != nil {
+							data := map[string]interface{}{}
+							for key, value := range target.GetAdditionalData() {
+								data[key] = value
+							}
+							targetData["additionalData"] = data
+						}
+						excludeTargets = append(excludeTargets, targetData)
+					}
+				}
+				configData["excludeTargets"] = excludeTargets
+			}
+
+			// Type-specific properties
+			switch configType := config.(type) {
+			case models.EmailAuthenticationMethodConfigurationable:
+				// Email-specific properties
+				if configType.GetAllowExternalIdToUseEmailOtp() != nil {
+					configData["allowExternalIdToUseEmailOtp"] = configType.GetAllowExternalIdToUseEmailOtp().String()
+				}
+				if configType.GetIncludeTargets() != nil {
+					includeTargets := make([]map[string]interface{}, 0, len(configType.GetIncludeTargets()))
+					for _, target := range configType.GetIncludeTargets() {
+						if target != nil {
+							targetData := map[string]interface{}{}
+							if target.GetId() != nil {
+								targetData["id"] = *target.GetId()
+							}
+							if target.GetOdataType() != nil {
+								targetData["@odata.type"] = *target.GetOdataType()
+							}
+							if target.GetTargetType() != nil {
+								targetData["targetType"] = target.GetTargetType().String()
+							}
+							if target.GetIsRegistrationRequired() != nil {
+								targetData["isRegistrationRequired"] = *target.GetIsRegistrationRequired()
+							}
+							if target.GetAdditionalData() != nil {
+								data := map[string]interface{}{}
+								for key, value := range target.GetAdditionalData() {
+									data[key] = value
+								}
+								targetData["additionalData"] = data
+							}
+							includeTargets = append(includeTargets, targetData)
+						}
+					}
+					configData["includeTargets"] = includeTargets
+				}
+
+			case models.Fido2AuthenticationMethodConfigurationable:
+				// FIDO2-specific properties
+				if configType.GetIsAttestationEnforced() != nil {
+					configData["isAttestationEnforced"] = *configType.GetIsAttestationEnforced()
+				}
+				if configType.GetIsSelfServiceRegistrationAllowed() != nil {
+					configData["isSelfServiceRegistrationAllowed"] = *configType.GetIsSelfServiceRegistrationAllowed()
+				}
+				if configType.GetKeyRestrictions() != nil {
+					keyRestrictions := configType.GetKeyRestrictions()
+					keyRestrictionsData := map[string]interface{}{}
+					if keyRestrictions.GetAdditionalData() != nil {
+						data := map[string]interface{}{}
+						for key, value := range keyRestrictions.GetAdditionalData() {
+							data[key] = value
+						}
+						keyRestrictionsData["additionalData"] = data
+					}
+					if keyRestrictions.GetOdataType() != nil {
+						keyRestrictionsData["@odata.type"] = *keyRestrictions.GetOdataType()
+					}
+					configData["keyRestrictions"] = keyRestrictionsData
+				}
+				if configType.GetIncludeTargets() != nil {
+					includeTargets := make([]map[string]interface{}, 0, len(configType.GetIncludeTargets()))
+					for _, target := range configType.GetIncludeTargets() {
+						if target != nil {
+							targetData := map[string]interface{}{}
+							if target.GetId() != nil {
+								targetData["id"] = *target.GetId()
+							}
+							if target.GetOdataType() != nil {
+								targetData["@odata.type"] = *target.GetOdataType()
+							}
+							if target.GetTargetType() != nil {
+								targetData["targetType"] = target.GetTargetType().String()
+							}
+							if target.GetIsRegistrationRequired() != nil {
+								targetData["isRegistrationRequired"] = *target.GetIsRegistrationRequired()
+							}
+							if target.GetAdditionalData() != nil {
+								data := map[string]interface{}{}
+								for key, value := range target.GetAdditionalData() {
+									data[key] = value
+								}
+								targetData["additionalData"] = data
+							}
+							includeTargets = append(includeTargets, targetData)
+						}
+					}
+					configData["includeTargets"] = includeTargets
+				}
+
+			case models.SmsAuthenticationMethodConfigurationable:
+				// SMS-specific properties
+				if configType.GetIncludeTargets() != nil {
+					includeTargets := make([]map[string]interface{}, 0, len(configType.GetIncludeTargets()))
+					for _, target := range configType.GetIncludeTargets() {
+						if target != nil {
+							targetData := map[string]interface{}{}
+							if target.GetId() != nil {
+								targetData["id"] = *target.GetId()
+							}
+							if target.GetOdataType() != nil {
+								targetData["@odata.type"] = *target.GetOdataType()
+							}
+							if target.GetTargetType() != nil {
+								targetData["targetType"] = target.GetTargetType().String()
+							}
+							if target.GetIsRegistrationRequired() != nil {
+								targetData["isRegistrationRequired"] = *target.GetIsRegistrationRequired()
+							}
+							if target.GetAdditionalData() != nil {
+								data := map[string]interface{}{}
+								for key, value := range target.GetAdditionalData() {
+									data[key] = value
+								}
+								targetData["additionalData"] = data
+							}
+							// SMS-specific property
+							if smsTarget, ok := target.(models.SmsAuthenticationMethodTargetable); ok {
+								if smsTarget.GetIsUsableForSignIn() != nil {
+									targetData["isUsableForSignIn"] = *smsTarget.GetIsUsableForSignIn()
+								}
+							}
+							includeTargets = append(includeTargets, targetData)
+						}
+					}
+					configData["includeTargets"] = includeTargets
+				}
+
+			case betamodels.MicrosoftAuthenticatorAuthenticationMethodConfigurationable:
+				// Microsoft Authenticator-specific properties
+				if configType.GetIsSoftwareOathEnabled() != nil {
+					configData["isSoftwareOathEnabled"] = *configType.GetIsSoftwareOathEnabled()
+				}
+				if configType.GetIncludeTargets() != nil {
+					includeTargets := make([]map[string]interface{}, 0, len(configType.GetIncludeTargets()))
+					for _, target := range configType.GetIncludeTargets() {
+						if target != nil {
+							targetData := map[string]interface{}{}
+							if target.GetId() != nil {
+								targetData["id"] = *target.GetId()
+							}
+							if target.GetOdataType() != nil {
+								targetData["@odata.type"] = *target.GetOdataType()
+							}
+							if target.GetTargetType() != nil {
+								targetData["targetType"] = target.GetTargetType().String()
+							}
+							if target.GetIsRegistrationRequired() != nil {
+								targetData["isRegistrationRequired"] = *target.GetIsRegistrationRequired()
+							}
+							if target.GetAdditionalData() != nil {
+								data := map[string]interface{}{}
+								for key, value := range target.GetAdditionalData() {
+									data[key] = value
+								}
+								targetData["additionalData"] = data
+							}
+							includeTargets = append(includeTargets, targetData)
+						}
+					}
+					configData["includeTargets"] = includeTargets
+				}
+				// Feature settings
+				if configType.GetFeatureSettings() != nil {
+					featureSettings := configType.GetFeatureSettings()
+					featureSettingsData := map[string]interface{}{}
+					if featureSettings.GetOdataType() != nil {
+						featureSettingsData["@odata.type"] = *featureSettings.GetOdataType()
+					}
+					if featureSettings.GetAdditionalData() != nil {
+						data := map[string]interface{}{}
+						for key, value := range featureSettings.GetAdditionalData() {
+							data[key] = value
+						}
+						featureSettingsData["additionalData"] = data
+					}
+					if featureSettings.GetDisplayAppInformationRequiredState() != nil {
+						displayAppInfo := featureSettings.GetDisplayAppInformationRequiredState()
+						displayAppInfoData := map[string]interface{}{}
+						if displayAppInfo.GetOdataType() != nil {
+							displayAppInfoData["@odata.type"] = *displayAppInfo.GetOdataType()
+						}
+						if displayAppInfo.GetState() != nil {
+							displayAppInfoData["state"] = displayAppInfo.GetState().String()
+						}
+						if displayAppInfo.GetExcludeTarget() != nil {
+							excludeTarget := displayAppInfo.GetExcludeTarget()
+							excludeTargetData := map[string]interface{}{}
+							if excludeTarget.GetId() != nil {
+								excludeTargetData["id"] = *excludeTarget.GetId()
+							}
+							if excludeTarget.GetOdataType() != nil {
+								excludeTargetData["@odata.type"] = *excludeTarget.GetOdataType()
+							}
+							if excludeTarget.GetTargetType() != nil {
+								excludeTargetData["targetType"] = excludeTarget.GetTargetType().String()
+							}
+							if excludeTarget.GetAdditionalData() != nil {
+								data := map[string]interface{}{}
+								for key, value := range excludeTarget.GetAdditionalData() {
+									data[key] = value
+								}
+								excludeTargetData["additionalData"] = data
+							}
+							displayAppInfoData["excludeTarget"] = excludeTargetData
+						}
+						if displayAppInfo.GetIncludeTarget() != nil {
+							includeTarget := displayAppInfo.GetIncludeTarget()
+							includeTargetData := map[string]interface{}{}
+							if includeTarget.GetId() != nil {
+								includeTargetData["id"] = *includeTarget.GetId()
+							}
+							if includeTarget.GetOdataType() != nil {
+								includeTargetData["@odata.type"] = *includeTarget.GetOdataType()
+							}
+							if includeTarget.GetTargetType() != nil {
+								includeTargetData["targetType"] = includeTarget.GetTargetType().String()
+							}
+							if includeTarget.GetAdditionalData() != nil {
+								data := map[string]interface{}{}
+								for key, value := range includeTarget.GetAdditionalData() {
+									data[key] = value
+								}
+								includeTargetData["additionalData"] = data
+							}
+							displayAppInfoData["includeTarget"] = includeTargetData
+						}
+						featureSettingsData["displayAppInformationRequiredState"] = displayAppInfoData
+					}
+					if featureSettings.GetDisplayLocationInformationRequiredState() != nil {
+						displayLocationInfo := featureSettings.GetDisplayLocationInformationRequiredState()
+						displayLocationInfoData := map[string]interface{}{}
+						if displayLocationInfo.GetOdataType() != nil {
+							displayLocationInfoData["@odata.type"] = *displayLocationInfo.GetOdataType()
+						}
+						if displayLocationInfo.GetState() != nil {
+							displayLocationInfoData["state"] = displayLocationInfo.GetState().String()
+						}
+						if displayLocationInfo.GetExcludeTarget() != nil {
+							excludeTarget := displayLocationInfo.GetExcludeTarget()
+							excludeTargetData := map[string]interface{}{}
+							if excludeTarget.GetId() != nil {
+								excludeTargetData["id"] = *excludeTarget.GetId()
+							}
+							if excludeTarget.GetOdataType() != nil {
+								excludeTargetData["@odata.type"] = *excludeTarget.GetOdataType()
+							}
+							if excludeTarget.GetTargetType() != nil {
+								excludeTargetData["targetType"] = excludeTarget.GetTargetType().String()
+							}
+							if excludeTarget.GetAdditionalData() != nil {
+								data := map[string]interface{}{}
+								for key, value := range excludeTarget.GetAdditionalData() {
+									data[key] = value
+								}
+								excludeTargetData["additionalData"] = data
+							}
+							displayLocationInfoData["excludeTarget"] = excludeTargetData
+						}
+						if displayLocationInfo.GetIncludeTarget() != nil {
+							includeTarget := displayLocationInfo.GetIncludeTarget()
+							includeTargetData := map[string]interface{}{}
+							if includeTarget.GetId() != nil {
+								includeTargetData["id"] = *includeTarget.GetId()
+							}
+							if includeTarget.GetOdataType() != nil {
+								includeTargetData["@odata.type"] = *includeTarget.GetOdataType()
+							}
+							if includeTarget.GetTargetType() != nil {
+								includeTargetData["targetType"] = includeTarget.GetTargetType().String()
+							}
+							if includeTarget.GetAdditionalData() != nil {
+								data := map[string]interface{}{}
+								for key, value := range includeTarget.GetAdditionalData() {
+									data[key] = value
+								}
+								includeTargetData["additionalData"] = data
+							}
+							displayLocationInfoData["includeTarget"] = includeTargetData
+						}
+						featureSettingsData["displayLocationInformationRequiredState"] = displayLocationInfoData
+					}
+
+					// Add numberMatchingRequiredState using beta SDK method
+					if featureSettings.GetNumberMatchingRequiredState() != nil {
+						numberMatchingInfo := featureSettings.GetNumberMatchingRequiredState()
+						numberMatchingData := map[string]interface{}{}
+						if numberMatchingInfo.GetOdataType() != nil {
+							numberMatchingData["@odata.type"] = *numberMatchingInfo.GetOdataType()
+						}
+						if numberMatchingInfo.GetState() != nil {
+							numberMatchingData["state"] = numberMatchingInfo.GetState().String()
+						}
+						if numberMatchingInfo.GetExcludeTarget() != nil {
+							excludeTarget := numberMatchingInfo.GetExcludeTarget()
+							excludeTargetData := map[string]interface{}{}
+							if excludeTarget.GetId() != nil {
+								excludeTargetData["id"] = *excludeTarget.GetId()
+							}
+							if excludeTarget.GetOdataType() != nil {
+								excludeTargetData["@odata.type"] = *excludeTarget.GetOdataType()
+							}
+							if excludeTarget.GetTargetType() != nil {
+								excludeTargetData["targetType"] = excludeTarget.GetTargetType().String()
+							}
+							if excludeTarget.GetAdditionalData() != nil {
+								data := map[string]interface{}{}
+								for key, value := range excludeTarget.GetAdditionalData() {
+									data[key] = value
+								}
+								excludeTargetData["additionalData"] = data
+							}
+							numberMatchingData["excludeTarget"] = excludeTargetData
+						}
+						if numberMatchingInfo.GetIncludeTarget() != nil {
+							includeTarget := numberMatchingInfo.GetIncludeTarget()
+							includeTargetData := map[string]interface{}{}
+							if includeTarget.GetId() != nil {
+								includeTargetData["id"] = *includeTarget.GetId()
+							}
+							if includeTarget.GetOdataType() != nil {
+								includeTargetData["@odata.type"] = *includeTarget.GetOdataType()
+							}
+							if includeTarget.GetTargetType() != nil {
+								includeTargetData["targetType"] = includeTarget.GetTargetType().String()
+							}
+							if includeTarget.GetAdditionalData() != nil {
+								data := map[string]interface{}{}
+								for key, value := range includeTarget.GetAdditionalData() {
+									data[key] = value
+								}
+								includeTargetData["additionalData"] = data
+							}
+							numberMatchingData["includeTarget"] = includeTargetData
+						}
+						featureSettingsData["numberMatchingRequiredState"] = numberMatchingData
+					}
+
+					// Add companionAppAllowedState using beta SDK method
+					if featureSettings.GetCompanionAppAllowedState() != nil {
+						companionAppInfo := featureSettings.GetCompanionAppAllowedState()
+						companionAppData := map[string]interface{}{}
+						if companionAppInfo.GetOdataType() != nil {
+							companionAppData["@odata.type"] = *companionAppInfo.GetOdataType()
+						}
+						if companionAppInfo.GetState() != nil {
+							companionAppData["state"] = companionAppInfo.GetState().String()
+						}
+						if companionAppInfo.GetExcludeTarget() != nil {
+							excludeTarget := companionAppInfo.GetExcludeTarget()
+							excludeTargetData := map[string]interface{}{}
+							if excludeTarget.GetId() != nil {
+								excludeTargetData["id"] = *excludeTarget.GetId()
+							}
+							if excludeTarget.GetOdataType() != nil {
+								excludeTargetData["@odata.type"] = *excludeTarget.GetOdataType()
+							}
+							if excludeTarget.GetTargetType() != nil {
+								excludeTargetData["targetType"] = excludeTarget.GetTargetType().String()
+							}
+							if excludeTarget.GetAdditionalData() != nil {
+								data := map[string]interface{}{}
+								for key, value := range excludeTarget.GetAdditionalData() {
+									data[key] = value
+								}
+								excludeTargetData["additionalData"] = data
+							}
+							companionAppData["excludeTarget"] = excludeTargetData
+						}
+						if companionAppInfo.GetIncludeTarget() != nil {
+							includeTarget := companionAppInfo.GetIncludeTarget()
+							includeTargetData := map[string]interface{}{}
+							if includeTarget.GetId() != nil {
+								includeTargetData["id"] = *includeTarget.GetId()
+							}
+							if includeTarget.GetOdataType() != nil {
+								includeTargetData["@odata.type"] = *includeTarget.GetOdataType()
+							}
+							if includeTarget.GetTargetType() != nil {
+								includeTargetData["targetType"] = includeTarget.GetTargetType().String()
+							}
+							if includeTarget.GetAdditionalData() != nil {
+								data := map[string]interface{}{}
+								for key, value := range includeTarget.GetAdditionalData() {
+									data[key] = value
+								}
+								includeTargetData["additionalData"] = data
+							}
+							companionAppData["includeTarget"] = includeTargetData
+						}
+						featureSettingsData["companionAppAllowedState"] = companionAppData
+					}
+
+					configData["featureSettings"] = featureSettingsData
+				}
+
+			case models.X509CertificateAuthenticationMethodConfigurationable:
+				// X509 Certificate-specific properties
+				if configType.GetAuthenticationModeConfiguration() != nil {
+					authModeConfig := configType.GetAuthenticationModeConfiguration()
+					authModeConfigData := map[string]interface{}{}
+					if authModeConfig.GetOdataType() != nil {
+						authModeConfigData["@odata.type"] = *authModeConfig.GetOdataType()
+					}
+					if authModeConfig.GetAdditionalData() != nil {
+						data := map[string]interface{}{}
+						for key, value := range authModeConfig.GetAdditionalData() {
+							data[key] = value
+						}
+						authModeConfigData["additionalData"] = data
+					}
+					configData["authenticationModeConfiguration"] = authModeConfigData
+				}
+				if configType.GetCertificateUserBindings() != nil {
+					certUserBindings := make([]map[string]interface{}, 0, len(configType.GetCertificateUserBindings()))
+					for _, binding := range configType.GetCertificateUserBindings() {
+						if binding != nil {
+							bindingData := map[string]interface{}{}
+							if binding.GetOdataType() != nil {
+								bindingData["@odata.type"] = *binding.GetOdataType()
+							}
+							if binding.GetPriority() != nil {
+								bindingData["priority"] = *binding.GetPriority()
+							}
+							if binding.GetUserProperty() != nil {
+								bindingData["userProperty"] = *binding.GetUserProperty()
+							}
+							if binding.GetX509CertificateField() != nil {
+								bindingData["x509CertificateField"] = *binding.GetX509CertificateField()
+							}
+							if binding.GetAdditionalData() != nil {
+								data := map[string]interface{}{}
+								for key, value := range binding.GetAdditionalData() {
+									data[key] = value
+								}
+								bindingData["additionalData"] = data
+							}
+							certUserBindings = append(certUserBindings, bindingData)
+						}
+					}
+					configData["certificateUserBindings"] = certUserBindings
+				}
+				if configType.GetIncludeTargets() != nil {
+					includeTargets := make([]map[string]interface{}, 0, len(configType.GetIncludeTargets()))
+					for _, target := range configType.GetIncludeTargets() {
+						if target != nil {
+							targetData := map[string]interface{}{}
+							if target.GetId() != nil {
+								targetData["id"] = *target.GetId()
+							}
+							if target.GetOdataType() != nil {
+								targetData["@odata.type"] = *target.GetOdataType()
+							}
+							if target.GetTargetType() != nil {
+								targetData["targetType"] = target.GetTargetType().String()
+							}
+							if target.GetIsRegistrationRequired() != nil {
+								targetData["isRegistrationRequired"] = *target.GetIsRegistrationRequired()
+							}
+							if target.GetAdditionalData() != nil {
+								data := map[string]interface{}{}
+								for key, value := range target.GetAdditionalData() {
+									data[key] = value
+								}
+								targetData["additionalData"] = data
+							}
+							includeTargets = append(includeTargets, targetData)
+						}
+					}
+					configData["includeTargets"] = includeTargets
+				}
+
+			case models.TemporaryAccessPassAuthenticationMethodConfigurationable:
+				// Temporary Access Pass-specific properties
+				if configType.GetDefaultLength() != nil {
+					configData["defaultLength"] = *configType.GetDefaultLength()
+				}
+				if configType.GetDefaultLifetimeInMinutes() != nil {
+					configData["defaultLifetimeInMinutes"] = *configType.GetDefaultLifetimeInMinutes()
+				}
+				if configType.GetIsUsableOnce() != nil {
+					configData["isUsableOnce"] = *configType.GetIsUsableOnce()
+				}
+				if configType.GetMaximumLifetimeInMinutes() != nil {
+					configData["maximumLifetimeInMinutes"] = *configType.GetMaximumLifetimeInMinutes()
+				}
+				if configType.GetMinimumLifetimeInMinutes() != nil {
+					configData["minimumLifetimeInMinutes"] = *configType.GetMinimumLifetimeInMinutes()
+				}
+				if configType.GetIncludeTargets() != nil {
+					includeTargets := make([]map[string]interface{}, 0, len(configType.GetIncludeTargets()))
+					for _, target := range configType.GetIncludeTargets() {
+						if target != nil {
+							targetData := map[string]interface{}{}
+							if target.GetId() != nil {
+								targetData["id"] = *target.GetId()
+							}
+							if target.GetOdataType() != nil {
+								targetData["@odata.type"] = *target.GetOdataType()
+							}
+							if target.GetTargetType() != nil {
+								targetData["targetType"] = target.GetTargetType().String()
+							}
+							if target.GetIsRegistrationRequired() != nil {
+								targetData["isRegistrationRequired"] = *target.GetIsRegistrationRequired()
+							}
+							if target.GetAdditionalData() != nil {
+								data := map[string]interface{}{}
+								for key, value := range target.GetAdditionalData() {
+									data[key] = value
+								}
+								targetData["additionalData"] = data
+							}
+							includeTargets = append(includeTargets, targetData)
+						}
+					}
+					configData["includeTargets"] = includeTargets
+				}
+
+			case models.VoiceAuthenticationMethodConfigurationable:
+				// Voice-specific properties
+				if configType.GetIsOfficePhoneAllowed() != nil {
+					configData["isOfficePhoneAllowed"] = *configType.GetIsOfficePhoneAllowed()
+				}
+				if configType.GetIncludeTargets() != nil {
+					includeTargets := make([]map[string]interface{}, 0, len(configType.GetIncludeTargets()))
+					for _, target := range configType.GetIncludeTargets() {
+						if target != nil {
+							targetData := map[string]interface{}{}
+							if target.GetId() != nil {
+								targetData["id"] = *target.GetId()
+							}
+							if target.GetOdataType() != nil {
+								targetData["@odata.type"] = *target.GetOdataType()
+							}
+							if target.GetTargetType() != nil {
+								targetData["targetType"] = target.GetTargetType().String()
+							}
+							if target.GetIsRegistrationRequired() != nil {
+								targetData["isRegistrationRequired"] = *target.GetIsRegistrationRequired()
+							}
+							if target.GetAdditionalData() != nil {
+								data := map[string]interface{}{}
+								for key, value := range target.GetAdditionalData() {
+									data[key] = value
+								}
+								targetData["additionalData"] = data
+							}
+							includeTargets = append(includeTargets, targetData)
+						}
+					}
+					configData["includeTargets"] = includeTargets
+				}
+			}
+
+			configurations = append(configurations, configData)
+		}
+
+		return configurations
+	}
+	return nil
 }
 
 func (roleAssignment *ADDirectoryRoleAssignmentInfo) DirectoryRoleAssignmentRoleDefinition() map[string]interface{} {
