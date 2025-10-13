@@ -198,17 +198,3 @@ select
 from
   azuread_external_identity_policy;
 ```
-
-## Schema
-
-| Name                                    | Type        | Description                                                                            |
-| --------------------------------------- | ----------- | -------------------------------------------------------------------------------------- |
-| `id`                                    | `text`      | The unique identifier for the external identity policy.                                |
-| `display_name`                          | `text`      | The display name for the external identity policy.                                     |
-| `allow_external_identities_to_leave`    | `boolean`   | Flag indicating whether external users can leave the tenant via self-service controls. |
-| `allow_deleted_identities_data_removal` | `boolean`   | Flag indicating whether deleted identities data can be removed.                        |
-| `deleted_date_time`                     | `timestamp` | The date and time when the policy was deleted.                                         |
-| `title`                                 | `text`      | Title of the resource.                                                                 |
-| `tenant_id`                             | `text`      | The Azure Tenant ID where the resource is located.                                     |
-| `sp_connection_name`                    | `text`      | Steampipe connection name.                                                             |
-| `sp_ctx`                                | `jsonb`     | Steampipe context in JSON form.                                                        |
