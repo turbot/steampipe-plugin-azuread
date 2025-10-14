@@ -10,7 +10,7 @@ builds:
       - GOPRIVATE=github.com/turbot
     goos:
       - linux
-
+      - darwin
     goarch:
       - amd64
       - arm64
