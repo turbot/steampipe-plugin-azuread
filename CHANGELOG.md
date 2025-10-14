@@ -1,3 +1,23 @@
+## v1.6.0 [2025-10-14]
+
+_What's new?_
+
+- New tables added ([#283](https://github.com/turbot/steampipe-plugin-azuread/pull/283))
+  - [azuread_access_review_schedule_definition](https://hub.steampipe.io/plugins/turbot/azuread/tables/azuread_access_review_schedule_definition)
+  - [azuread_authentication_method_policy](https://hub.steampipe.io/plugins/turbot/azuread/tables/azuread_authentication_method_policy)
+  - [azuread_external_identity_policy](https://hub.steampipe.io/plugins/turbot/azuread/tables/azuread_external_identity_policy)
+  - [azuread_governance_role_setting](https://hub.steampipe.io/plugins/turbot/azuread/tables/azuread_governance_role_setting)
+
+_Enhancements_
+
+- Added `additional_data` column to the `azuread_conditional_access_policy` table. ([#283](https://github.com/turbot/steampipe-plugin-azuread/pull/283))
+
+_Dependencies_
+
+- Recompiled plugin with [github.com/microsoftgraph/msgraph-beta-sdk-go v0.151.0](https://github.com/microsoftgraph/msgraph-beta-sdk-go/releases/tag/v0.151.0). ([#283](https://github.com/turbot/steampipe-plugin-azuread/pull/283))
+- Recompiled plugin with [steampipe-plugin-sdk v5.13.1](https://github.com/turbot/steampipe-plugin-sdk/blob/develop/CHANGELOG.md#v5131-2025-09-25) that addresses critical and high vulnerabilities in dependent packages. ([#288](https://github.com/turbot/steampipe-plugin-azuread/pull/288))
+
+
 ## v1.5.0 [2025-09-19]
 
 _What's new?_
