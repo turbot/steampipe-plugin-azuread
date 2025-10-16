@@ -1,0 +1,40 @@
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: steampipe_darwin
+    env:
+      - CGO_ENABLED=0
+      - GO111MODULE=on
+      - GOPRIVATE=github.com/turbot
+    goos:
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    binary: "{{ .ProjectName }}.plugin"
+    flags:
+      - -tags=netgo
+      - -trimpath
+    ldflags:
+      - -s -w -buildid=
+      - -X main.version={{ .Version }} -X main.commit={{ .Commit }} -X main.date={{ .Date }}
+
+archives:
+  - id: darwin
+    format: gz
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - none*
+
+checksum:
+  name_template: "{{ .ProjectName }}_{{ .Version }}_SHA256SUMS"
+  algorithm: sha256
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"

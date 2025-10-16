@@ -1,0 +1,42 @@
+# old-style config (no 'version:' key)
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: steampipe_linux
+    env:
+      - CGO_ENABLED=0
+      - GO111MODULE=on
+      - GOPRIVATE=github.com/turbot
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    binary: "{{ .ProjectName }}.plugin"
+    flags:
+      - -tags=netgo
+      - -trimpath
+    ldflags:
+      - -s -w -buildid=
+      - -X main.version={{ .Version }} -X main.commit={{ .Commit }} -X main.date={{ .Date }}
+
+archives:
+  - id: linux
+    # keep your single-file .gz artifacts so the ORAS step still matches
+    format: gz
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - none*
+
+checksum:
+  name_template: "{{ .ProjectName }}_{{ .Version }}_SHA256SUMS"
+  algorithm: sha256
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
