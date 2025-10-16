@@ -1,3 +1,5 @@
+dist: dist-darwin
+
 before:
   hooks:
     - go mod tidy
