@@ -1,4 +1,4 @@
-## v1.6.0 [2025-10-14]
+## v1.6.0 [2025-10-16]
 
 _What's new?_
 
@@ -6,7 +6,6 @@ _What's new?_
   - [azuread_access_review_schedule_definition](https://hub.steampipe.io/plugins/turbot/azuread/tables/azuread_access_review_schedule_definition)
   - [azuread_authentication_method_policy](https://hub.steampipe.io/plugins/turbot/azuread/tables/azuread_authentication_method_policy)
   - [azuread_external_identity_policy](https://hub.steampipe.io/plugins/turbot/azuread/tables/azuread_external_identity_policy)
-  - [azuread_governance_role_setting](https://hub.steampipe.io/plugins/turbot/azuread/tables/azuread_governance_role_setting)
 
 _Enhancements_
 
