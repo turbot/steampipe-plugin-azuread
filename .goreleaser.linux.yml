@@ -1,4 +1,3 @@
-# old-style config (no 'version:' key)
 dist: dist-linux
 
 before:
