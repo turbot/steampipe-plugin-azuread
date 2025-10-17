@@ -37,6 +37,10 @@ type ADCrossTenantAccessPolicyInfo struct {
 	models.CrossTenantAccessPolicyable
 }
 
+type ADDeviceRegistrationPolicyInfo struct {
+	models.DeviceRegistrationPolicyable
+}
+
 type ADDeviceInfo struct {
 	models.Deviceable
 }
@@ -1597,6 +1601,89 @@ func (crossTenantAccessPolicy *ADCrossTenantAccessPolicyInfo) CrossTenantAccessP
 	}
 
 	return result
+}
+
+// Device Registration Policy Transform Functions
+
+func (deviceRegistrationPolicy *ADDeviceRegistrationPolicyInfo) DeviceRegistrationPolicyMultiFactorAuthConfiguration() string {
+	if deviceRegistrationPolicy.GetMultiFactorAuthConfiguration() == nil {
+		return ""
+	}
+	return deviceRegistrationPolicy.GetMultiFactorAuthConfiguration().String()
+}
+
+func (deviceRegistrationPolicy *ADDeviceRegistrationPolicyInfo) DeviceRegistrationPolicyAzureADRegistration() map[string]interface{} {
+	if deviceRegistrationPolicy.GetAzureADRegistration() == nil {
+		return nil
+	}
+
+	data := map[string]interface{}{}
+	azureADReg := deviceRegistrationPolicy.GetAzureADRegistration()
+
+	if azureADReg.GetIsAdminConfigurable() != nil {
+		data["isAdminConfigurable"] = *azureADReg.GetIsAdminConfigurable()
+	}
+
+	if azureADReg.GetAllowedToRegister() != nil {
+		allowedData := map[string]interface{}{}
+		if azureADReg.GetAllowedToRegister().GetOdataType() != nil {
+			allowedData["@odata.type"] = *azureADReg.GetAllowedToRegister().GetOdataType()
+		}
+		if azureADReg.GetAllowedToRegister().GetAdditionalData() != nil {
+			allowedData["additionalData"] = azureADReg.GetAllowedToRegister().GetAdditionalData()
+		}
+		data["allowedToRegister"] = allowedData
+	}
+
+	return data
+}
+
+func (deviceRegistrationPolicy *ADDeviceRegistrationPolicyInfo) DeviceRegistrationPolicyAzureADJoin() map[string]interface{} {
+	if deviceRegistrationPolicy.GetAzureADJoin() == nil {
+		return nil
+	}
+
+	data := map[string]interface{}{}
+	azureADJoin := deviceRegistrationPolicy.GetAzureADJoin()
+
+	if azureADJoin.GetIsAdminConfigurable() != nil {
+		data["isAdminConfigurable"] = *azureADJoin.GetIsAdminConfigurable()
+	}
+
+	if azureADJoin.GetAllowedToJoin() != nil {
+		allowedData := map[string]interface{}{}
+		if azureADJoin.GetAllowedToJoin().GetOdataType() != nil {
+			allowedData["@odata.type"] = *azureADJoin.GetAllowedToJoin().GetOdataType()
+		}
+		if azureADJoin.GetAllowedToJoin().GetAdditionalData() != nil {
+			allowedData["additionalData"] = azureADJoin.GetAllowedToJoin().GetAdditionalData()
+		}
+		data["allowedToJoin"] = allowedData
+	}
+
+	// Get additional data which may contain localAdmins and other fields
+	if azureADJoin.GetAdditionalData() != nil {
+		for key, value := range azureADJoin.GetAdditionalData() {
+			data[key] = value
+		}
+	}
+
+	return data
+}
+
+func (deviceRegistrationPolicy *ADDeviceRegistrationPolicyInfo) DeviceRegistrationPolicyLocalAdminPassword() map[string]interface{} {
+	if deviceRegistrationPolicy.GetLocalAdminPassword() == nil {
+		return nil
+	}
+
+	data := map[string]interface{}{}
+	localAdminPassword := deviceRegistrationPolicy.GetLocalAdminPassword()
+
+	if localAdminPassword.GetIsEnabled() != nil {
+		data["isEnabled"] = *localAdminPassword.GetIsEnabled()
+	}
+
+	return data
 }
 
 func (device *ADDeviceInfo) DeviceMemberOf() []map[string]interface{} {
