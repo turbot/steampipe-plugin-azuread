@@ -38,7 +38,7 @@ from
   azuread_device_registration_policy;
 ```
 
-### Check if multi-factor authentication is required for device registration
+### Check if MFA is required for device registration
 Determine if your organization requires users to complete multi-factor authentication when registering devices. This is important for maintaining strong security controls.
 
 ```sql+postgres
@@ -63,28 +63,7 @@ where
   multi_factor_auth_configuration = 'required';
 ```
 
-### List device registration settings for Azure AD Join
-Explore the configuration settings for Azure AD Join, including who is allowed to join devices and local administrator settings. This helps understand device enrollment permissions in your organization.
-
-```sql+postgres
-select
-  display_name,
-  id,
-  azure_ad_join
-from
-  azuread_device_registration_policy;
-```
-
-```sql+sqlite
-select
-  display_name,
-  id,
-  azure_ad_join
-from
-  azuread_device_registration_policy;
-```
-
-### Check if Azure AD device registration is configurable by admins
+### Check if device registration is configurable by admins
 Determine if administrators can configure Azure AD device registration settings. This is useful for understanding the level of administrative control over device registration.
 
 ```sql+postgres
@@ -135,9 +114,7 @@ select
   id,
   user_device_quota
 from
-  azuread_device_registration_policy
-where
-  user_device_quota > 5;
+  azuread_device_registration_policy;
 ```
 
 ```sql+sqlite
@@ -146,7 +123,5 @@ select
   id,
   user_device_quota
 from
-  azuread_device_registration_policy
-where
-  user_device_quota > 5;
+  azuread_device_registration_policy;
 ```
