@@ -1,3 +1,10 @@
+## v1.7.0 [2025-10-17]
+
+_What's new?_
+
+- New tables added ([#294](https://github.com/turbot/steampipe-plugin-azuread/pull/294))
+  - [azuread_device_registration_policy](https://hub.steampipe.io/plugins/turbot/azuread/tables/azuread_device_registration_policy)
+
 ## v1.6.0 [2025-10-16]
 
 _What's new?_
