@@ -255,6 +255,10 @@ func buildUserRequestFields(ctx context.Context, queryColumns []string) ([]strin
 
 		selectColumns = append(selectColumns, strcase.ToLowerCamel(columnName))
 	}
+	// always select id column to make sure that all the columns are hydrated
+	if !slices.Contains(selectColumns, "id") {
+		selectColumns = append(selectColumns, []string{"id"}...)
+	}
 
 	return selectColumns, expandColumns
 }
