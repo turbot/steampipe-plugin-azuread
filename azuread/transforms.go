@@ -1,10 +1,12 @@
 package azuread
 
 import (
+	"context"
 	"time"
 
 	betamodels "github.com/microsoftgraph/msgraph-beta-sdk-go/models"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 type ADAdminConsentRequestPolicyInfo struct {
@@ -2214,4 +2216,84 @@ func (user *ADUserInfo) SignInActivity() map[string]interface{} {
 		"LastNonInteractiveSignInDateTime":  actiity.GetLastNonInteractiveSignInDateTime(),
 		"LastNonInteractiveSignInRequestId": actiity.GetLastNonInteractiveSignInRequestId(),
 	}
+}
+
+// Mailbox settings transform functions
+func (user *ADUserInfo) GetAutomaticRepliesSetting(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	if d.HydrateItem == nil {
+		return nil, nil
+	}
+	mailboxSettings := d.HydrateItem.(models.MailboxSettingsable)
+	return mailboxSettings.GetAutomaticRepliesSetting(), nil
+}
+
+func (user *ADUserInfo) GetDateFormat(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	if d.HydrateItem == nil {
+		return nil, nil
+	}
+	mailboxSettings := d.HydrateItem.(models.MailboxSettingsable)
+	if dateFormat := mailboxSettings.GetDateFormat(); dateFormat != nil {
+		return *dateFormat, nil
+	}
+	return nil, nil
+}
+
+func (user *ADUserInfo) GetDelegateMeetingMessageDeliveryOptions(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	if d.HydrateItem == nil {
+		return nil, nil
+	}
+	mailboxSettings := d.HydrateItem.(models.MailboxSettingsable)
+	if options := mailboxSettings.GetDelegateMeetingMessageDeliveryOptions(); options != nil {
+		return options.String(), nil
+	}
+	return nil, nil
+}
+
+func (user *ADUserInfo) GetLanguage(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	if d.HydrateItem == nil {
+		return nil, nil
+	}
+	mailboxSettings := d.HydrateItem.(models.MailboxSettingsable)
+	return mailboxSettings.GetLanguage(), nil
+}
+
+func (user *ADUserInfo) GetTimeFormat(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	if d.HydrateItem == nil {
+		return nil, nil
+	}
+	mailboxSettings := d.HydrateItem.(models.MailboxSettingsable)
+	if timeFormat := mailboxSettings.GetTimeFormat(); timeFormat != nil {
+		return *timeFormat, nil
+	}
+	return nil, nil
+}
+
+func (user *ADUserInfo) GetTimeZone(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	if d.HydrateItem == nil {
+		return nil, nil
+	}
+	mailboxSettings := d.HydrateItem.(models.MailboxSettingsable)
+	if timeZone := mailboxSettings.GetTimeZone(); timeZone != nil {
+		return *timeZone, nil
+	}
+	return nil, nil
+}
+
+func (user *ADUserInfo) GetUserPurpose(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	if d.HydrateItem == nil {
+		return nil, nil
+	}
+	mailboxSettings := d.HydrateItem.(models.MailboxSettingsable)
+	if purpose := mailboxSettings.GetUserPurpose(); purpose != nil {
+		return purpose.String(), nil
+	}
+	return nil, nil
+}
+
+func (user *ADUserInfo) GetWorkingHours(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	if d.HydrateItem == nil {
+		return nil, nil
+	}
+	mailboxSettings := d.HydrateItem.(models.MailboxSettingsable)
+	return mailboxSettings.GetWorkingHours(), nil
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/iancoleman/strcase"
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
+	"github.com/microsoftgraph/msgraph-sdk-go/models/odataerrors"
 	"github.com/microsoftgraph/msgraph-sdk-go/users"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
@@ -54,6 +55,16 @@ func tableAzureAdUser(_ context.Context) *plugin.Table {
 			{Name: "surname", Type: proto.ColumnType_STRING, Description: "Family name or last name of the active directory user.", Transform: transform.FromMethod("GetSurname")},
 
 			{Name: "filter", Type: proto.ColumnType_STRING, Transform: transform.FromQual("filter"), Description: "Odata query to search for resources."},
+
+			// Mailbox settings
+			{Name: "automatic_replies_setting", Type: proto.ColumnType_JSON, Description: "Automatic replies settings for the user.", Transform: transform.FromMethod("GetAutomaticRepliesSetting"), Hydrate: getUserMailboxSettings},
+			{Name: "date_format", Type: proto.ColumnType_STRING, Description: "The date format for the user.", Transform: transform.FromMethod("GetDateFormat"), Hydrate: getUserMailboxSettings},
+			{Name: "delegate_meeting_message_delivery_options", Type: proto.ColumnType_STRING, Description: "The delivery options for delegate meeting messages.", Transform: transform.FromMethod("GetDelegateMeetingMessageDeliveryOptions"), Hydrate: getUserMailboxSettings},
+			{Name: "language", Type: proto.ColumnType_JSON, Description: "The language of the user.", Transform: transform.FromMethod("GetLanguage"), Hydrate: getUserMailboxSettings},
+			{Name: "time_format", Type: proto.ColumnType_STRING, Description: "The time format for the user.", Transform: transform.FromMethod("GetTimeFormat"), Hydrate: getUserMailboxSettings},
+			{Name: "time_zone", Type: proto.ColumnType_STRING, Description: "The time zone for the user.", Transform: transform.FromMethod("GetTimeZone"), Hydrate: getUserMailboxSettings},
+			{Name: "user_purpose", Type: proto.ColumnType_STRING, Description: "The purpose of the user's mailbox.", Transform: transform.FromMethod("GetUserPurpose"), Hydrate: getUserMailboxSettings},
+			{Name: "working_hours", Type: proto.ColumnType_JSON, Description: "The working hours for the user.", Transform: transform.FromMethod("GetWorkingHours"), Hydrate: getUserMailboxSettings},
 
 			// Other fields
 			{Name: "created_date_time", Type: proto.ColumnType_TIMESTAMP, Description: "The time at which the user was created.", Transform: transform.FromMethod("GetCreatedDateTime")},
@@ -244,8 +255,45 @@ func buildUserRequestFields(ctx context.Context, queryColumns []string) ([]strin
 
 		selectColumns = append(selectColumns, strcase.ToLowerCamel(columnName))
 	}
-	
+
 	return selectColumns, expandColumns
+}
+
+func getUserMailboxSettings(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	if h.Item == nil {
+		return nil, nil
+	}
+
+	userInfo := h.Item.(*ADUserInfo)
+	if userInfo.GetId() == nil {
+		return nil, nil
+	}
+
+	client, _, err := GetGraphClient(ctx, d)
+	if err != nil {
+		plugin.Logger(ctx).Error("azuread_user.getUserMailboxSettings", "connection_error", err)
+		return nil, err
+	}
+
+	// Get user mailbox settings
+
+	mailboxSettings, err := client.Users().ByUserId(*userInfo.GetId()).MailboxSettings().Get(ctx, nil)
+	if err != nil {
+		// handle expected error for users without Exchange Online mailboxes
+		if odataErr, ok := err.(*odataerrors.ODataError); ok {
+			if strings.Contains(odataErr.Error(), "mailbox is either inactive, soft-deleted, or is hosted on-premise") {
+				plugin.Logger(ctx).Debug("getUserMailboxSettings", "info", "User does not have an active Exchange Online mailbox")
+				return nil, nil
+			}
+		}
+		return nil, nil
+	}
+
+	if mailboxSettings == nil {
+		return nil, nil
+	}
+
+	return mailboxSettings, nil
 }
 
 //// TRANSFORM FUNCTIONS
