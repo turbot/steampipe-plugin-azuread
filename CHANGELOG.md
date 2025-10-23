@@ -1,3 +1,17 @@
+## v1.8.0 [2025-10-23]
+
+_Enhancements_
+
+- Added the following columns to the `azuread_user` table: ([#295](https://github.com/turbot/steampipe-plugin-azuread/pull/295))
+  - `automatic_replies_setting`
+  - `date_format`
+  - `delegate_meeting_message_delivery_options` 
+  - `language`
+  - `time_format`
+  - `time_zone` 
+  - `user_purpose`
+  - `working_hours`
+
 ## v1.7.0 [2025-10-17]
 
 _What's new?_
