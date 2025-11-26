@@ -73,7 +73,7 @@ Installing the latest azuread plugin will create a config file (~/.steampipe/con
 connection "azuread" {
   plugin = "azuread"
 
-  # Defaults to "AZUREPUBLICCLOUD". Valid environments are "AZUREPUBLICCLOUD", "AZURECHINACLOUD" and "AZUREUSGOVERNMENTCLOUD"
+  # Defaults to "AZUREPUBLICCLOUD". Valid environments are "AZUREPUBLICCLOUD", "AZURECHINACLOUD", "AZUREUSGOVERNMENTCLOUD" and "AZUREUSGOVERNMENTCLOUDHIGH"
   # environment = "AZUREPUBLICCLOUD"
 
   # You can connect to Azure using one of options below:
@@ -254,7 +254,7 @@ The Azure AD plugin will use the standard Azure environment variables to obtain 
 
 ```sh
 export AZURE_TENANT_ID="00000000-0000-0000-0000-000000000000"
-export AZURE_ENVIRONMENT="AZUREPUBLICCLOUD" # Defaults to "AZUREPUBLICCLOUD". Valid environments are "AZUREPUBLICCLOUD", "AZURECHINACLOUD" and "AZUREUSGOVERNMENTCLOUD"
+export AZURE_ENVIRONMENT="AZUREPUBLICCLOUD" # Defaults to "AZUREPUBLICCLOUD". Valid environments are "AZUREPUBLICCLOUD", "AZURECHINACLOUD", "AZUREUSGOVERNMENTCLOUD" and "AZUREUSGOVERNMENTCLOUDHIGH"
 export AZURE_CLIENT_ID="00000000-0000-0000-0000-000000000000"
 export AZURE_CLIENT_SECRET="my plaintext secret"
 export AZURE_CERTIFICATE_PATH=path/to/file.pem

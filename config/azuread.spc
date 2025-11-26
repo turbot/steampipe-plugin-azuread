@@ -1,7 +1,7 @@
 connection "azuread" {
   plugin = "azuread"
 
-  # Defaults to "AZUREPUBLICCLOUD". Valid environments are "AZUREPUBLICCLOUD", "AZURECHINACLOUD" and "AZUREUSGOVERNMENTCLOUD"
+  # Defaults to "AZUREPUBLICCLOUD". Valid environments are "AZUREPUBLICCLOUD", "AZURECHINACLOUD", "AZUREUSGOVERNMENTCLOUD" and "AZUREUSGOVERNMENTCLOUDHIGH"
   # environment = "AZUREPUBLICCLOUD"
 
   # You can connect to Azure using one of options below:
