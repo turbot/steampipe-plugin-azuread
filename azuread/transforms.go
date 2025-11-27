@@ -40,7 +40,7 @@ type ADCrossTenantAccessPolicyInfo struct {
 }
 
 type ADDeviceRegistrationPolicyInfo struct {
-	models.DeviceRegistrationPolicyable
+	betamodels.DeviceRegistrationPolicyable
 }
 
 type ADDeviceInfo struct {
@@ -1280,6 +1280,9 @@ func (authorizationPolicy *ADAuthorizationPolicyInfo) AuthorizationPolicyDefault
 	if authorizationPolicy.GetDefaultUserRolePermissions().GetAllowedToReadOtherUsers() != nil {
 		data["allowedToReadOtherUsers"] = *authorizationPolicy.GetDefaultUserRolePermissions().GetAllowedToReadOtherUsers()
 	}
+	if authorizationPolicy.GetDefaultUserRolePermissions().GetAllowedToReadBitlockerKeysForOwnedDevice() != nil {
+		data["allowedToReadBitlockerKeysForOwnedDevice"] = *authorizationPolicy.GetDefaultUserRolePermissions().GetAllowedToReadBitlockerKeysForOwnedDevice()
+	}
 	if authorizationPolicy.GetDefaultUserRolePermissions().GetPermissionGrantPoliciesAssigned() != nil {
 		data["permissionGrantPoliciesAssigned"] = authorizationPolicy.GetDefaultUserRolePermissions().GetPermissionGrantPoliciesAssigned()
 	}
@@ -1292,6 +1295,13 @@ func (authorizationPolicy *ADAuthorizationPolicyInfo) AuthorizationPolicyAllowIn
 		return ""
 	}
 	return authorizationPolicy.GetAllowInvitesFrom().String()
+}
+
+func (authorizationPolicy *ADAuthorizationPolicyInfo) AllowedToReadBitlockerKeysForOwnedDevice() *bool {
+	if authorizationPolicy.GetDefaultUserRolePermissions() == nil {
+		return nil
+	}
+	return authorizationPolicy.GetDefaultUserRolePermissions().GetAllowedToReadBitlockerKeysForOwnedDevice()
 }
 
 func (conditionalAccessPolicy *ADConditionalAccessPolicyInfo) ConditionalAccessPolicyConditionsAdditionalData() interface{} {
@@ -1663,10 +1673,46 @@ func (deviceRegistrationPolicy *ADDeviceRegistrationPolicyInfo) DeviceRegistrati
 		data["allowedToJoin"] = allowedData
 	}
 
-	// Get additional data which may contain localAdmins and other fields
+	// Get localAdmins field from beta SDK
+	if azureADJoin.GetLocalAdmins() != nil {
+		localAdminsData := map[string]interface{}{}
+		localAdmins := azureADJoin.GetLocalAdmins()
+
+		if localAdmins.GetEnableGlobalAdmins() != nil {
+			localAdminsData["enableGlobalAdmins"] = *localAdmins.GetEnableGlobalAdmins()
+		}
+
+		if localAdmins.GetRegisteringUsers() != nil {
+			registeringUsersData := map[string]interface{}{}
+			if localAdmins.GetRegisteringUsers().GetOdataType() != nil {
+				registeringUsersData["@odata.type"] = *localAdmins.GetRegisteringUsers().GetOdataType()
+			}
+			if localAdmins.GetRegisteringUsers().GetAdditionalData() != nil {
+				registeringUsersData["additionalData"] = localAdmins.GetRegisteringUsers().GetAdditionalData()
+			}
+			localAdminsData["registeringUsers"] = registeringUsersData
+		}
+
+		if localAdmins.GetOdataType() != nil {
+			localAdminsData["@odata.type"] = *localAdmins.GetOdataType()
+		}
+
+		if localAdmins.GetAdditionalData() != nil {
+			for key, value := range localAdmins.GetAdditionalData() {
+				localAdminsData[key] = value
+			}
+		}
+
+		data["localAdmins"] = localAdminsData
+	}
+
+	// Get additional data which may contain other fields
 	if azureADJoin.GetAdditionalData() != nil {
 		for key, value := range azureADJoin.GetAdditionalData() {
-			data[key] = value
+			// Skip localAdmins if it's in additionalData since we're extracting it explicitly
+			if key != "localAdmins" {
+				data[key] = value
+			}
 		}
 	}
 

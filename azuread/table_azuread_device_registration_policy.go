@@ -39,8 +39,8 @@ func tableAzureAdDeviceRegistrationPolicy(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listAdDeviceRegistrationPolicy(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	// Create client
-	client, _, err := GetGraphClient(ctx, d)
+	// Create beta client to access localAdmins field in azure_ad_join
+	client, _, err := GetGraphBetaClient(ctx, d)
 	if err != nil {
 		plugin.Logger(ctx).Error("azuread_device_registration_policy.listAdDeviceRegistrationPolicy", "connection_error", err)
 		return nil, err
