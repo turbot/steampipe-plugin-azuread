@@ -1,3 +1,13 @@
+## v1.9.0 [2025-11-28]
+
+_Enhancements_
+
+- Added `allowed_to_read_bitlocker_keys_for_owned_device` column to the `azuread_authorization_policy` table. ([#299](https://github.com/turbot/steampipe-plugin-azuread/pull/299))
+
+_Bug fixes_
+
+- Fixed an issue where queries against Azure Government tenants failed with `InvalidAuthenticationToken` errors. ([#300](https://github.com/turbot/steampipe-plugin-azuread/pull/300))
+
 ## v1.8.0 [2025-10-23]
 
 _Enhancements_
