@@ -21,6 +21,22 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 )
 
+const (
+	environmentAzureChinaCloud        = "AZURECHINACLOUD"
+	environmentAzureUSGovernmentCloud = "AZUREUSGOVERNMENTCLOUD"
+)
+
+func getCloudConfiguration(environment string) cloud.Configuration {
+	switch environment {
+	case environmentAzureChinaCloud:
+		return cloud.AzureChina
+	case environmentAzureUSGovernmentCloud:
+		return cloud.AzureGovernment
+	default:
+		return cloud.AzurePublic
+	}
+}
+
 /*
 GetGraphClient creates a graph service client configured from (~/.steampipe/config, environment variables and CLI) in the order:
 1. Client secret
@@ -87,15 +103,7 @@ func GetGraphClient(ctx context.Context, d *plugin.QueryData) (*msgraphsdkgo.Gra
 		certificatePassword = os.Getenv("AZURE_CERTIFICATE_PASSWORD")
 	}
 
-	var cloudConfiguration cloud.Configuration
-	switch environment {
-	case "AZURECHINACLOUD":
-		cloudConfiguration = cloud.AzureChina
-	case "AZUREUSGOVERNMENTCLOUD":
-		cloudConfiguration = cloud.AzureGovernment
-	default:
-		cloudConfiguration = cloud.AzurePublic
-	}
+	cloudConfiguration := getCloudConfiguration(environment)
 
 	var cred azcore.TokenCredential
 	var err error
@@ -166,13 +174,18 @@ func GetGraphClient(ctx context.Context, d *plugin.QueryData) (*msgraphsdkgo.Gra
 		}
 	}
 
-	// update the Authentication provider scope if env is china cloud
+	// update the Authentication provider scope if env is china cloud or us gov
 	var auth *a.AzureIdentityAuthenticationProvider
-	if environment == "AZURECHINACLOUD" {
+	switch environment {
+	case environmentAzureChinaCloud:
 		auth, err = a.NewAzureIdentityAuthenticationProviderWithScopes(cred, []string{
 			"https://microsoftgraph.chinacloudapi.cn/.default",
 		})
-	} else {
+	case environmentAzureUSGovernmentCloud:
+		auth, err = a.NewAzureIdentityAuthenticationProviderWithScopes(cred, []string{
+			"https://graph.microsoft.us/.default",
+		})
+	default:
 		auth, err = a.NewAzureIdentityAuthenticationProvider(cred)
 	}
 	if err != nil {
@@ -184,9 +197,12 @@ func GetGraphClient(ctx context.Context, d *plugin.QueryData) (*msgraphsdkgo.Gra
 		return nil, nil, fmt.Errorf("error creating graph adapter: %v", err)
 	}
 
-	// update the baseurl if env is china cloud
-	if environment == "AZURECHINACLOUD" {
+	// update the baseurl if env is china cloud or us gov
+	switch environment {
+	case environmentAzureChinaCloud:
 		adapter.SetBaseUrl("https://microsoftgraph.chinacloudapi.cn/v1.0")
+	case environmentAzureUSGovernmentCloud:
+		adapter.SetBaseUrl("https://graph.microsoft.us/v1.0")
 	}
 
 	client := msgraphsdkgo.NewGraphServiceClient(adapter)
@@ -254,15 +270,7 @@ func GetGraphBetaClient(ctx context.Context, d *plugin.QueryData) (*msgraphsdkbe
 		certificatePassword = os.Getenv("AZURE_CERTIFICATE_PASSWORD")
 	}
 
-	var cloudConfiguration cloud.Configuration
-	switch environment {
-	case "AZURECHINACLOUD":
-		cloudConfiguration = cloud.AzureChina
-	case "AZUREUSGOVERNMENTCLOUD":
-		cloudConfiguration = cloud.AzureGovernment
-	default:
-		cloudConfiguration = cloud.AzurePublic
-	}
+	cloudConfiguration := getCloudConfiguration(environment)
 
 	var cred azcore.TokenCredential
 	var err error
@@ -333,13 +341,18 @@ func GetGraphBetaClient(ctx context.Context, d *plugin.QueryData) (*msgraphsdkbe
 		}
 	}
 
-	// update the Authentication provider scope if env is china cloud
+	// update the Authentication provider scope if env is china cloud or us gov
 	var auth *a.AzureIdentityAuthenticationProvider
-	if environment == "AZURECHINACLOUD" {
+	switch environment {
+	case environmentAzureChinaCloud:
 		auth, err = a.NewAzureIdentityAuthenticationProviderWithScopes(cred, []string{
 			"https://microsoftgraph.chinacloudapi.cn/.default",
 		})
-	} else {
+	case environmentAzureUSGovernmentCloud:
+		auth, err = a.NewAzureIdentityAuthenticationProviderWithScopes(cred, []string{
+			"https://graph.microsoft.us/.default",
+		})
+	default:
 		auth, err = a.NewAzureIdentityAuthenticationProvider(cred)
 	}
 	if err != nil {
@@ -351,9 +364,12 @@ func GetGraphBetaClient(ctx context.Context, d *plugin.QueryData) (*msgraphsdkbe
 		return nil, nil, fmt.Errorf("error creating graph adapter: %v", err)
 	}
 
-	// update the baseurl if env is china cloud
-	if environment == "AZURECHINACLOUD" {
+	// update the baseurl if env is china cloud or us gov
+	switch environment {
+	case environmentAzureChinaCloud:
 		adapter.SetBaseUrl("https://microsoftgraph.chinacloudapi.cn/beta")
+	case environmentAzureUSGovernmentCloud:
+		adapter.SetBaseUrl("https://graph.microsoft.us/beta")
 	}
 
 	client := msgraphsdkbeta.NewGraphServiceClient(adapter)
