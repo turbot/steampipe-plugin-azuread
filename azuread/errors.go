@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"strings"
 
+	betaodataerrors "github.com/microsoftgraph/msgraph-beta-sdk-go/models/odataerrors"
 	"github.com/microsoftgraph/msgraph-sdk-go/models/odataerrors"
 	"github.com/turbot/steampipe-plugin-sdk/v6/plugin"
 )
@@ -33,7 +34,24 @@ func getErrorObject(err error) *RequestError {
 		}
 	}
 
+	// The beta SDK's ODataError is a distinct type whose Error() drops the Graph code.
+	if oDataError, ok := err.(*betaodataerrors.ODataError); ok {
+		if terr := oDataError.GetErrorEscaped(); terr != nil {
+			return &RequestError{
+				Code:    derefString(terr.GetCode()),
+				Message: derefString(terr.GetMessage()),
+			}
+		}
+	}
+
 	return &RequestError{Message: err.Error()}
+}
+
+func derefString(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
 }
 
 func isIgnorableErrorPredicate(ignoreErrorCodes []string) plugin.ErrorPredicateWithContext {
