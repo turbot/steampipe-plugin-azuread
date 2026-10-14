@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/iancoleman/strcase"
+	abstractions "github.com/microsoft/kiota-abstractions-go"
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
 	"github.com/microsoftgraph/msgraph-sdk-go/auditlogs"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
@@ -140,28 +141,34 @@ func listAdDirectoryAuditReports(ctx context.Context, d *plugin.QueryData, _ *pl
 		return nil, errObj
 	}
 
-	pageIterator, err := msgraphcore.NewPageIterator[interface{}](result, adapter, models.CreateSignInCollectionResponseFromDiscriminatorValue)
-	if err != nil {
-		plugin.Logger(ctx).Error("listAdDirectoryAuditReports", "create_iterator_instance_error", err)
-		return nil, err
-	}
-
-	err = pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
-		// To prevent errors during type conversion caused by inconsistent API responses (especially with larger data sets), we may get the different type of response (models.SignInable), we need to include the following check.
-		if directoryAudit, ok := pageItem.(models.DirectoryAuditable); ok {
-			d.StreamListItem(ctx, &ADDirectoryAuditReportInfo{directoryAudit})
-		}
+	err = iterateDirectoryAudits(ctx, result, adapter, func(directoryAudit models.DirectoryAuditable) bool {
+		d.StreamListItem(ctx, &ADDirectoryAuditReportInfo{directoryAudit})
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
 		return d.RowsRemaining(ctx) != 0
 	})
-
 	if err != nil {
 		plugin.Logger(ctx).Error("listAdDirectoryAuditReports", "paging_error", err)
 		return nil, err
 	}
 
 	return nil, nil
+}
+
+// iterateDirectoryAudits calls emit for each directory audit on the first page and on every @odata.nextLink page.
+func iterateDirectoryAudits(ctx context.Context, firstPage models.DirectoryAuditCollectionResponseable, adapter abstractions.RequestAdapter, emit func(models.DirectoryAuditable) bool) error {
+	pageIterator, err := msgraphcore.NewPageIterator[interface{}](firstPage, adapter, models.CreateDirectoryAuditCollectionResponseFromDiscriminatorValue)
+	if err != nil {
+		return err
+	}
+
+	return pageIterator.Iterate(ctx, func(pageItem interface{}) bool {
+		directoryAudit, ok := pageItem.(models.DirectoryAuditable)
+		if !ok {
+			return true
+		}
+		return emit(directoryAudit)
+	})
 }
 
 //// HYDRATE FUNCTIONS
