@@ -16,7 +16,7 @@ import (
 func TestIterateDirectoryAuditsKeepsRowsPastFirstPage(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `{"value":[
+		_, _ = fmt.Fprint(w, `{"value":[
 			{"id":"page2-a","activityDisplayName":"Delete user","result":"success"},
 			{"id":"page2-b","activityDisplayName":"Add app role assignment","result":"failure"}
 		]}`)
