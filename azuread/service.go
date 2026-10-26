@@ -408,7 +408,7 @@ func getTenantFromCLI() (string, error) {
 
 	output, err := cliCmd.Output()
 	if err != nil {
-		return "", fmt.Errorf("Invoking Azure CLI failed with the following error: %v", err)
+		return "", fmt.Errorf("invoking Azure CLI failed with the following error: %v", err)
 	}
 
 	var tokenResponse struct {
