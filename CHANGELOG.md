@@ -1,3 +1,14 @@
+## v1.10.0 [2026-10-26]
+
+_Bug fixes_
+
+- Fixed the `azuread_directory_audit_report` table to return all results instead of only the first page. ([#325](https://github.com/turbot/steampipe-plugin-azuread/pull/325)) (Thanks [@amit-experimenting](https://github.com/amit-experimenting) for the contribution!)
+
+_Dependencies_
+
+- Recompiled plugin with Go version `1.26`. ([#307](https://github.com/turbot/steampipe-plugin-azuread/pull/307))
+- Recompiled plugin with [steampipe-plugin-sdk v6.0.0](https://github.com/turbot/steampipe-plugin-sdk/blob/develop/CHANGELOG.md#v600-2026-05-20) which fixes a data race on connection config during query execution.
+
 ## v1.9.0 [2025-11-28]
 
 _Enhancements_
