@@ -5,6 +5,7 @@ import (
 
 	"github.com/turbot/steampipe-plugin-sdk/v6/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v6/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v6/rate_limiter"
 )
 
 const pluginName = "steampipe-plugin-azuread"
@@ -25,6 +26,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 				ShouldIgnoreErrorFunc: isIgnorableErrorPredicate([]string{"Request_ResourceNotFound"}),
 			},
 		},
+		RateLimiters: []*rate_limiter.Definition{signInReportListLimiter},
 		ConnectionConfigSchema: &plugin.ConnectionConfigSchema{
 			NewInstance: ConfigInstance,
 		},
