@@ -58,7 +58,7 @@ func tableAzureAdServicePrincipalAppRoleAssignment(_ context.Context) *plugin.Ta
 			{Name: "principal_type", Type: proto.ColumnType_STRING, Description: "The type of the assigned principal. This can either be User, Group, or ServicePrincipal.", Transform: transform.FromMethod("GetPrincipalType")},
 
 			// Standard columns
-			{Name: "service_principal_id", Type: proto.ColumnType_STRING, Description: "The identifier (id) of the service principal.", Transform: transform.FromMethod("GetResourceId")},
+			{Name: "service_principal_id", Type: proto.ColumnType_STRING, Description: "The identifier (id) of the service principal.", Transform: transform.FromMethod("GetPrincipalId")},
 		},
 	}
 }
