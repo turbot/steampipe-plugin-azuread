@@ -52,6 +52,8 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"azuread_group_app_role_assignment":                    tableAzureAdGroupAppRoleAssignment(ctx),
 			"azuread_group":                                        tableAzureAdGroup(ctx),
 			"azuread_identity_provider":                            tableAzureAdIdentityProvider(ctx),
+			"azuread_secure_score_control_score":                   tableAzureAdSecureScoreControlScore(ctx),
+			"azuread_security_alert":                               tableAzureAdSecurityAlert(ctx),
 			"azuread_security_defaults_policy":                     tableAzureAdSecurityDefaultsPolicy(ctx),
 			"azuread_service_principal_app_role_assigned_to":       tableAzureAdServicePrincipalAppRoleAssignedTo(ctx),
 			"azuread_service_principal_app_role_assignment":        tableAzureAdServicePrincipalAppRoleAssignment(ctx),
