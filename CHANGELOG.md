@@ -1,3 +1,19 @@
+## v1.11.0 [2026-11-04]
+
+_What's new?_
+
+- New tables added
+  - [azuread_oauth2_permission_grant](https://hub.steampipe.io/plugins/turbot/azuread/tables/azuread_oauth2_permission_grant) ([#330](https://github.com/turbot/steampipe-plugin-azuread/pull/330))
+
+_Bug fixes_
+
+- Fixed the `azuread_service_principal_app_role_assignment` table to populate the `service_principal_id` column from `principalId` instead of `resourceId`, so queries filtered by `service_principal_id` now return rows. ([#332](https://github.com/turbot/steampipe-plugin-azuread/pull/332))
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v6.1.0](https://github.com/turbot/steampipe-plugin-sdk/blob/develop/CHANGELOG.md). ([#319](https://github.com/turbot/steampipe-plugin-azuread/pull/319))
+- Recompiled plugin with `google.golang.org/grpc v1.83.1`. ([#318](https://github.com/turbot/steampipe-plugin-azuread/pull/318))
+
 ## v1.10.0 [2026-10-26]
 
 _Bug fixes_
