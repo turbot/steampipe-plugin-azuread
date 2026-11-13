@@ -74,7 +74,7 @@ func getTenantUncached(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	var err error
 	cacheKey := "getTenant"
 
-	if cachedData, ok := d.ConnectionManager.Cache.Get(cacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, cacheKey); ok {
 		tenantID = cachedData.(string)
 	} else {
 		// Read tenant ID from config, or environment variables
@@ -93,7 +93,7 @@ func getTenantUncached(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 			}
 		}
 		// save to extension cache
-		d.ConnectionManager.Cache.Set(cacheKey, tenantID)
+		_ = d.ConnectionCache.Set(ctx, cacheKey, tenantID)
 	}
 
 	return tenantID, nil
